@@ -211,6 +211,7 @@ namespace RickMorty.EditorTools
         {
             try
             {
+                PlayerSettings.runInBackground = true;   // validacion de XR: sin esto la imagen queda pegada a la cabeza al abrir el menu del sistema
                 PlayerSettings.companyName = "UAO Immersive Solutions";
                 PlayerSettings.productName = "Rick y Morty - Mezclas de otra dimension";
                 PlayerSettings.colorSpace = ColorSpace.Linear;
