@@ -1,0 +1,297 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cfb6fb98ae232e44a88e5b915061f6a, type: 3}
+  m_Name: ItemVisualRegistry
+  m_EditorClassIdentifier: Assembly-CSharp::RickMorty.ItemVisualRegistry
+  entries:
+  - id: mega_semilla
+    prefab: {fileID: -6158939176863879963, guid: e3e5a731ff7fd8d4dbad036c2508dbbb, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: meeseeks
+    prefab: {fileID: 6491147476489140132, guid: 395fb01f2b3cb0741b6a44d4ffb55a4f, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: fleeb
+    prefab: {fileID: -6158939176863879963, guid: f7ce448fd010c414eb5f2e60267c89eb, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: plumbus_polvo
+    prefab: {fileID: 6491147476489140132, guid: a0a2c1fe776d03a419d18dcc0778d0af, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: esporas
+    prefab: {fileID: 6491147476489140132, guid: 502110b7571c95847bc46980fc6ba605, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: kalaxianos
+    prefab: {fileID: 6491147476489140132, guid: f42096b3be035644da4477d1392e6fdd, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: acido
+    prefab: {fileID: -6158939176863879963, guid: 8bc460d22fc649b44905de6353b7bdda, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: materia_oscura
+    prefab: {fileID: -6158939176863879963, guid: 6929df0ae2c207e4bb379a012af43b10, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: bola_meeseeks
+    prefab: {fileID: -7140828350281737981, guid: e3aad6ef13f7288498e05df4258ed008, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: plumbus
+    prefab: {fileID: -155548337592563370, guid: 9c0ebe0f3cce6fd4fb2cb74c167bb1ca, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: espada_zord
+    prefab: {fileID: -2172928747417152072, guid: 60ebd9e5e0097174dbccfc8bc4dfa20a, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: marihuana
+    prefab: {fileID: 6491147476489140132, guid: 8128d2213854e504e9e3568cf708edc3, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: toallin
+    prefab: {fileID: -2715557421411950683, guid: 5f2778bab1c22b0468bdb986be8f55ce, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: guantelete
+    prefab: {fileID: 5274975038285055498, guid: 15006636271f74b4b87336c6d3865f45, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: katana
+    prefab: {fileID: 3904549690820407262, guid: e0688c03c1ebe694e845cb26d2fd4b91, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: pistola_laser
+    prefab: {fileID: -1840280379639144951, guid: 1127ff9e6c913ff4e95ed7b43e27252f, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: sable_luz
+    prefab: {fileID: 2086130439783759400, guid: 5057acd931570b34baccc00b9c52ccab, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: semen
+    prefab: {fileID: 6491147476489140132, guid: 13b40b112725deb47a75daccb4983dd8, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: clon_rick
+    prefab: {fileID: 5336918619568364068, guid: 3ae058253de2a2342a31bc83fa2a9ed8, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: peluche_teto
+    prefab: {fileID: 4006804626218852487, guid: 794f49b09c7d49a459f2e528c9ed4bd2, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: papa_rellena
+    prefab: {fileID: 948592545645146124, guid: c2605fba5fcf740489e18f425aeb91bd, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: cuchillo_csgo
+    prefab: {fileID: -7309497111061721740, guid: e77f49f3fc8627145a178f2aa27baf36, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: scar
+    prefab: {fileID: -1403419715265510372, guid: 96905fe4f669b5c4cba4ee4ee61ec26f, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: token_fortnite
+    prefab: {fileID: 3837772772108306900, guid: cf67ba9adc5e4c14f97882d461c0af1e, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: aguardiente
+    prefab: {fileID: 8872858127914018839, guid: 20b828d51b9e9db479e12d88583104e2, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: szechuan
+    prefab: {fileID: 1042114271278271010, guid: 1a3f6691ac8903e4fa96ed627b3f7cc0, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: camiseta_america
+    prefab: {fileID: -3474190099453251304, guid: 65d1d56b55fe769438323f8b260a7c7d, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: sr_pantalones
+    prefab: {fileID: 9028759660887771524, guid: 6b46da6554a423e499cce698da9e74f1, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: pepino_mutante
+    prefab: {fileID: -9108684567824323967, guid: 2eb324aaa19a77f45a6b023e562a7ae5, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: caja_contrabando
+    prefab: {fileID: -7140828350281737981, guid: ae2ff751b6a706d45aadb239258dfab5, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: empanada
+    prefab: {fileID: 2412252574361917426, guid: 41cd91ec47671ca4da2b44ff2882ee41, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: bloque_minecraft
+    prefab: {fileID: 6391452424793900440, guid: 0645212f455fc204598b5c8c02457b95, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: dakimakura
+    prefab: {fileID: -1742928634551336611, guid: 14039d7811faf4a4e892df348882552b, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: rick_caleno
+    prefab: {fileID: 8771091787928289351, guid: 7071eba24a61d4d429a686f8a25bde76, type: 3}
+    scale: 0.08571429
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: portal_carton
+    prefab: {fileID: -3520077195375943244, guid: 01c5c641d5a33f04f81bbfc44df639a6, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: kunai
+    prefab: {fileID: -1409716105112154920, guid: 88dd7e71dd3ffea4b845f357414615cf, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: casco_snowball
+    prefab: {fileID: -8572570756521637309, guid: 8e0608d1ed7824049b762da78c145804, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: meeseeks_kirkland
+    prefab: {fileID: -3502286386739293829, guid: 1f61b7795a6c10f4fb0e00b09124997a, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: tio_steve
+    prefab: {fileID: 146392418974487087, guid: 5405f79b28ac14b4d81227edcf1f3525, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: bateria_microverso
+    prefab: {fileID: -5935219700760929853, guid: 312a03d6f26b8774fbf1fe1311709c4a, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: mini_cronenberg
+    prefab: {fileID: -1858897559680168830, guid: 65c384c09c71f30448d9250c667bf9a7, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: cereal_eyeholes
+    prefab: {fileID: -2070825520478028446, guid: 1005f3524fb74734d99807a0f6e57cf2, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: vhs_balistica
+    prefab: {fileID: 356505500669572594, guid: 6e793e5b831a3a84c8235e8c3d49946a, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: semilla_sillas
+    prefab: {fileID: -538279368011768949, guid: 58ec2869cffff56469c4fda2e28566f0, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: pistola_portales
+    prefab: {fileID: 5791486090738950837, guid: 652ec59df285e4248a1e940282e6d3fb, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: meeseeks_npc
+    prefab: {fileID: -2022854062907756400, guid: 292da8b97c89442478cbfffcb620f704, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: "pistola_l\xE1ser"
+    prefab: {fileID: 0}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1

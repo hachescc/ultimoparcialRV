@@ -1,0 +1,102 @@
+{
+  "lines": [
+    { "id": "intro_wake", "text": "(Dándole un golpe a la mesa) ¡Despierta, Morty! (Eructa) No te traje al garaje para que babees mis malditos planos. Levanta esa cabeza, tenemos prisa. Tengo que irme a... uh... a otro planeta a resolver un problemita diplomático que arruiné. Tienes que aprender a usar la mesa de mezclas rápido. A tu izquierda tienes cuatro líquidos y a la derecha cuatro malditos sólidos. Es como jugar a la cocinita, Morty, pero si te equivocas nos desintegramos a nivel molecular." },
+
+    { "id": "onb_watch", "text": "Primero lo primero. Te até un Reloj Multiversal a la muñeca izquierda con cinta americana. Levanta la muñeca y míralo, Morty. Ahí te voy a hablar cuando me vaya." },
+    { "id": "onb_move", "text": "Ahora camina con el joystick izquierdo hasta ese círculo verde del piso. Sí, como un bebé aprendiendo a caminar. Vamos." },
+    { "id": "onb_turn", "text": "Gira con el joystick derecho. Mira el garaje. No toques al capibara, está meditando." },
+    { "id": "onb_grab", "text": "Vuelve a la mesa y agarra un frasco con el botón de agarre. El de los costados, Morty, no el del dedo índice. Si se te cae no pasa nada, tengo un sistema para idiotas." },
+    { "id": "onb_good", "variants": ["Bien. Supongo.", "Increíble, tienes manos. (Eructa)", "Ok, ok, no lo arruinaste.", "Wow, Morty. El nivel mínimo de competencia."] },
+    { "id": "onb_timeout", "variants": ["Ugh, me aburro. Asumo que ya entendiste. Sigamos.", "No tengo todo el día, Morty. Siguiente.", "(Eructa) Bueno, ya, como sea. Lo siguiente."] },
+    { "id": "onb_trigger", "text": "Antes de seguir: agarra esa caja de Meeseeks y aprieta el gatillo del índice. El gatillo USA las cosas, el agarre las AGARRA. Dos botones, Morty. Dos." },
+
+    { "id": "mission1_intro", "text": "Empecemos por algo para bebés. Agarra el Extracto de Mega-Semilla y mézclalo con el polvo de Meeseeks. Mételos al tazón y aprieta el botón rojo. ¡Rápido, Morty, el multiverso no va a esperar a que tus neuronas arranquen!" },
+    { "id": "mission1_fail", "text": "¡Oh, genial, Morty! (Eructa) Supongo que ver dos ingredientes y un tazón es demasiada estimulación para tu cerebro del tamaño de un maní. Es literalmente mezclar A con B. Ni siquiera Jerry podría arruinar esto... Bueno, sí podría, pero se supone que tú tienes un porcentaje de mi ADN. Inténtalo de nuevo antes de que me arrepienta de no haber clonado a un perro en tu lugar." },
+    { "id": "mission1_success", "text": "Tampoco te ganes un premio Nobel en tu cabeza, Morty. Es solo un maldito Meeseeks en un frasco. A nadie le importa, su existencia es dolor, blablabla. Hagamos algo que requiera al menos dos sinapsis haciendo contacto. Agarra Polvo de Plumbus, Jugo de Fleeb y esas Esporas Parasitarias y júntalos. Y trata de no llorar si las esporas se mueven, cobarde." },
+    { "id": "mission2_reminder", "text": "Bien, ya viste lo que hace. Ahora sí: Polvo de Plumbus, Jugo de Fleeb y Esporas Parasitarias. Los tres al tazón." },
+    { "id": "mission2_fail", "text": "(Eructa) ¡Santa ciencia, Morty! ¿Tienes las manos llenas de mantequilla o qué? Esas esporas no crecen en los árboles, tuve que sacarlas del tracto digestivo de un gusano espacial. Solo mézclalo como te dije, no estás intentando curar el cáncer, estás haciendo química básica de primaria interdimensional." },
+    { "id": "mission2_success", "text": "Vaya, Morty, lograste no matarnos. Acabas de crear un Plumbus perfectamente normal. Ya sabes exactamente cómo se usa y para qué sirve en la casa, como cualquier persona normal en la maldita galaxia, así que no te voy a insultar explicándote lo obvio. Última prueba antes de largarme. Toma ese Plumbus que acabas de hacer y combínalo con los Cristales Kalaxianos. Hazlo, Morty. No pienses, solo hazlo." },
+    { "id": "mission3_fail", "text": "¡Idiota! (Eructa) Acabas de hacer que explotemos, Morty. Tuve que arrastrar tu consciencia a una dimensión idéntica donde no fuiste tan estúpido para que sigas vivo. Me debes un clon y diez minutos de mi vida, pedazo de basura. Empieza otra vez y no toques los cristales como si fueras un simio." },
+    { "id": "mission3_success", "text": "Nada mal, Morty. Digo, no es para aplaudirte, sigo siendo el mamífero más inteligente de este y todos los universos, pero para tener mis genes diluidos con los de tu padre, lo hiciste decente." },
+
+    { "id": "rick_leaving", "text": "Escucha, me largo. Rompí mi pistola de portales en un planeta lleno de gente con cabezas de... mira, no importa. Tienes que experimentar y fabricarme una Pistola de Portales nueva para arreglarla. Arréglatelas con lo que tienes aquí, prueba combinaciones. ¡Ah! Y dejé la puerta del garaje abierta. Puedes salir a la calle a probar tus asquerosidades, pero ni se te ocurra salir del perímetro de la cinta policial. La casa está rodeada por el FBI porque tu hermana descargó películas piratas... o tal vez porque le vendí antimateria a unos terroristas espaciales, no me acuerdo bien. Como sea, si pisas fuera de la cinta, los francotiradores te volarán la cabeza. Y tienes unos quince minutos antes de que entren. ¡Usa la ciencia, Morty! ¡Adiós!" },
+
+    { "id": "explosion_random", "variants": [
+      "¡Al suelo, idiota! (Eructa) Mezclar eso no tiene ningún sentido químico ni siquiera en las dimensiones donde el alfabeto son puros números. ¡Sigue la lógica básica, Morty, no metas las manos a lo ciego!",
+      "Oh, maravilloso. Acabas de inventar la bomba de humo más patética y dolorosa del multiverso. Mis sensores dicen que te quemaste las cejas. Lástima que no puedo verlo. Concéntrate, pedazo de basura.",
+      "¿Qué intentabas hacer, Morty? ¿Hornear un pastel de estupidez? Esos elementos se repelen a nivel subatómico. Limpia ese hollín de tu cara y vuelve a intentarlo antes de que decida reemplazarte por una licuadora inteligente."
+    ] },
+    { "id": "mix_empty", "text": "El tazón está vacío, Morty. Hasta Jerry sabe que hay que meter algo antes de mezclar." },
+    { "id": "mix_need_more", "text": "Un solo ingrediente no es una mezcla, Morty. Es un ingrediente. Mínimo dos." },
+    { "id": "final_use_station", "text": "¡No en el tazón, Morty! Eso es ingeniería, no cocina. Pon la Portal Gun de cartón en el soporte de ensamblaje del centro de la mesa." },
+    { "id": "final_socket_hint", "text": "Bien, el chasis está asegurado. Ahora acércale los Cristales Kalaxianos y el líquido estabilizador. Con pulso, Morty." },
+    { "id": "final_created", "text": "(Estática) ...espera, ¿qué fue esa fluctuación de energía? Morty... agarra esa cosa." },
+
+    { "id": "final_1", "text": "(Se escucha un bláster de fondo) ¡Ah, muere, escoria! (Eructa) ¿Morty? ¿Sigues ahí? Mis sensores en la órbita acaban de detectar una fluctuación de energía de clase omega en el garaje... Espera. ¿Esa es mi tecnología? ¿Agarraste la basura de cartón que te dejé para humillarte, le metiste cristales puros y lo puenteaste usando... alcohol de caña barato?" },
+    { "id": "final_2", "text": "Me lleva el demonio, Morty. Es la cosa más estúpida, suicida y científicamente aberrante que has hecho en tus catorce inútiles años de vida. Rompiste al menos cinco leyes de la termodinámica. Felicidades, pasaste de ser mi escudo humano favorito a un asistente técnico funcional." },
+    { "id": "final_3", "text": "Ahora escúchame bien. Dispara esa cosa contra la pared del garaje y entra rápido. Sincronicé las coordenadas cuánticas para que el portal te traiga directo a la Nebulosa Prometeo. Y hazlo ya, puedo escuchar a los agentes del FBI pateando los gnomos del jardín. Ah, y Morty... si el portal se cierra antes de que pases por completo, te cortará por la mitad. No intentes meter un brazo primero. ¡Salta, Morty!" },
+    { "id": "portal_open", "text": "¡Ese es mi chico! Ahora camina hacia el portal. ¡Todo el cuerpo, Morty!" },
+
+    { "id": "fbi_warning", "text": "Morty, esa es la cinta del FBI. Un paso más y un francotirador te hace un agujero de ventilación en la cabeza." },
+    { "id": "fbi_shot", "text": "(Eructa) Te dije que no salieras de la cinta. Por suerte tenía un respaldo de tu cerebro de hace cinco minutos. Esto te costó tiempo, genio." },
+    { "id": "fbi_5min", "text": "Morty, mis sensores dicen que el FBI entra en cinco minutos. Mueve esas manos de mantequilla." },
+    { "id": "fbi_3min", "text": "¡Tres minutos, Morty! Ya están poniendo un ariete en la puerta de la cocina." },
+    { "id": "fbi_1min", "text": "¡UN MINUTO! ¡Si te atrapan, di que no me conoces! ¡Di que eres un clon de Jerry!" },
+    { "id": "fbi_caught", "text": "Oh, genial. Te atraparon. (Eructa) Bueno, ahora tengo que fabricar otro Morty. Nota mental: los Mortys de esta dimensión son pésimos bajo presión." },
+    { "id": "ending_victory", "text": "Bienvenido a la Nebulosa Prometeo, Morty. No te acostumbres." },
+    { "id": "ending_defeat", "text": "Mira tus resultados y llora, Morty. Luego inténtalo otra vez." },
+
+    { "id": "hint_intro", "variants": ["(Eructa) Ugh, está bien, te doy una pista porque me das lástima.", "Morty, llevas un rato sin descubrir nada. Pista gratis, no te acostumbres.", "Voy a hacer algo que odio: ayudarte."] },
+    { "id": "respawn_first", "text": "Instalé un micro-portal de retorno de seguridad en los matraces base, Morty. Sabía que tus manos de mantequilla los tirarían al suelo en cinco minutos. De nada, idiota." },
+    { "id": "comfort_on", "text": "Activando viñeta de confort. Qué lindo, Morty. Tienes un estómago tan débil que el universo tiene que ponerte orejeras de caballo para que no vomites en mis planos." },
+
+    { "id": "cardboard_bang", "text": "Jajaja, ¿de verdad pensaste que eso iba a funcionar? Es cartón, Morty. Le falta energía y algo que lo estabilice. Piensa." },
+    { "id": "gauntlet_snap", "text": "¿Hiciste chasquido con el guantelete? Perfecto, Morty, acabas de borrar la mitad de mi laboratorio. Thanos estaría orgulloso. Yo no." },
+    { "id": "weed_burn", "text": "Oh, Morty... quemaste la marihuana cósmica. La gravedad acaba de bajar a la mitad. Bueno, aprovecha y lanza cosas en cámara lenta, supongo." },
+    { "id": "toallin_weed", "speaker": "Toallín", "text": "¡Oigan! ¿Quieren drogarse? No olviden llevar una toalla... y unos doritos." },
+    { "id": "toallin_idle", "speaker": "Toallín", "variants": ["Hola, soy Toallín. ¿Quieres drogarte?", "No olvides llevar una toalla.", "Tengo frío. Estoy mojado. ¿Alguien quiere fumar?"] },
+    { "id": "snowball_on", "text": "¿Te pusiste el casco de Snowball? No, no, Morty, quítate eso o no vas a entender nada de lo que..." },
+    { "id": "eat_szechuan", "text": "Lo lograste, Morty. (Sollozo) La salsa Szechuan de 1998... El arco de mi vida está completo." },
+    { "id": "eat_aguardiente", "text": "¿Te tomaste el estabilizador cuántico, Morty? ¡Eso era para la pistola! Bueno, haz otro. Y no vomites en mis planos." },
+    { "id": "eat_papa", "text": "Morty, esa papa rellena tiene más grasa que el motor de mi nave. Ahora vas a caminar como mi abuela." },
+    { "id": "eyeholes", "text": "¡Te dije que no te comieras los Eyeholes, Morty! ¡El Hombre Agujero de Ojo protege su cereal!" },
+
+    { "id": "meeseeks_spawn", "speaker": "Mr. Meeseeks", "text": "¡Soy el Sr. Meeseeks, mírenme! Voy a limpiar la basura tirada, ¡puedo hacerlo!" },
+    { "id": "meeseeks_contraband_spawn", "speaker": "Meeseeks Kirkland", "text": "*cof cof* Sí, sí, soy un Meeseeks... más o menos. ¿Qué querés? Ah, nada. Bueno." },
+
+    { "id": "kill_meeseeks", "text": "Vaya, Morty, resolviste su dolor existencial volándole la cabeza. Muy humanitario de tu parte. Ahora limpia ese polvo azul antes de que se me meta en los conductos de ventilación." },
+    { "id": "kill_steve", "text": "¡Bien hecho, Morty! Por un segundo pensé que de verdad ibas a abrazar a esa abominación. La violencia extrema es la única respuesta a la nostalgia alienígena falsa." },
+    { "id": "kill_capybara", "text": "¡Santo cielo, Morty! ¿Qué demonios te pasa? ¡Era un roedor pacífico! ¡Estaba alcanzando el nirvana en realidad virtual! Me das asco, Morty. Tienes problemas psicológicos graves." },
+    { "id": "kill_pantalones", "text": "(Silencio incómodo...) Morty... él... él era un buen amigo de la familia. Te has pasado de la raya. No voy a mirarte a los ojos en toda la semana." },
+    { "id": "kill_caleno", "text": "¿Mataste a mi versión caleña, Morty? Esa era la versión de mí que sí sabía bailar salsa." },
+    { "id": "laser_capybara", "text": "No molestes al roedor cuántico, Morty." },
+
+    { "id": "steve_hug", "speaker": "Tío Steve", "variants": ["¡Un abrazo, sobrino!", "¿No me recuerdas? ¡Soy el tío Steve!", "¡Ven aquí, campeón!", "Abrazito... abrazito..."] },
+    { "id": "steve_hugged", "text": "¡Te abrazó el parásito, Morty! Ahora tienes falsos recuerdos de un tío que nunca existió. Sacúdete eso y mata al próximo." },
+    { "id": "pantalones_fail", "speaker": "Sr. Pantalones", "text": "Oooh-wiii... eso no salió nada bien, Morty." },
+    { "id": "pantalones_idle", "speaker": "Sr. Pantalones", "text": "¡Oooh-wiii! ¡Hola Morty! Estoy aquí para apoyarte." },
+
+    { "id": "caleno_token", "speaker": "Rick Caleño", "text": "¿Y yo qué hago con esta chatarra, ve? Necesito lucas de verdad, mijo." },
+    { "id": "caleno_america", "speaker": "Rick Caleño", "text": "¡Ey, ey, ey! ¡La camiseta de la mechita, ve! ¡Vamos América, que esta noche tenemos que ganar! ¡Oleee, ole ole ole!" },
+    { "id": "caleno_chant", "speaker": "Rick Caleño", "variants": ["¡Vamos Ameeeerica!", "¡Ole, ole, ole!", "¡Qué chimba, ve!", "¡La mechita, mijo!", "¡Dale rojo, dale!"] },
+
+    { "id": "event_blackout", "text": "¡Morty! El FBI le cortó la luz a la casa. Trabaja a oscuras, como un topo. Los cristales brillan, úsalos." },
+    { "id": "event_steve", "text": "Morty, detecto un parásito de memoria entrando al garaje. Si te dice que es tu tío Steve, ¡mátalo! No tienes un tío Steve." },
+    { "id": "event_quake", "text": "¡Agárrate, Morty! Una fluctuación interdimensional. Seguro es alguien en otra dimensión haciendo una estupidez. Probablemente otro tú." },
+
+    { "id": "found_pistola_laser", "text": "Una pistola láser. Útil. Aunque, ¿sabes?, si le agregas polvo de Plumbus podrías hacer algo que parezca... no sé... una pistola de portales. De juguete." },
+    { "id": "found_portal_carton", "text": "Jaja, una Portal Gun de cartón. Te la dejé ahí para humillarte, Morty. Para que funcione necesitaría energía pura y algo que enfríe el núcleo. Algo con mucho alcohol anisado, por ejemplo... no, olvídalo." },
+    { "id": "found_aguardiente", "text": "Aguardiente del Valle. Morty, el alcohol anisado es el mejor estabilizador cuántico que existe. No me preguntes cómo lo sé." },
+    { "id": "found_tio_steve", "text": "¡Morty! ¡Creaste un parásito de memoria! ¡Mátalo antes de que te abrace!" },
+    { "id": "found_guantelete", "text": "Un guantelete del infinito. No chasquees los dedos, Morty. En serio. No lo hagas." },
+    { "id": "found_bloque_minecraft", "text": "Un bloque de tierra que ignora la física. Clásico. Suéltalo en el aire y ahí se queda." },
+    { "id": "found_clon_rick", "text": "Una bola de clon de Rick. Guárdala, Morty. Por si acaso." },
+    { "id": "found_rick_caleno", "text": "¿Ese soy yo... en versión caleña? Tiene más estilo que yo, y eso me molesta." },
+    { "id": "found_empanada", "text": "Una empanada cuántica. Existe en varias realidades a la vez. Si la muerdes vas a salir disparado a algún lugar del garaje." },
+    { "id": "found_szechuan", "text": "Morty... ¿eso es... salsa Szechuan del 98? Ni se te ocurra tirarla a la basura." },
+    { "id": "found_espada_zord", "text": "La espada de Zord. Pesa como un planeta enano, muévela despacio." },
+    { "id": "found_casco_snowball", "text": "El casco de Snowball. Si te lo pones vas a escuchar todo en perruno. No te lo pongas." },
+    { "id": "found_cereal_eyeholes", "text": "Eyeholes. No te los acerques a la boca, Morty. Él siempre está mirando." },
+    { "id": "found_marihuana", "text": "Marihuana cósmica. No la quemes con el láser, Morty. Hablo en serio. Bueno, no tan en serio." }
+  ]
+}
