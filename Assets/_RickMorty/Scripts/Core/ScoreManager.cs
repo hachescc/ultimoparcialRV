@@ -69,11 +69,42 @@ namespace RickMorty
             Score = Mathf.Max(0, Score + pts);
             Log.Add($"{(pts >= 0 ? "+" : "")}{pts}  {reason}");
             Changed?.Invoke();
+            Popup(pts);
         }
+
+        /// <summary>Numero flotante (+100 / -50) para que el jugador VEA por que cambio su puntaje.</summary>
+        static void Popup(int pts)
+        {
+            if (pts == 0) return;
+            var gm = GameManager.Instance;
+            if (gm != null && (gm.State == GameState.Ending || gm.State == GameState.GameOver)) return;
+            var cam = Camera.main;
+            if (cam == null) return;
+            Vector3 pos;
+            var bowl = gm != null ? gm.mixingBowl : null;
+            if (bowl != null && (bowl.transform.position - cam.transform.position).sqrMagnitude < 2.5f * 2.5f)
+                pos = bowl.transform.position + Vector3.up * 0.5f;
+            else
+            {
+                var f = cam.transform.forward; f.y = 0;
+                if (f.sqrMagnitude < 0.01f) f = Vector3.forward;
+                pos = cam.transform.position + f.normalized * 1.0f + Vector3.down * 0.12f;
+            }
+            FX.FloatingText(pos, (pts > 0 ? "+" : "") + pts + " pts", pts > 0 ? new Color(0.45f, 1f, 0.45f) : new Color(1f, 0.35f, 0.3f), 0.9f, 1.8f, 0.25f);
+        }
+
+        // Repetir la misma mezcla puntua como maximo 3 veces (antes daba +10 sin limite: se podia "farmear").
+        readonly System.Collections.Generic.Dictionary<string, int> m_RepeatCount = new System.Collections.Generic.Dictionary<string, int>();
 
         void OnMixSucceeded(RecipeDef r, bool first)
         {
             SuccessfulMixes++;
+            if (!first)
+            {
+                m_RepeatCount.TryGetValue(r.result ?? "", out int n);
+                m_RepeatCount[r.result ?? ""] = n + 1;
+                if (n >= MaxSameBonus) { Changed?.Invoke(); return; }
+            }
             Add(first ? pointsPerDiscovery : pointsPerRepeatMix, (first ? "Descubrimiento: " : "Mezcla: ") + GameDatabase.NameOf(r.result));
         }
 

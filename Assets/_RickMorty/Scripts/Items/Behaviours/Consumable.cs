@@ -51,19 +51,26 @@ namespace RickMorty
 
         static IEnumerator CoTeleport(PlayerRig rig, GameManager gm)
         {
+            if (s_Teleporting) yield break;   // una segunda empanada no debe guardar el "otro lado" como punto de regreso
             var back = rig.FeetPosition;
             var fwd = rig.head != null ? rig.head.forward : Vector3.forward;
             var spots = gm.quantumSpots;
             if (spots == null || spots.Length == 0) yield break;
+            s_Teleporting = true;
             var spot = spots[Random.Range(0, spots.Length)];
             ScreenFX.Instance?.Flash(new Color(0.6f, 1f, 0.6f), 0.05f, 0.5f);
             AudioFX.Play("portal", rig.HeadPosition, 0.7f);
             rig.TeleportTo(spot.position, spot.forward);
             WristWatch.Instance?.Notify("EXISTES EN OTRA REALIDAD (3 s)", new Color(0.6f, 1f, 0.6f), 3f);
             yield return new WaitForSeconds(3f);
+            s_Teleporting = false;
+            // si la partida termino mientras tanto, el jugador ya esta en la sala final: no lo devolvemos al garaje
+            if (gm == null || rig == null || gm.State == GameState.Ending || gm.State == GameState.GameOver) yield break;
             ScreenFX.Instance?.Flash(new Color(0.6f, 1f, 0.6f), 0.05f, 0.5f);
             rig.TeleportTo(back, fwd);
         }
+        static bool s_Teleporting;
+        public static void ResetStatics() => s_Teleporting = false;
 
         static IEnumerator CoEyeholes(Consumable box)
         {
@@ -73,14 +80,30 @@ namespace RickMorty
             GameObject man = null;
             if (spot != null)
             {
-                man = new GameObject("Hombre Agujero de Ojo (placeholder)");
+                man = new GameObject("Hombre Agujero de Ojo");
                 man.transform.SetPositionAndRotation(spot.position, spot.rotation);
-                var head = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                Destroy(head.GetComponent<Collider>());
+                var reg = ItemVisualRegistry.Get();
+                var entry = reg != null ? reg.Find("hombre_eyeholes") : null;
+                if (entry != null)
+                {
+                    // modelo de cuerpo entero parado en el piso: se escala para que la cabeza quede a la altura de la ventana
+                    var model = Instantiate(entry.prefab, man.transform);
+                    float k = Mathf.Max(0.6f, (spot.position.y + 0.08f) / 1.92f);
+                    model.transform.localScale = Vector3.one * k;
+                    model.transform.position = new Vector3(spot.position.x, 0f, spot.position.z);
+                    model.transform.rotation = spot.rotation;
+                    man.AddComponent<EyeholeManShake>();
+                }
+                var head = entry != null ? new GameObject("SinCabezaPlaceholder") : GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                if (entry != null) head.SetActive(false);
                 head.transform.SetParent(man.transform, false);
-                head.transform.localScale = new Vector3(1.1f, 1.2f, 1.1f);
-                head.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(new Color(0.45f, 0.25f, 0.6f));
-                for (int i = -1; i <= 1; i += 2)
+                if (entry == null)
+                {
+                    Destroy(head.GetComponent<Collider>());
+                    head.transform.localScale = new Vector3(1.1f, 1.2f, 1.1f);
+                    head.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(new Color(0.45f, 0.25f, 0.6f));
+                }
+                for (int i = -1; entry == null && i <= 1; i += 2)
                 {
                     var hole = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                     Destroy(hole.GetComponent<Collider>());
@@ -105,9 +128,26 @@ namespace RickMorty
                     box.Body.AddForce(dir * 6f, ForceMode.VelocityChange);
                 }
             }
-            yield return new WaitForSeconds(1.2f);
+            yield return new WaitForSeconds(2.4f);
             if (box != null) box.Item.Consume(0f, true);
             if (man != null) Destroy(man);
+        }
+    }
+
+    /// <summary>El Hombre Agujero de Ojo golpea la ventana: sacudida corta y agresiva mientras esta en escena.</summary>
+    public class EyeholeManShake : MonoBehaviour
+    {
+        Vector3 m_Base;
+        Quaternion m_BaseRot;
+        float m_T;
+        void Start() { m_Base = transform.position; m_BaseRot = transform.rotation; }
+        void Update()
+        {
+            m_T += Time.deltaTime;
+            // embestidas hacia la ventana + temblor
+            float lunge = Mathf.Abs(Mathf.Sin(m_T * 9f)) * 0.12f;
+            transform.position = m_Base + (m_BaseRot * Vector3.forward) * lunge + Vector3.up * (Mathf.Sin(m_T * 23f) * 0.015f);
+            transform.rotation = m_BaseRot * Quaternion.Euler(0, 0, Mathf.Sin(m_T * 17f) * 3f);
         }
     }
 }

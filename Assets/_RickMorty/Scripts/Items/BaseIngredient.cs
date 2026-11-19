@@ -21,6 +21,7 @@ namespace RickMorty
         Renderer[] m_Renderers;
         Collider[] m_Colliders;
         bool m_Returning;
+        float m_AwayTime;
 
         void Awake()
         {
@@ -70,6 +71,14 @@ namespace RickMorty
         {
             if (m_Returning) return;
             if (transform.position.y < -3f || transform.position.y > 60f) ReturnHome(false, 0f);
+
+            // Quieto y lejos de su soporte (encima de un techo, del estante alto, detras de una caja...):
+            // a los 15 s vuelve solo. Sin esto se podia perder un ingrediente de la receta final para toda la partida.
+            bool stray = !m_Item.IsHeld && !m_Item.InSocket && !m_Item.Unavailable
+                && (transform.position - homePosition).sqrMagnitude > 1.3f * 1.3f
+                && m_Item.Body != null && m_Item.Body.linearVelocity.sqrMagnitude < 0.02f;
+            m_AwayTime = stray ? m_AwayTime + Time.deltaTime : 0f;
+            if (m_AwayTime > 15f) { m_AwayTime = 0f; ReturnHome(false, 0f); }
         }
 
         public void ReturnHome(bool fromFloor, float delay)

@@ -289,8 +289,32 @@ MonoBehaviour:
     positionOffset: {x: 0, y: 0, z: 0}
     rotationOffset: {x: 0, y: 0, z: 0}
     generateBoxCollider: 1
-  - id: "pistola_l\xE1ser"
-    prefab: {fileID: 0}
+  - id: hombre_eyeholes
+    prefab: {fileID: 5272468937433112388, guid: fb3a2bd7243c9c24984c39e740a59589, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: relleno_kalaxianos
+    prefab: {fileID: 6452780406256327652, guid: 88d9abcbcf8a4434ea4b189f11acb374, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: relleno_esporas
+    prefab: {fileID: 3667674802040140275, guid: 4ad94b514bf6bab4ca8c1a36b6ce5b9e, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: relleno_plumbus_polvo
+    prefab: {fileID: 5048791133237790932, guid: b8fc1a87542cbf9419c3d7457056f186, type: 3}
+    scale: 1
+    positionOffset: {x: 0, y: 0, z: 0}
+    rotationOffset: {x: 0, y: 0, z: 0}
+    generateBoxCollider: 1
+  - id: relleno_marihuana
+    prefab: {fileID: -8118563813203059072, guid: da4e2d292586ddf47b19a3720825b507, type: 3}
     scale: 1
     positionOffset: {x: 0, y: 0, z: 0}
     rotationOffset: {x: 0, y: 0, z: 0}

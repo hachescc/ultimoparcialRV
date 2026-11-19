@@ -12,7 +12,8 @@ namespace RickMorty
 
         float m_NextFlicker;
         float m_FlickerEnd;
-        bool m_Blackout;
+        bool m_Blackout, m_Low;
+        float m_NextFlip;
         AudioSource m_Hum;
 
         void Start()
@@ -37,7 +38,10 @@ namespace RickMorty
             else if (Time.time > m_NextFlicker)
             {
                 if (m_FlickerEnd < Time.time) m_FlickerEnd = Time.time + Random.Range(0.15f, 0.6f);
-                k = Random.value > 0.5f ? 1f : 0.15f;
+                // cada estado dura al menos 0.1 s y baja al 60 % (antes cambiaba al azar CADA cuadro entre 100 % y 15 %:
+                // un estrobo de toda la sala, molesto en el visor)
+                if (Time.time >= m_NextFlip) { m_NextFlip = Time.time + Random.Range(0.1f, 0.22f); m_Low = !m_Low; }
+                k = m_Low ? 0.6f : 1f;
                 if (Time.time > m_FlickerEnd) m_NextFlicker = Time.time + Random.Range(6f, 20f);
             }
             if (targetLight != null) targetLight.intensity = baseIntensity * k;

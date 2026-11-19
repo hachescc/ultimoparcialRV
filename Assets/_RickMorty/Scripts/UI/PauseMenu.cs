@@ -20,7 +20,72 @@ namespace RickMorty
 
         Canvas m_Canvas;
         GameObject m_Dim;
-        TextMeshProUGUI m_VignetteLabel, m_TurnLabel, m_Info;
+        TextMeshProUGUI m_VignetteLabel, m_TurnLabel, m_Info, m_RestartLabel, m_QuitLabel;
+        readonly System.Collections.Generic.List<RectTransform> m_Rows = new System.Collections.Generic.List<RectTransform>();
+        RectTransform m_SkipRow;
+        int m_Confirm;            // 1 = reiniciar, 2 = salir (esperando el segundo toque)
+        float m_ConfirmUntil;
+        const string RestartText = "Reiniciar partida", QuitText = "Salir del juego";
+
+        RectTransform Row(UnityEngine.UI.Button b)
+        {
+            var rt = (RectTransform)b.transform;
+            m_Rows.Add(rt);
+            return rt;
+        }
+
+        /// <summary>Reparte los botones visibles de arriba hacia abajo: 6 cm de alto y 3 cm de separacion
+        /// (antes 1 cm: "Salir" quedaba pegado a "Reiniciar" y era facil equivocarse con el rayo).</summary>
+        void Layout()
+        {
+            const float bh = 0.074f, gap = 0.038f;
+            float y = 0.88f;
+            foreach (var rt in m_Rows)
+            {
+                if (!rt.gameObject.activeSelf) continue;
+                rt.anchorMin = new Vector2(0.1f, y - bh);
+                rt.anchorMax = new Vector2(0.9f, y);
+                rt.offsetMin = rt.offsetMax = Vector2.zero;
+                y -= bh + gap;
+            }
+        }
+
+        void SkipTutorial()
+        {
+            Close();
+            GameManager.Instance?.DebugSkipTutorial();
+        }
+
+        void Update()
+        {
+            // la confirmacion de reiniciar/salir caduca sola (tiempo real: el juego esta en pausa)
+            if (m_Confirm != 0 && Time.unscaledTime > m_ConfirmUntil) ResetConfirm();
+        }
+
+        void ResetConfirm()
+        {
+            m_Confirm = 0;
+            if (m_RestartLabel != null) m_RestartLabel.text = RestartText;
+            if (m_QuitLabel != null) m_QuitLabel.text = QuitText;
+        }
+
+        /// <summary>Primer toque: pide confirmar. Segundo toque (antes de 4 s): ejecuta.</summary>
+        bool Confirmed(int what, TextMeshProUGUI label)
+        {
+            if (m_Confirm == what && Time.unscaledTime <= m_ConfirmUntil) return true;
+            ResetConfirm();
+            m_Confirm = what;
+            m_ConfirmUntil = Time.unscaledTime + 4f;
+            if (label != null) label.text = "¿Seguro? Toca otra vez";
+            return false;
+        }
+
+#if !UNITY_EDITOR
+        // En el visor: si aparece el menu del sistema o se quitan el visor, el juego se pausa solo
+        // (antes el reloj del FBI y los eventos seguian corriendo sin que el jugador viera nada).
+        void OnApplicationFocus(bool focus) { if (!focus && !IsOpen) Open(); }
+        void OnApplicationPause(bool paused) { if (paused && !IsOpen) Open(); }
+#endif
         InputAction m_Toggle;
         bool m_ShownComfortLine;
 
@@ -59,26 +124,35 @@ namespace RickMorty
             dr.sortingOrder = 40;   // por encima de los paneles del mundo, por debajo del menu (50)
             m_Dim.SetActive(false);
 
-            m_Canvas = UIKit.WorldCanvas("PauseCanvas", transform, new Vector2(700, 660), 0.001f, true);
+            m_Canvas = UIKit.WorldCanvas("PauseCanvas", transform, new Vector2(700, 820), 0.001f, true);
             m_Canvas.sortingOrder = 50;
             var root = m_Canvas.transform;
             UIKit.Fill("Marco", root, new Color(0.35f, 1f, 0.45f, 0.95f));
             var panel = UIKit.Panel("Bg", root, new Color(0.03f, 0.07f, 0.06f, 0.98f), Vector2.zero, Vector2.one, new Vector2(5, 5), new Vector2(-5, -5));
             root = panel.transform;
             var title = UIKit.Text("Title", root, "PAUSA", 56, UIKit.Neon, TextAlignmentOptions.Center,
-                new Vector2(0, 0.86f), new Vector2(1, 1), Vector2.zero, Vector2.zero);
+                new Vector2(0, 0.895f), new Vector2(1, 1), Vector2.zero, Vector2.zero);
             UIKit.AsTitle(title);
 
-            UIKit.Button("Resume", root, "Reanudar", Close, new Vector2(0.1f, 0.745f), new Vector2(0.9f, 0.845f));
-            UIKit.Button("Controls", root, "Ver controles  (botón Y · tecla B)", () => ControlsPanel.Instance?.Open(), new Vector2(0.1f, 0.63f), new Vector2(0.9f, 0.73f), color: new Color(0.2f, 0.42f, 0.25f, 0.95f));
-            var v = UIKit.Button("Vignette", root, "", ToggleVignette, new Vector2(0.1f, 0.515f), new Vector2(0.9f, 0.615f), color: new Color(0.15f, 0.3f, 0.5f, 0.95f));
+            // Las filas se acomodan en Layout() segun cuales esten visibles (el boton de saltar solo existe en el tutorial).
+            Row(UIKit.Button("Resume", root, "Reanudar", Close, Vector2.zero, Vector2.one, fontSize: 30f));
+            Row(UIKit.Button("Controls", root, "Ver controles", () => ControlsPanel.Instance?.Open(), Vector2.zero, Vector2.one, color: new Color(0.2f, 0.42f, 0.25f, 0.95f), fontSize: 30f));
+            m_SkipRow = Row(UIKit.Button("Skip", root, "Saltar el tutorial de Rick", SkipTutorial, Vector2.zero, Vector2.one, color: new Color(0.42f, 0.3f, 0.55f, 0.95f), fontSize: 30f));
+            var v = UIKit.Button("Vignette", root, "", ToggleVignette, Vector2.zero, Vector2.one, color: new Color(0.15f, 0.3f, 0.5f, 0.95f), fontSize: 30f);
+            Row(v);
             m_VignetteLabel = v.GetComponentInChildren<TextMeshProUGUI>();
-            var t = UIKit.Button("Turn", root, "", ToggleTurn, new Vector2(0.1f, 0.40f), new Vector2(0.9f, 0.50f), color: new Color(0.15f, 0.3f, 0.5f, 0.95f));
+            var t = UIKit.Button("Turn", root, "", ToggleTurn, Vector2.zero, Vector2.one, color: new Color(0.15f, 0.3f, 0.5f, 0.95f), fontSize: 30f);
+            Row(t);
             m_TurnLabel = t.GetComponentInChildren<TextMeshProUGUI>();
-            UIKit.Button("Restart", root, "Reiniciar partida", Restart, new Vector2(0.1f, 0.285f), new Vector2(0.9f, 0.385f), color: new Color(0.5f, 0.35f, 0.1f, 0.95f));
-            UIKit.Button("Quit", root, "Salir del juego", Quit, new Vector2(0.1f, 0.17f), new Vector2(0.9f, 0.27f), color: new Color(0.5f, 0.12f, 0.1f, 0.95f));
-            m_Info = UIKit.Text("Info", root, "", 22, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center,
-                new Vector2(0, 0.02f), new Vector2(1, 0.15f), new Vector2(10, 0), new Vector2(-10, 0));
+            var rs = UIKit.Button("Restart", root, RestartText, Restart, Vector2.zero, Vector2.one, color: new Color(0.5f, 0.35f, 0.1f, 0.95f), fontSize: 30f);
+            Row(rs);
+            m_RestartLabel = rs.GetComponentInChildren<TextMeshProUGUI>();
+            var q = UIKit.Button("Quit", root, QuitText, Quit, Vector2.zero, Vector2.one, color: new Color(0.5f, 0.12f, 0.1f, 0.95f), fontSize: 30f);
+            Row(q);
+            m_QuitLabel = q.GetComponentInChildren<TextMeshProUGUI>();
+            m_Info = UIKit.Text("Info", root, "", 24, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center,
+                new Vector2(0, 0.01f), new Vector2(1, 0.115f), new Vector2(10, 0), new Vector2(-10, 0));
+            Layout();
             m_Canvas.gameObject.SetActive(false);
             RefreshLabels();
         }
@@ -107,13 +181,25 @@ namespace RickMorty
             var gm = GameManager.Instance;
             if (gm != null && (gm.State == GameState.Ending || gm.State == GameState.GameOver)) return;
             RefreshLabels();
+            ResetConfirm();
+            // el boton de saltar solo tiene sentido mientras Rick explica
+            if (m_SkipRow != null)
+                m_SkipRow.gameObject.SetActive(gm != null && (gm.State == GameState.Intro || gm.State == GameState.Onboarding || gm.State == GameState.Tutorial));
+            Layout();
+            // un destello o fundido congelado por la pausa taparia el menu: se limpian
+            ScreenFX.Instance?.ClearForPause();
             m_Canvas.gameObject.SetActive(true);
+            AudioFX.Play2D("button", 0.4f, 0.8f);
             if (head != null)
             {
                 var f = head.forward; f.y = 0;
                 if (f.sqrMagnitude < 0.01f) f = Vector3.forward;
                 f.Normalize();
-                m_Canvas.transform.position = head.position + f * 0.9f;
+                // si hay una pared o un estante a menos de 90 cm, el panel se acerca para no quedar metido adentro
+                float dist = 0.9f;
+                if (Physics.SphereCast(head.position, 0.2f, f, out var hit, 1.2f, ~0, QueryTriggerInteraction.Ignore))
+                    dist = Mathf.Clamp(hit.distance - 0.05f, 0.55f, 0.9f);
+                m_Canvas.transform.position = head.position + f * dist;
                 m_Canvas.transform.rotation = Quaternion.LookRotation(f, Vector3.up);
                 m_Dim.transform.SetParent(head, false);   // sigue la cabeza mientras la pausa este abierta
                 m_Dim.transform.localPosition = Vector3.zero;
@@ -175,11 +261,13 @@ namespace RickMorty
 
         void Restart()
         {
+            if (!Confirmed(1, m_RestartLabel)) return;
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex >= 0 ? SceneManager.GetActiveScene().buildIndex : 0);
         }
 
         void Quit()
         {
+            if (!Confirmed(2, m_QuitLabel)) return;
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.isPlaying = false;
 #else

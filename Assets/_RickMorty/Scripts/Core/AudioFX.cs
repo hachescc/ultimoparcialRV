@@ -27,12 +27,29 @@ namespace RickMorty
                 go.transform.SetParent(s_Root);
                 var src = go.AddComponent<AudioSource>();
                 src.playOnAwake = false;
-                src.rolloffMode = AudioRolloffMode.Linear;
-                src.minDistance = 1f;
-                src.maxDistance = 25f;
+                // caida logaritmica: lo cercano suena claramente mas fuerte que lo lejano
+                // (con la lineal 1-25 m, un vidrio a 5 m sonaba al 83 % y no se ubicaba de donde venia)
+                src.rolloffMode = AudioRolloffMode.Logarithmic;
+                src.minDistance = 0.8f;
+                src.maxDistance = 14f;
                 src.dopplerLevel = 0f;
                 s_Pool.Add(src);
             }
+        }
+
+        static readonly string[] s_Common =
+        {
+            "explosion", "alarm", "tinnitus", "portal", "chord", "siren", "splat", "button", "beep", "watch_ping", "arcade_win",
+            "rick_blip", "grab", "plop", "socket", "tick", "ui_hover", "impact_metal", "impact_glass", "impact_wood", "impact_flesh",
+            "bubbles", "hum", "whoosh", "burp", "laser", "shot", "sniper", "chomp", "scream", "dust", "zap", "snap", "meeseeks", "bark", "room"
+        };
+
+        /// <summary>Sintetiza por adelantado los sonidos mas usados. Antes la primera explosion generaba mas de
+        /// 5 segundos de muestras en un solo cuadro y el juego daba un tiron justo en el momento del susto.</summary>
+        public static void Prewarm()
+        {
+            foreach (var n in s_Common) Clip(n);
+            EnsurePool();
         }
 
         public static AudioClip Clip(string name)
@@ -105,6 +122,14 @@ namespace RickMorty
             switch (name)
             {
                 case "beep": d = Tone(880, 0.12f, Wave.Sine, 0.5f); break;
+                // "voz" de Rick sin grabaciones: rafaga de pitidos graves tipo radio, para que cada linea SUENE
+                case "rick_blip": d = Concat(Tone(210, 0.05f, Wave.Saw, 0.22f), Silence(0.035f), Tone(175, 0.05f, Wave.Saw, 0.22f), Silence(0.03f), Tone(240, 0.045f, Wave.Saw, 0.2f), Silence(0.04f), Tone(190, 0.06f, Wave.Saw, 0.22f), Silence(0.03f), Tone(225, 0.05f, Wave.Saw, 0.2f)); break;
+                case "grab": d = Decay(Mix(Noise(rng, 0.06f, 0.35f, 30f, 0.2f), Tone(320, 0.06f, Wave.Sine, 0.3f)), 18f); break;
+                case "plop": d = Mix(Sweep(520, 180, 0.12f, Wave.Sine, 0.5f), Noise(rng, 0.08f, 0.2f, 25f, 0.2f)); break;
+                case "socket": d = Concat(Tone(700, 0.025f, Wave.Square, 0.2f), Tone(1050, 0.04f, Wave.Sine, 0.3f)); break;
+                case "tick": d = Decay(Tone(1900, 0.06f, Wave.Sine, 0.45f), 30f); break;
+                case "ui_hover": d = Decay(Tone(1250, 0.03f, Wave.Sine, 0.18f), 40f); break;
+                case "room": d = Mix(Tone(60, 2f, Wave.Sine, 0.25f, false), Tone(120, 2f, Wave.Sine, 0.08f, false), Noise(rng, 2f, 0.05f, 0f, 1f)); break;
                 case "watch_ping": d = Concat(Tone(1200, 0.07f, Wave.Sine, 0.5f), Silence(0.03f), Tone(1600, 0.09f, Wave.Sine, 0.5f)); break;
                 case "arcade_win": d = Concat(Tone(523, 0.08f, Wave.Square, 0.25f), Tone(659, 0.08f, Wave.Square, 0.25f), Tone(784, 0.08f, Wave.Square, 0.25f), Tone(1047, 0.25f, Wave.Square, 0.25f)); break;
                 case "explosion": d = Mix(Noise(rng, 1.4f, 0.9f, 3.0f, 0.08f), Sweep(90, 35, 0.9f, Wave.Sine, 0.9f)); break;

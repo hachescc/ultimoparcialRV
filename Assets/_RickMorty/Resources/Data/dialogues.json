@@ -10,7 +10,7 @@
     { "id": "onb_timeout", "variants": ["Ugh, me aburro. Asumo que ya entendiste. Sigamos.", "No tengo todo el día, Morty. Siguiente.", "(Eructa) Bueno, ya, como sea. Lo siguiente."] },
     { "id": "onb_trigger", "text": "Antes de seguir: agarra esa caja de Meeseeks y aprieta el gatillo del índice. El gatillo USA las cosas, el agarre las AGARRA. Dos botones, Morty. Dos." },
 
-    { "id": "mission1_intro", "text": "Empecemos por algo para bebés. Agarra el Extracto de Mega-Semilla y mézclalo con el polvo de Meeseeks. Mételos al tazón y aprieta el botón rojo. ¡Rápido, Morty, el multiverso no va a esperar a que tus neuronas arranquen!" },
+    { "id": "mission1_intro", "text": "Empecemos por algo para bebés. Agarra el Extracto de Mega-Semilla y mézclalo con la Esencia Meeseeks. Mételos al tazón y aprieta el botón rojo. ¡Rápido, Morty, el multiverso no va a esperar a que tus neuronas arranquen!" },
     { "id": "mission1_fail", "text": "¡Oh, genial, Morty! (Eructa) Supongo que ver dos ingredientes y un tazón es demasiada estimulación para tu cerebro del tamaño de un maní. Es literalmente mezclar A con B. Ni siquiera Jerry podría arruinar esto... Bueno, sí podría, pero se supone que tú tienes un porcentaje de mi ADN. Inténtalo de nuevo antes de que me arrepienta de no haber clonado a un perro en tu lugar." },
     { "id": "mission1_success", "text": "Tampoco te ganes un premio Nobel en tu cabeza, Morty. Es solo un maldito Meeseeks en un frasco. A nadie le importa, su existencia es dolor, blablabla. Hagamos algo que requiera al menos dos sinapsis haciendo contacto. Agarra Polvo de Plumbus, Jugo de Fleeb y esas Esporas Parasitarias y júntalos. Y trata de no llorar si las esporas se mueven, cobarde." },
     { "id": "mission2_reminder", "text": "Bien, ya viste lo que hace. Ahora sí: Polvo de Plumbus, Jugo de Fleeb y Esporas Parasitarias. Los tres al tazón." },
@@ -19,7 +19,7 @@
     { "id": "mission3_fail", "text": "¡Idiota! (Eructa) Acabas de hacer que explotemos, Morty. Tuve que arrastrar tu consciencia a una dimensión idéntica donde no fuiste tan estúpido para que sigas vivo. Me debes un clon y diez minutos de mi vida, pedazo de basura. Empieza otra vez y no toques los cristales como si fueras un simio." },
     { "id": "mission3_success", "text": "Nada mal, Morty. Digo, no es para aplaudirte, sigo siendo el mamífero más inteligente de este y todos los universos, pero para tener mis genes diluidos con los de tu padre, lo hiciste decente." },
 
-    { "id": "rick_leaving", "text": "Escucha, me largo. Rompí mi pistola de portales en un planeta lleno de gente con cabezas de... mira, no importa. Tienes que experimentar y fabricarme una Pistola de Portales nueva para arreglarla. Arréglatelas con lo que tienes aquí, prueba combinaciones. ¡Ah! Y dejé la puerta del garaje abierta. Puedes salir a la calle a probar tus asquerosidades, pero ni se te ocurra salir del perímetro de la cinta policial. La casa está rodeada por el FBI porque tu hermana descargó películas piratas... o tal vez porque le vendí antimateria a unos terroristas espaciales, no me acuerdo bien. Como sea, si pisas fuera de la cinta, los francotiradores te volarán la cabeza. Y tienes unos quince minutos antes de que entren. ¡Usa la ciencia, Morty! ¡Adiós!" },
+    { "id": "rick_leaving", "text": "Escucha, me largo. Rompí mi pistola de portales en un planeta lleno de gente con cabezas de... mira, no importa. Tienes que experimentar y fabricarme una Pistola de Portales nueva. Arréglatelas con lo que tienes aquí, prueba combinaciones. ¡Ah! Y dejé la puerta del garaje abierta. Puedes salir a la calle a probar tus asquerosidades, pero ni se te ocurra salir del perímetro de la cinta policial. La casa está rodeada por el FBI porque tu hermana descargó películas piratas... o tal vez porque le vendí antimateria a unos terroristas espaciales, no me acuerdo bien. Como sea, si pisas fuera de la cinta, los francotiradores te volarán la cabeza. Y tienes unos quince minutos antes de que entren. ¡Usa la ciencia, Morty! ¡Adiós!" },
 
     { "id": "explosion_random", "variants": [
       "¡Al suelo, idiota! (Eructa) Mezclar eso no tiene ningún sentido químico ni siquiera en las dimensiones donde el alfabeto son puros números. ¡Sigue la lógica básica, Morty, no metas las manos a lo ciego!",
@@ -71,7 +71,7 @@
     { "id": "kill_caleno", "text": "¿Mataste a mi versión caleña, Morty? Esa era la versión de mí que sí sabía bailar salsa." },
     { "id": "laser_capybara", "text": "No molestes al roedor cuántico, Morty." },
 
-    { "id": "steve_hug", "speaker": "Tío Steve", "variants": ["¡Un abrazo, sobrino!", "¿No me recuerdas? ¡Soy el tío Steve!", "¡Ven aquí, campeón!", "Abrazito... abrazito..."] },
+    { "id": "steve_hug", "speaker": "Tío Steve", "variants": ["¡Un abrazo, sobrino!", "¿No me recuerdas? ¡Soy el tío Steve!", "¡Ven aquí, campeón!", "Abracito... abracito..."] },
     { "id": "steve_hugged", "text": "¡Te abrazó el parásito, Morty! Ahora tienes falsos recuerdos de un tío que nunca existió. Sacúdete eso y mata al próximo." },
     { "id": "pantalones_fail", "speaker": "Sr. Pantalones", "text": "Oooh-wiii... eso no salió nada bien, Morty." },
     { "id": "pantalones_idle", "speaker": "Sr. Pantalones", "text": "¡Oooh-wiii! ¡Hola Morty! Estoy aquí para apoyarte." },

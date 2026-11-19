@@ -59,6 +59,8 @@ namespace RickMorty
                 if (l == null || l.m_Text == null) continue;
                 l.m_Visible = false;
                 if (l.m_Item != null && l.m_Item.Unavailable) continue;
+                // los ingredientes base en su soporte ya tienen placa fija con el nombre: sin etiqueta flotante duplicada
+                if (l.m_Item != null && l.m_Item.IsBase && l.m_Item.InSocket) continue;
                 var p = l.transform.position + Vector3.up * l.height;
                 var d = p - head;
                 float dist = d.magnitude;

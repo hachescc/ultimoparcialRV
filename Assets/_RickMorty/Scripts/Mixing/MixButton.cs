@@ -30,10 +30,23 @@ namespace RickMorty
             m_Interactable = GetComponent<XRSimpleInteractable>();
             m_Interactable.selectEntered.AddListener(OnSelect);
             m_Interactable.activated.AddListener(_ => Press(null));
+            // Tocar el boton con la mano ya lo presiona. El XRPokeFilter por defecto solo aceptaba un empuje
+            // HORIZONTAL (eje Z): al presionar hacia abajo, como cualquier boton, no pasaba nada.
+            m_Interactable.hoverEntered.AddListener(OnHover);
             if (cap != null) m_CapRest = cap.localPosition;
         }
 
         void OnSelect(SelectEnterEventArgs args) => Press(args.interactorObject);
+
+        void OnHover(HoverEnterEventArgs args)
+        {
+            if (args.interactorObject is UnityEngine.XR.Interaction.Toolkit.Interactors.XRPokeInteractor poke)
+            {
+                // solo cuenta si la mano llega desde arriba o de frente (no al rozarlo por debajo de la mesa)
+                var tip = poke.attachTransform != null ? poke.attachTransform.position : poke.transform.position;
+                if (tip.y >= transform.position.y - 0.02f) Press(args.interactorObject);
+            }
+        }
 
         public void Press(UnityEngine.XR.Interaction.Toolkit.Interactors.IXRInteractor by)
         {

@@ -71,19 +71,43 @@ namespace RickMorty
 
             var txtGo = new GameObject("OverlayText");
             txtGo.transform.SetParent(transform, false);
-            txtGo.transform.localPosition = new Vector3(0, 0.02f, 0.4f);   // a 40 cm: comodo de leer en VR
+            // A 1 m (antes 40 cm y ~60 grados de ancho: las puntas del texto quedaban en la zona borrosa de la lente)
+            txtGo.transform.localPosition = new Vector3(0, 0.03f, 1.0f);
             m_OverlayText = txtGo.AddComponent<TextMeshPro>();
-            m_OverlayText.fontSize = 0.34f;
+            m_OverlayText.fontSize = 0.44f;
             m_OverlayText.textWrappingMode = TextWrappingModes.Normal;
             m_OverlayText.outlineWidth = 0.18f;
             m_OverlayText.outlineColor = new Color32(40, 0, 30, 255);
             m_OverlayText.alignment = TextAlignmentOptions.Center;
-            m_OverlayText.rectTransform.sizeDelta = new Vector2(0.55f, 0.3f);
-            m_OverlayText.text = "";
+            m_OverlayText.rectTransform.sizeDelta = new Vector2(0.9f, 0.45f);
+            SetOverlayText("");
             m_OverlayText.color = Color.white;
             m_OverlayText.fontStyle = FontStyles.Bold;
             m_OverlayText.renderer.sharedMaterial.renderQueue = 4001;
             m_OverlayText.sortingOrder = 32010;
+
+            // placa oscura detras del texto: blanco sobre el rosado del abrazo o el rojo del francotirador no tenia contraste
+            var bg = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            Destroy(bg.GetComponent<Collider>());
+            bg.name = "OverlayTextBg";
+            bg.layer = txtGo.layer;
+            bg.transform.SetParent(txtGo.transform, false);
+            bg.transform.localPosition = new Vector3(0, 0, 0.01f);
+            bg.transform.localScale = new Vector3(0.98f, 0.34f, 1f);
+            m_OverlayTextBg = bg.GetComponent<Renderer>();
+            var bgMat = MatLib.TransparentInstance(new Color(0.02f, 0.02f, 0.03f, 0.62f));
+            bgMat.renderQueue = 4000;
+            m_OverlayTextBg.sharedMaterial = bgMat;
+            m_OverlayTextBg.sortingOrder = 32005;
+            m_OverlayTextBg.enabled = false;
+        }
+
+        Renderer m_OverlayTextBg;
+
+        void SetOverlayText(string text)
+        {
+            if (m_OverlayText != null) m_OverlayText.text = text;
+            if (m_OverlayTextBg != null) m_OverlayTextBg.enabled = !string.IsNullOrEmpty(text);
         }
 
         void BuildVolume()
@@ -142,6 +166,13 @@ namespace RickMorty
         }
 
         /// <summary>Destello: sube instantaneo, se mantiene y se desvanece.</summary>
+        /// <summary>Al abrir la pausa: quita fundidos, destellos y textos (corren con tiempo de juego y quedarian congelados encima del menu).</summary>
+        public void ClearForPause()
+        {
+            SetFade(Color.black, 0f);
+            ClearOverlay();
+        }
+
         public void Flash(Color color, float hold = 0.1f, float fadeOut = 1.2f)
         {
             if (m_FadeCo != null) StopCoroutine(m_FadeCo);
@@ -150,12 +181,14 @@ namespace RickMorty
 
         IEnumerator CoFlash(Color color, float hold, float fadeOut)
         {
-            color.a = 1f;
+            // alpha del color = intensidad maxima del destello (1 si no se indica)
+            float peak = color.a > 0.01f ? color.a : 1f;
+            color.a = peak;
             m_FadeMat.SetColor("_BaseColor", color);
             m_Fade.enabled = true;
             yield return new WaitForSeconds(hold);
             m_FadeCo = null;
-            yield return Fade(color, 1f, 0f, fadeOut);
+            yield return Fade(color, peak, 0f, fadeOut);
         }
 
         // ---------------- Overlays ----------------
@@ -180,7 +213,7 @@ namespace RickMorty
             m_Hearts = null;
             m_HeartRenderers = null;
             if (m_Overlay != null) m_Overlay.enabled = false;
-            if (m_OverlayText != null) m_OverlayText.text = "";
+            if (m_OverlayText != null) SetOverlayText("");
             IsBlind = false;
         }
 
@@ -191,7 +224,7 @@ namespace RickMorty
             var hearts = m_Hearts = SpawnHearts(14);
             m_HeartRenderers = new Renderer[hearts.Count];
             for (int i = 0; i < hearts.Count; i++) m_HeartRenderers[i] = hearts[i].GetComponent<Renderer>();
-            m_OverlayText.text = UIKit.TitleTag("EL TÍO STEVE TE ABRAZÓ") + "\n<size=55%>Recuerdos falsos de un tío que nunca existió...</size>";
+            SetOverlayText(UIKit.TitleTag("EL TÍO STEVE TE ABRAZÓ") + "\n<size=55%>Recuerdos falsos de un tío que nunca existió...</size>");
             float t = 0;
             while (t < seconds)
             {
@@ -215,6 +248,7 @@ namespace RickMorty
         }
 
         static Texture2D s_Heart;
+        static Material s_HeartMat;
 
         List<Transform> SpawnHearts(int n)
         {
@@ -240,10 +274,15 @@ namespace RickMorty
                 q.layer = m_Overlay.gameObject.layer;
                 q.transform.SetParent(transform, false);
                 var r = q.GetComponent<Renderer>();
-                var m = MatLib.TransparentInstance(Color.white);
-                m.SetTexture("_BaseMap", s_Heart);
-                m.renderQueue = 3995;
-                r.sharedMaterial = m;
+                // un solo material para todos los corazones (el color/alpha va por MaterialPropertyBlock);
+                // antes se creaban 14 materiales por abrazo y nunca se destruian
+                if (s_HeartMat == null)
+                {
+                    s_HeartMat = MatLib.TransparentInstance(Color.white);
+                    s_HeartMat.SetTexture("_BaseMap", s_Heart);
+                    s_HeartMat.renderQueue = 3995;
+                }
+                r.sharedMaterial = s_HeartMat;
                 r.sortingOrder = 31995;
                 list.Add(q.transform);
             }
@@ -258,7 +297,7 @@ namespace RickMorty
 
         IEnumerator CoCenterText(string text, Color color, float seconds)
         {
-            m_OverlayText.text = text;
+            SetOverlayText(text);
             float t = 0;
             while (t < seconds)
             {
@@ -267,7 +306,7 @@ namespace RickMorty
                 m_OverlayText.color = color;
                 yield return null;
             }
-            m_OverlayText.text = "";
+            SetOverlayText("");
             m_OverlayCo = null;
         }
 
@@ -306,15 +345,17 @@ namespace RickMorty
                     case 0: // VHS
                         m_Color.saturation.Override(60f);
                         m_Color.colorFilter.Override(new Color(1f, 0.92f, 0.8f));
-                        m_Grain.intensity.Override(1f);
+                        m_Grain.intensity.Override(0f);     // el grano de pelicula es caro en Quest y en el visor solo se ve como ruido
                         m_Chroma.intensity.Override(0.8f);
-                        m_Lens.intensity.Override(-0.15f);
+                        m_Lens.intensity.Override(0f);
                         break;
                     case 1: // borrachera
-                        m_Chroma.intensity.Override(0.6f + 0.4f * Mathf.Sin(t * 2f));
-                        m_Lens.intensity.Override(0.35f * Mathf.Sin(t * 1.3f));
-                        m_Color.saturation.Override(20f);
-                        m_Color.colorFilter.Override(Color.white);
+                        // borrachera por COLOR (vaiven de tono y saturacion). Antes ondulaba la lente ±0.35 durante 12 s:
+                        // deformar la imagen del visor es de lo que mas marea en VR.
+                        m_Chroma.intensity.Override(0.5f + 0.3f * Mathf.Sin(t * 2f));
+                        m_Lens.intensity.Override(0f);
+                        m_Color.saturation.Override(25f + 35f * Mathf.Sin(t * 1.1f));
+                        m_Color.colorFilter.Override(Color.Lerp(new Color(1f, 0.9f, 0.7f), new Color(0.8f, 1f, 0.85f), 0.5f + 0.5f * Mathf.Sin(t * 0.9f)));
                         m_Grain.intensity.Override(0f);
                         break;
                     default: // humo morado

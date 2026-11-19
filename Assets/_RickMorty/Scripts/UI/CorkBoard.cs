@@ -64,7 +64,7 @@ namespace RickMorty
             var maxA = new Vector2((cx + 1) * w, 0.86f - cy * 0.285f);
             var note = UIKit.Panel("Nota_" + i, m_NotesLayer, s_NoteColors[i % s_NoteColors.Length], minA, maxA, new Vector2(16, 12), new Vector2(-16, -14), false);
             note.rectTransform.localRotation = Quaternion.Euler(0, 0, ((i * 37) % 7 - 3) * 1.1f);
-            var t = UIKit.Block("Texto", note.transform, text, 18, 27, new Color(0.12f, 0.1f, 0.08f), Vector2.zero, Vector2.one, 12);
+            var t = UIKit.Block("Texto", note.transform, text, 22, 31, new Color(0.12f, 0.1f, 0.08f), Vector2.zero, Vector2.one, 12);
             t.alignment = TextAlignmentOptions.Center;
 
             // chincheta arriba al centro de la nota (en coordenadas del canvas)

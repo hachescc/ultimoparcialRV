@@ -25,7 +25,7 @@
     {"id":"scar","name":"SCAR del Fortnite","category":"arma","shape":"gun","color":"#FFC400","size":0.55,"mass":2.5,"behaviour":"scar","description":"Gatillo sostenido: ráfaga con dispersión horrible."},
     {"id":"token_fortnite","name":"Token Dorado del Fortnite","category":"absurdo","shape":"coin","color":"#FFD700","size":0.2,"mass":0.5,"behaviour":"spinner","description":"Moneda V-Bucks que gira sobre su eje."},
     {"id":"aguardiente","name":"Aguardiente Blanco del Valle","category":"comida","shape":"bottle","color":"#DDF4FF","size":0.14,"mass":0.8,"behaviour":"food_drunk","description":"Estabilizador cuántico. También se puede beber."},
-    {"id":"szechuan","name":"Salsa Szechuan de 1998","category":"comida","shape":"cube","color":"#E8E2D0","size":0.08,"mass":0.1,"behaviour":"food_vhs","description":"El arco de la vida de Rick esta completo."},
+    {"id":"szechuan","name":"Salsa Szechuan de 1998","category":"comida","shape":"cube","color":"#E8E2D0","size":0.08,"mass":0.1,"behaviour":"food_vhs","description":"El arco de la vida de Rick está completo."},
     {"id":"camiseta_america","name":"Camiseta del América de Cali","category":"absurdo","shape":"cube","color":"#C8102E","size":0.3,"mass":0.3,"behaviour":"","description":"Roja escarlata, 1996. Al Rick Caleño le encanta."},
     {"id":"sr_pantalones","name":"Sr. Pantalones de Popó","category":"criatura","shape":"capsule","color":"#F3D36B","size":0.12,"mass":0.2,"behaviour":"creature_pet","description":"Del tamaño de un ratón. Da pistas si lo sostienes."},
     {"id":"pepino_mutante","name":"Pepino Mutante Mal Hecho","category":"criatura","shape":"capsule","color":"#3E8E2F","size":0.25,"mass":0.6,"behaviour":"creature_throwable","description":"Lánzalo a la casa del vecino."},

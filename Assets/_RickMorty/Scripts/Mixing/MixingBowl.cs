@@ -66,6 +66,9 @@ namespace RickMorty
 
             var contents = Contents();
             var ids = contents.Select(c => c.itemId).ToList();
+            if (contents.Count > m_LastCount && Time.timeSinceLevelLoad > 2f)
+                AudioFX.Play("plop", transform.position, 0.55f, 1f + 0.12f * contents.Count);   // confirma que el ingrediente SI quedo dentro
+            m_LastCount = contents.Count;
 
             // Color del liquido = promedio de lo que hay dentro
             Color target = new Color(0.3f, 0.8f, 0.4f, 0.6f);
@@ -103,8 +106,15 @@ namespace RickMorty
             }
             if (anyHeldNear && Time.time >= m_NextHaptic) m_NextHaptic = Time.time + 0.5f;
 
+            // Rojo = esa combinacion va a explotar. Ahora tambien lo DICE (antes solo cambiaba el color y nadie lo explicaba).
+            if (danger && !m_Danger && contents.Count >= 2 && Time.time > m_NextDangerText)
+            {
+                m_NextDangerText = Time.time + 4f;
+                FX.FloatingText(transform.position + Vector3.up * 0.42f, "¡MEZCLA INESTABLE!", new Color(1f, 0.3f, 0.25f), 0.8f, 2.2f, 0.12f);
+            }
             m_Danger = danger;
-            UpdateGlow(danger ? new Color(1f, 0.15f, 0.1f) : new Color(0.3f, 1f, 0.4f), danger ? 1.5f + Mathf.Sin(Time.time * 20f) : 0.3f);
+            // luz roja estable con un latido lento (antes parpadeaba irregular a 3-5 Hz)
+            UpdateGlow(danger ? new Color(1f, 0.15f, 0.1f) : new Color(0.3f, 1f, 0.4f), danger ? 1.6f + 0.35f * Mathf.Sin(Time.time * 4f) : 0.3f);
         }
 
         void UpdateGlow(Color c, float intensity)
@@ -116,6 +126,10 @@ namespace RickMorty
                 bowlLight.intensity = intensity;
             }
         }
+
+        static bool s_FirstBoom = true;
+        int m_LastCount;
+        float m_NextDangerText;
 
         /// <summary>Llamado por el boton MEZCLAR.</summary>
         public void Mix()
@@ -129,6 +143,14 @@ namespace RickMorty
                 AudioFX.Play("beep", transform.position, 0.6f, 0.6f);
                 return;
             }
+            if (GameManager.Instance != null && GameManager.Instance.MixBlockedNow)
+            {
+                // Rick esta esperando que uses la Caja de Meeseeks: adelantarse hacia explotar la mezcla "correcta" de la mision 2
+                RickComms.Instance?.SayText("¡Todavía no, Morty! Primero usa la Caja de Meeseeks: agárrala y aprieta el gatillo.");
+                AudioFX.Play("beep", transform.position, 0.6f, 0.6f);
+                FX.FloatingText(transform.position + Vector3.up * 0.45f, "Primero usa la Caja de Meeseeks", new Color(1f, 0.85f, 0.3f), 0.7f, 2.5f, 0.15f);
+                return;
+            }
             var contents = new List<MixableItem>(Contents());
             var ids = contents.Select(c => c.itemId).ToList();
 
@@ -136,12 +158,15 @@ namespace RickMorty
             {
                 RickComms.Instance?.Say(contents.Count == 0 ? "mix_empty" : "mix_need_more");
                 AudioFX.Play("beep", transform.position, 0.6f, 0.6f);
+                FX.FloatingText(transform.position + Vector3.up * 0.45f, "Mínimo 2 ingredientes en el tazón", new Color(1f, 0.85f, 0.3f), 0.7f, 2.5f, 0.15f);
                 return;
             }
 
             if (GameDatabase.IsFinalCombo(ids))
             {
                 RickComms.Instance?.Say("final_use_station");
+                AudioFX.Play("beep", transform.position, 0.6f, 0.6f);
+                FX.FloatingText(transform.position + Vector3.up * 0.45f, "Eso va en el SOPORTE DE ENSAMBLAJE →", new Color(0.5f, 1f, 0.5f), 0.7f, 3f, 0.15f);
                 return;
             }
 
@@ -206,9 +231,11 @@ namespace RickMorty
             var rig = PlayerRig.Instance;
             if (rig != null && (rig.HeadPosition - center).magnitude < 5f)
             {
-                ScreenFX.Instance?.Flash(Color.white, 0.25f, 1.8f);
-                ScreenFX.Instance?.Muffle(3f);
-                AudioFX.Play2D("tinnitus", 0.5f);
+                // destello corto y tibio (antes: blanco total 2 s en CADA mezcla fallida; molesto y agresivo en el visor)
+                ScreenFX.Instance?.Flash(new Color(1f, 0.95f, 0.8f, 0.6f), 0.08f, 0.7f);
+                ScreenFX.Instance?.Muffle(s_FirstBoom ? 3f : 1.5f);
+                AudioFX.Play2D("tinnitus", s_FirstBoom ? 0.45f : 0.15f);
+                s_FirstBoom = false;
                 rig.Haptic(Hand.Both, 1f, 0.5f);
             }
             GameEvents.RaiseMixFailed(reason);

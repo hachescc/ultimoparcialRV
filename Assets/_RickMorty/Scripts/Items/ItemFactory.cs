@@ -310,6 +310,26 @@ namespace RickMorty
                         r.sharedMaterials = mats;
                     }
                 }
+                // Solidos con contenido propio (cristales, esporas, polvo, cogollos) en vez de un relleno de color liso:
+                // tres frascos se veian casi del mismo rosado y solo se distinguian leyendo la etiqueta.
+                var reg = ItemVisualRegistry.Get();
+                var fill = reg != null && def.shape == "jar" ? reg.Find("relleno_" + def.id) : null;
+                if (fill != null)
+                {
+                    var jarMesh = model.GetComponentInChildren<MeshFilter>();
+                    if (jarMesh != null && jarMesh.sharedMesh != null)
+                    {
+                        var jb = jarMesh.sharedMesh.bounds;
+                        var content = Object.Instantiate(fill.prefab, jarMesh.transform);
+                        content.name = "Relleno";
+                        float w = Mathf.Min(jb.size.x, jb.size.z) * 0.6f;
+                        content.transform.localRotation = Quaternion.identity;
+                        content.transform.localScale = new Vector3(w, jb.size.y * 0.5f, w);
+                        content.transform.localPosition = new Vector3(jb.center.x, jb.min.y + jb.size.y * 0.07f, jb.center.z);
+                        foreach (var c in content.GetComponentsInChildren<Collider>()) Object.Destroy(c);
+                        return;
+                    }
+                }
                 var color = def.Color;
                 var liquidMat = def.id == "materia_oscura" ? MatLib.Unlit(new Color(0.01f, 0.01f, 0.01f))
                     : MatLib.Lit(color, def.id == "kalaxianos" || def.id == "acido" || def.id == "mega_semilla" || def.id == "meeseeks" || def.id == "marihuana" || def.id == "semen" ? 1.2f : 0.3f, 0.6f);
@@ -420,7 +440,7 @@ namespace RickMorty
             bool init = false;
             foreach (var r in renderers)
             {
-                if (r.name == "Liquido") continue;
+                if (r.name == "Liquido" || r.transform.parent != null && (r.transform.parent.name == "Relleno" || r.transform.parent.name.StartsWith("relleno_"))) continue;
                 Mesh mesh = null;
                 var mf = r.GetComponent<MeshFilter>();
                 if (mf != null) mesh = mf.sharedMesh;

@@ -21,6 +21,7 @@ namespace RickMorty
         public event System.Action<int> MinuteWarning; // minutos restantes
 
         int m_LastWarnedMinute = -1;
+        int m_LastTick = -1;
 
         void Awake()
         {
@@ -53,6 +54,13 @@ namespace RickMorty
             {
                 m_LastWarnedMinute = minute;
                 if (minute == 5 || minute == 3 || minute == 1) MinuteWarning?.Invoke(minute);
+            }
+
+            // ultimos 10 segundos: un "tic" por segundo (cada vez mas agudo) para que se sienta el final
+            if (Remaining > 0f && Remaining <= 10f)
+            {
+                int sec = Mathf.CeilToInt(Remaining);
+                if (sec != m_LastTick) { m_LastTick = sec; AudioFX.Play2D("tick", 0.7f, 1f + (10 - sec) * 0.06f); }
             }
 
             if (Remaining <= 0f)

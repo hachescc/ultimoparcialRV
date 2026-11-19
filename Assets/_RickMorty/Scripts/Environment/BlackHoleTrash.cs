@@ -18,7 +18,12 @@ namespace RickMorty
             if (core != null) core.Rotate(0, 120f * Time.deltaTime, 0, Space.Self);
         }
 
-        void OnTriggerEnter(Collider other)
+        void OnTriggerEnter(Collider other) => TrySwallow(other);
+
+        // Stay: si la mano entra sosteniendo el objeto y lo suelta ADENTRO, Enter ya paso y el objeto se quedaba ahi.
+        void OnTriggerStay(Collider other) => TrySwallow(other);
+
+        void TrySwallow(Collider other)
         {
             var item = other.GetComponentInParent<MixableItem>();
             if (item == null || item.Unavailable || item.IsHeld) return;

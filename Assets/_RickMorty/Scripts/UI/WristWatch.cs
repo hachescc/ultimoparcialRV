@@ -17,10 +17,12 @@ namespace RickMorty
         public Transform head;
         public DiscoveryHologram hologram;
         [Tooltip("Coseno del angulo maximo entre la cara del reloj y la cabeza para considerarlo 'mirado'")]
-        public float lookDot = 0.55f;
-        public float lookMaxDistance = 0.75f;
+        public float lookDot = 0.6f;
+        public float lookMaxDistance = 0.6f;
+        [Tooltip("Ademas el jugador debe estar MIRANDO hacia el reloj (coseno del angulo entre la vista y el reloj)")]
+        public float gazeDot = 0.74f;
 
-        TextMeshProUGUI m_Timer, m_Score, m_Subtitle, m_Speaker, m_Footer, m_Objective;
+        TextMeshProUGUI m_Timer, m_Score, m_Footer, m_TimerLabel;
         Image m_Bg, m_Screen;
         Canvas m_Banner;
         TextMeshProUGUI m_BannerText;
@@ -54,10 +56,32 @@ namespace RickMorty
             tape.transform.localScale = new Vector3(0.085f, 0.008f, 0.03f);
             tape.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(new Color(0.6f, 0.6f, 0.62f), 0f, 0.2f);
 
-            // Pantalla del reloj: filas fijas, texto con auto-tamano y "..." si no cabe (nunca se superpone)
+            // Pantalla del reloj: SOLO lo que se lee de un vistazo (tiempo, puntaje, coleccion) y en grande.
+            // Antes tambien traia subtitulos y objetivo con letra de 0.2-0.5 grados: ilegibles en el visor.
+            // Ese texto ahora sale en el monitor del garaje y en la franja de avisos (HudStrip).
             body.transform.localScale = new Vector3(0.088f, 0.012f, 0.074f);
+            // marco y botones laterales para que no parezca una caja gris
+            var bezel = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Destroy(bezel.GetComponent<Collider>());
+            bezel.name = "WatchBezel";
+            bezel.transform.SetParent(transform, false);
+            bezel.transform.localPosition = new Vector3(0, 0.0045f, 0);
+            bezel.transform.localScale = new Vector3(0.094f, 0.006f, 0.08f);
+            bezel.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(new Color(0.12f, 0.13f, 0.14f), 0f, 0.75f, 0.8f);
+            for (int i = 0; i < 2; i++)
+            {
+                var knob = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                Destroy(knob.GetComponent<Collider>());
+                knob.name = "WatchKnob";
+                knob.transform.SetParent(transform, false);
+                knob.transform.localPosition = new Vector3(0.05f, 0.002f, i == 0 ? -0.016f : 0.016f);
+                knob.transform.localRotation = Quaternion.Euler(0, 0, 90);
+                knob.transform.localScale = new Vector3(0.011f, 0.004f, 0.011f);
+                knob.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(i == 0 ? new Color(0.3f, 1f, 0.4f) : new Color(1f, 0.6f, 0.15f), 0.6f, 0.5f, 0.3f);
+            }
+
             var canvas = UIKit.WorldCanvas("WatchCanvas", transform, new Vector2(400, 330), 0.0002f, false);
-            canvas.transform.localPosition = new Vector3(0, 0.0065f, 0);
+            canvas.transform.localPosition = new Vector3(0, 0.0078f, 0);
             canvas.transform.localRotation = Quaternion.Euler(90, 0, 0);
             var root = canvas.transform;
 
@@ -65,18 +89,13 @@ namespace RickMorty
             m_Screen = UIKit.Panel("Screen", root, new Color(0.02f, 0.07f, 0.04f, 1f), Vector2.zero, Vector2.one, new Vector2(10, 10), new Vector2(-10, -10));
             var s = m_Screen.transform;
 
-            m_Timer = UIKit.Line("Timer", s, "--:--", 46, UIKit.Neon, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.80f), new Vector2(0.62f, 1f), 14, 4);
+            m_TimerLabel = UIKit.Line("TimerLabel", s, "EL FBI ENTRA EN", 24, new Color(1f, 0.82f, 0.35f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.86f), new Vector2(1, 1f), 16, 2);
+            m_Timer = UIKit.Line("Timer", s, "--:--", 104, UIKit.Neon, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.44f), new Vector2(1f, 0.88f), 14, 0);
             m_Timer.fontStyle = FontStyles.Bold;
-            m_Score = UIKit.Line("Score", s, "0 pts", 30, Color.white, TextAlignmentOptions.MidlineRight, new Vector2(0.55f, 0.80f), new Vector2(1f, 1f), 14, 4);
-            UIKit.Panel("Sep", s, new Color(0.3f, 0.9f, 0.4f, 0.35f), new Vector2(0, 0.795f), new Vector2(1, 0.8f), new Vector2(12, 0), new Vector2(-12, 0), false);
-
-            m_Speaker = UIKit.Line("Speaker", s, "", 21, UIKit.Cyan, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.69f), new Vector2(1, 0.79f), 14, 0);
-            m_Subtitle = UIKit.Block("Subtitle", s, "", 16, 24, Color.white, new Vector2(0, 0.33f), new Vector2(1, 0.69f), 14);
-
-            var obj = UIKit.Panel("ObjBox", s, new Color(1f, 0.8f, 0.25f, 0.12f), new Vector2(0, 0.105f), new Vector2(1, 0.32f), new Vector2(8, 0), new Vector2(-8, 0));
-            UIKit.Line("ObjLabel", obj.transform, "OBJETIVO", 13, new Color(1f, 0.82f, 0.35f), TextAlignmentOptions.TopLeft, new Vector2(0, 0.68f), new Vector2(1, 1), 8, 2);
-            m_Objective = UIKit.Block("Objective", obj.transform, "", 12, 17, new Color(1f, 0.93f, 0.75f), new Vector2(0, 0), new Vector2(1, 0.7f), 8);
-            m_Footer = UIKit.Line("Footer", s, "", 14, new Color(0.62f, 0.85f, 0.65f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0), new Vector2(1, 0.1f), 14, 0);
+            UIKit.Panel("Sep", s, new Color(0.3f, 0.9f, 0.4f, 0.35f), new Vector2(0, 0.425f), new Vector2(1, 0.432f), new Vector2(12, 0), new Vector2(-12, 0), false);
+            m_Score = UIKit.Line("Score", s, "0 pts", 54, Color.white, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.18f), new Vector2(1f, 0.42f), 16, 2);
+            m_Score.fontStyle = FontStyles.Bold;
+            m_Footer = UIKit.Line("Footer", s, "", 27, new Color(0.62f, 0.85f, 0.65f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.02f), new Vector2(1, 0.18f), 16, 0);
 
             // Cartel de notificaciones (flota sobre la muneca): fondo opaco para que se lea sobre cualquier cosa
             m_Banner = UIKit.WorldCanvas("NeonBanner", transform, new Vector2(760, 180), 0.00035f, false);
@@ -91,29 +110,15 @@ namespace RickMorty
 
         void OnEnable()
         {
-            if (RickComms.Instance != null) RickComms.Instance.SubtitleChanged += OnSubtitle;
             GameEvents.ItemDiscovered += OnDiscovered;
-        }
-
-        void Start()
-        {
-            if (RickComms.Instance != null)
-            {
-                RickComms.Instance.SubtitleChanged -= OnSubtitle;
-                RickComms.Instance.SubtitleChanged += OnSubtitle;
-            }
         }
 
         void OnDisable()
         {
-            if (RickComms.Instance != null) RickComms.Instance.SubtitleChanged -= OnSubtitle;
             GameEvents.ItemDiscovered -= OnDiscovered;
-        }
-
-        void OnSubtitle(string speaker, string text)
-        {
-            m_Speaker.text = string.IsNullOrEmpty(text) ? "" : "<b>" + speaker + "</b> (radio)";
-            m_Subtitle.text = text ?? "";
+            // si el control se apaga (se pierde el tracking) con un cartel a medias, no debe quedar pegado
+            if (m_Banner != null) m_Banner.gameObject.SetActive(false);
+            m_BannerCo = null;
         }
 
         void OnDiscovered(ItemDef def)
@@ -123,13 +128,16 @@ namespace RickMorty
             PlayerRig.Instance?.Haptic(Hand.Left, 0.9f, 0.4f);
         }
 
-        public void SetObjective(string text)
-        {
-            if (m_Objective != null) m_Objective.text = text;
-        }
+        /// <summary>El objetivo ya no se escribe en el reloj (no se podia leer): va al monitor y a la franja de avisos.</summary>
+        public void SetObjective(string text) { }
 
         public void Notify(string text, Color color, float seconds = 4f)
         {
+            // Los avisos salen delante del jugador (franja pegada al cuerpo). Antes flotaban sobre la muneca:
+            // con la mano abajo no se veian nunca.
+            var strip = HudStrip.Instance;
+            if (strip != null) { strip.Notify(text, color, seconds); return; }
+            if (!isActiveAndEnabled) return;   // control apagado: no se puede arrancar la corrutina
             if (m_BannerCo != null) StopCoroutine(m_BannerCo);
             m_BannerCo = StartCoroutine(CoBanner(text, color, seconds));
         }
@@ -142,7 +150,7 @@ namespace RickMorty
             while (t < seconds)
             {
                 t += Time.deltaTime;
-                float flicker = (t < 0.4f) ? (Random.value > 0.4f ? 1f : 0.3f) : 1f;
+                float flicker = 1f;   // sin estrobo: un cartel que parpadea a 30 cm de los ojos molesta
                 var c = color; c.a = flicker * Mathf.Clamp01((seconds - t) / 0.4f);
                 m_BannerText.color = c;
                 var bg = m_BannerBg.color; bg.a = 0.97f * Mathf.Clamp01((seconds - t) / 0.4f); m_BannerBg.color = bg;
@@ -168,7 +176,7 @@ namespace RickMorty
                 if (timer.Running || timer.Remaining < timer.duration)
                 {
                     int secs = Mathf.CeilToInt(timer.Remaining);
-                    if (secs != m_LastSecs) { m_LastSecs = secs; m_Timer.text = "FBI " + GameTimer.Format(timer.Remaining); }
+                    if (secs != m_LastSecs) { m_LastSecs = secs; m_Timer.text = GameTimer.Format(timer.Remaining); }
                     bool danger = timer.Remaining < 180f;
                     m_Timer.color = danger ? (Mathf.Repeat(Time.time, 1f) > 0.5f ? UIKit.Danger : Color.white) : UIKit.Neon;
                 }
@@ -183,7 +191,7 @@ namespace RickMorty
                 {
                     m_LastFound = found;
                     if (m_Discoverable < 0) m_Discoverable = GameDatabase.DiscoverableCount;
-                    m_Footer.text = $"Colección {found}/{m_Discoverable}  ·  mira la muñeca para verla";
+                    m_Footer.text = $"Colección {found}/{m_Discoverable}";
                 }
             }
 
@@ -193,7 +201,10 @@ namespace RickMorty
                 var toHead = head.position - transform.position;
                 float dist = toHead.magnitude;
                 float dot = dist > 0.0001f ? Vector3.Dot(transform.up, toHead / dist) : 0f;
-                bool looking = dist < lookMaxDistance && dot > lookDot;
+                // la cara del reloj apunta a la cabeza Y el jugador esta mirando hacia el reloj
+                // (antes bastaba con tener la mano a la altura de la mesa: el holograma saltaba solo mientras se trabajaba)
+                float gaze = dist > 0.0001f ? Vector3.Dot(head.forward, -toHead / dist) : 0f;
+                bool looking = dist < lookMaxDistance && dot > lookDot && gaze > gazeDot;
                 if (looking) m_LookTime += Time.deltaTime; else m_LookTime = 0f;
                 IsLooking = m_LookTime > 0.25f;
                 if (hologram != null) hologram.SetVisible(IsLooking || hologram.IsPointerOver);

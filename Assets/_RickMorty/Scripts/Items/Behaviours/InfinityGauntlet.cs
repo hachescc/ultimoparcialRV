@@ -59,6 +59,7 @@ namespace RickMorty
             for (int i = 0; i < half; i++)
             {
                 var m = candidates[i];
+                if (m == null) continue;   // pudo consumirse en una mezcla mientras corria el chasquido
                 FX.Burst(m.transform.position, new Color(0.45f, 0.35f, 0.25f), 25, 0.6f, 0.03f, 1.5f, -0.1f);
                 AudioFX.Play("dust", m.transform.position, 0.5f);
                 m.Consume(1.5f, false);

@@ -120,7 +120,7 @@ namespace RickMorty.Dev
             Shot("Morty despierta", "Morty despierta sobre la mesa del garaje. Rick golpea la mesa y empieza a darle instrucciones (subtitulos en el monitor y en el reloj).",
                 new Vector3(-0.3f, 1.6f, 0.4f), new Vector3(1.2f, 1.3f, 1.6f)); yield return null; // film
             Shot("Monitor del garaje", "Monitor colgante: objetivo actual y subtitulos de Rick. Todo lo que dice Rick también sale aquí.",
-                new Vector3(0, 1.85f, 2.35f), new Vector3(0, 2.05f, 3.25f), 60); yield return null; // film
+                new Vector3(0, 1.95f, 1.95f), new Vector3(0, 2.22f, 2.95f), 60); yield return null; // film
             Shot("Vista general del garaje", "Garaje: mesa de mezclas al centro, estanteria con utileria, tablero de corcho, lavanderia a la izquierda, capibara en el rincon derecho.",
                 new Vector3(-3.3f, 2.4f, -2.7f), new Vector3(0.5f, 0.8f, 2.5f), 78); yield return null; // film
             Comms()?.StopAll();
@@ -133,7 +133,7 @@ namespace RickMorty.Dev
             yield return new WaitForSeconds(1.5f);
             var watch = WristWatch.Instance;
             float oldDot = watch.lookDot, oldDist = watch.lookMaxDistance;
-            watch.lookDot = -2f; watch.lookMaxDistance = 100f;   // simula mirar la muneca
+            watch.lookDot = -2f; watch.gazeDot = -2f; watch.lookMaxDistance = 100f;   // simula mirar la muneca
             yield return new WaitForSeconds(1.2f);
             ShotWatch("Reloj Multiversal", "Paso 1: levantar la muñeca izquierda y mirar el Reloj Multiversal (temporizador, puntaje, subtitulos y objetivo)."); yield return null; // film
             ShotHologram("Holograma de descubrimientos (vacio)", "Al mirar el reloj se proyecta el holograma con la colección: lo no descubierto aparece como ???."); yield return null; // film
@@ -229,7 +229,7 @@ namespace RickMorty.Dev
             Comms()?.StopAll();
             ShotWatch("Temporizador del FBI", "Arranca la cuenta regresiva del FBI (15 min). El reloj muestra tiempo, puntaje, objetivo y descubrimientos."); yield return null; // film
             Shot("Objetivo en el monitor", "Objetivo: fabricar la Pistola de Portales antes de que entre el FBI.",
-                new Vector3(0, 1.85f, 2.35f), new Vector3(0, 2.05f, 3.25f), 60); yield return null; // film
+                new Vector3(0, 1.95f, 1.95f), new Vector3(0, 2.22f, 2.95f), 60); yield return null; // film
             Shot("Tablero de corcho", "Notas de Rick: reglas basicas y pistas que se van revelando cuando no hay progreso.",
                 new Vector3(-2.95f, 1.6f, 2.9f), new Vector3(-2.95f, 1.6f, 3.97f), 60); yield return null; // film
             PauseMenu.Instance.Open();
@@ -251,7 +251,7 @@ namespace RickMorty.Dev
             ShotDesk("Pistola Láser descubierta", "Las pistas de Rick y las notas del corcho guian hacia la receta final."); yield return null; // film
             Comms()?.StopAll();
             var watch = WristWatch.Instance;
-            watch.lookDot = -2f; watch.lookMaxDistance = 100f;
+            watch.lookDot = -2f; watch.gazeDot = -2f; watch.lookMaxDistance = 100f;
             yield return new WaitForSeconds(1.2f);
             ShotHologram("Holograma con descubrimientos", "La colección se llena; al apuntar a un objeto descubierto con la mano derecha se muestra su receta (no hay que memorizarlas)."); yield return null; // film
             watch.lookDot = 2f; watch.lookMaxDistance = 0.75f;
@@ -366,7 +366,7 @@ namespace RickMorty.Dev
             Comms()?.Say("snowball_on", true);
             yield return new WaitForSeconds(0.5f);
             Shot("Casco de Snowball", "Con el casco puesto todo suena grave y los insultos de Rick por la radio se convierten en ladridos.",
-                new Vector3(0, 1.85f, 2.35f), new Vector3(0, 2.05f, 3.25f), 60); yield return null; // film
+                new Vector3(0, 1.95f, 1.95f), new Vector3(0, 2.22f, 2.95f), 60); yield return null; // film
             Comms()?.StopAll();
             Comms()?.EnableDogMode(0f);
             var cereal = ItemFactory.Spawn("cereal_eyeholes", new Vector3(3.2f, 1.5f, 2.9f), Quaternion.identity);
@@ -551,6 +551,7 @@ namespace RickMorty.Dev
             Shot("Portal Gun de cartón en el soporte", "Receta final: la Portal Gun de cartón se asegura en el Soporte de Ensamblaje (socket XR)...",
                 new Vector3(0.1f, 1.4f, 1.15f), st.socket.transform.position, 50); yield return null; // film
             Comms()?.StopAll();
+            yield return WaitItem("kalaxianos", 30f);   // un evento aleatorio (Meeseeks pirata) pudo habérselos llevado unos segundos
             var crystals = Item("kalaxianos");
             ReleaseBase(crystals);
             yield return null;
@@ -638,7 +639,7 @@ namespace RickMorty.Dev
             if (cam != null)
                 foreach (Transform t in cam.transform)
                     if (t.name == "ScreenFade" || t.name == "ScreenOverlay" || t.name == "OverlayText" || t.name == "ComfortVignette")
-                        t.gameObject.layer = FxLayer;
+                        foreach (var ch in t.GetComponentsInChildren<Transform>(true)) ch.gameObject.layer = FxLayer;
             if (WristWatch.Instance != null) WristWatch.Instance.lookDot = 2f;   // holograma solo cuando lo pedimos
         }
 
@@ -739,7 +740,7 @@ namespace RickMorty.Dev
         {
             var canvas = WristWatch.Instance.hologram.transform.Find("HologramCanvas");
             if (canvas == null || !canvas.gameObject.activeInHierarchy) { ShotWatch(title, caption); return; }
-            ShotRot(title, caption, canvas.position - canvas.forward * 0.42f, canvas.rotation, 55);
+            ShotRot(title, caption, canvas.position - canvas.forward * 0.62f, canvas.rotation, 55);
         }
 
         void Shot(string title, string caption, Vector3 pos, Vector3 lookAt, float fov = 70f) =>

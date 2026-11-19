@@ -42,8 +42,9 @@ namespace RickMorty
             Destroy(quad.GetComponent<Collider>());
             quad.name = "ComfortVignette";
             quad.transform.SetParent(transform, false);
-            quad.transform.localPosition = new Vector3(0, 0, 0.14f);
-            quad.transform.localScale = new Vector3(0.42f, 0.42f, 1f);
+            // a 50 cm (antes 14 cm): tan cerca, cada ojo veia el hueco de la vineta corrido ~13 grados en sentido contrario
+            quad.transform.localPosition = new Vector3(0, 0, 0.5f);
+            quad.transform.localScale = new Vector3(1.5f, 1.5f, 1f);
             m_Renderer = quad.GetComponent<Renderer>();
             m_Mat = MatLib.TransparentInstance(Color.black);
             m_Mat.SetTexture("_BaseMap", BuildTexture());

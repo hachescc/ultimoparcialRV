@@ -202,6 +202,9 @@ namespace RickMorty.EditorTools
         {
             var f = settings.GetFeature<T>();
             if (f != null) { f.enabled = true; EditorUtility.SetDirty(f); }
+            // Antes fallaba en silencio: el repo quedo con Meta Quest Support y los perfiles Touch APAGADOS
+            // (el APK habria salido sin controles). Si pasa, hay que volver a correr el menu 1.
+            else Debug.LogError($"[RickMorty] OpenXR: no se encontro la feature {typeof(T).Name}. Vuelve a ejecutar 'Rick y Morty/1. Configurar proyecto' y revisa Project Settings > XR Plug-in Management > OpenXR.");
         }
 
         static void ConfigurePlayer()
@@ -278,11 +281,16 @@ namespace RickMorty.EditorTools
                 e.scale = scale;
                 e.generateBoxCollider = true;
             }
+            // entradas huerfanas (ids viejos que ya no existen, p. ej. uno que quedo con tilde): fuera
+            reg.entries.RemoveAll(e => e == null || (e.prefab == null && GameDatabase.GetItem(e.id) == null));
             foreach (var def in GameDatabase.Items)
                 Link(def.id, $"{Root}/Models/Items/{def.id}.glb");
             // Modelos usados por codigo que no son items
             Link("meeseeks_npc", $"{Root}/Models/Env/meeseeks_npc.glb");
             Link("rick_caleno", $"{Root}/Models/Env/rick.glb", 0.15f / 1.75f);
+            Link("hombre_eyeholes", $"{Root}/Models/Env/hombre_eyeholes.glb");
+            foreach (var id in new[] { "kalaxianos", "esporas", "plumbus_polvo", "marihuana" })
+                Link("relleno_" + id, $"{Root}/Models/Env/relleno_{id}.glb");
             EditorUtility.SetDirty(reg);
             AssetDatabase.SaveAssets();
             Debug.Log($"[RickMorty] Registro de modelos: {reg.entries.Count(e => e.prefab != null)}/{reg.entries.Count} con modelo.");

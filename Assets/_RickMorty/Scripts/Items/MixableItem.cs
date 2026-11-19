@@ -71,6 +71,8 @@ namespace RickMorty
             {
                 Grab.selectEntered.AddListener(OnSelectEntered);
                 Grab.activated.AddListener(OnActivated);
+                Grab.hoverEntered.AddListener(OnHoverEntered);
+                Grab.hoverExited.AddListener(OnHoverExited);
             }
         }
 
@@ -86,8 +88,46 @@ namespace RickMorty
 
         void OnSelectEntered(SelectEnterEventArgs args)
         {
-            if (args.interactorObject is XRSocketInteractor) return;
+            SetHighlight(false);
+            if (args.interactorObject is XRSocketInteractor)
+            {
+                // "clic" al encajar en un soporte (no al arrancar la escena, cuando todos los frascos se acomodan a la vez)
+                if (Time.timeSinceLevelLoad > 2f) AudioFX.Play("socket", transform.position, 0.35f);
+                return;
+            }
+            AudioFX.Play("grab", transform.position, 0.4f, Random.Range(0.92f, 1.08f));
             GameEvents.RaiseItemGrabbed(itemId);
+        }
+
+        // ---- Resalte: el objeto que la mano puede agarrar crece un 8 %. Antes solo habia una vibracion y,
+        // con varios frascos juntos, no se sabia cual iba a agarrarse.
+        Transform m_Visual;
+        Vector3 m_VisualScale;
+        int m_Hovers;
+
+        void OnHoverEntered(HoverEnterEventArgs args)
+        {
+            if (args.interactorObject is XRSocketInteractor) return;
+            m_Hovers++;
+            if (!IsHeld) SetHighlight(true);
+        }
+
+        void OnHoverExited(HoverExitEventArgs args)
+        {
+            if (args.interactorObject is XRSocketInteractor) return;
+            m_Hovers = Mathf.Max(0, m_Hovers - 1);
+            if (m_Hovers == 0) SetHighlight(false);
+        }
+
+        void SetHighlight(bool on)
+        {
+            if (m_Visual == null)
+            {
+                m_Visual = transform.Find("Visual");
+                if (m_Visual == null) return;
+                m_VisualScale = m_Visual.localScale;
+            }
+            m_Visual.localScale = on ? m_VisualScale * 1.08f : m_VisualScale;
         }
 
         void OnActivated(ActivateEventArgs args)

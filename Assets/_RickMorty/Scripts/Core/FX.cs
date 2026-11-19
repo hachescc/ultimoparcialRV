@@ -130,6 +130,8 @@ namespace RickMorty
             fader.duration = duration;
         }
 
+        static Material s_TextMat;
+
         public static TextMeshPro FloatingText(Vector3 pos, string text, Color color, float fontSize = 1.2f, float life = 1.5f, float rise = 0.4f)
         {
             var go = new GameObject("FX_Text");
@@ -140,8 +142,16 @@ namespace RickMorty
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;
-            tmp.outlineWidth = 0.2f;
-            tmp.outlineColor = Color.black;
+            // Un solo material con contorno para TODOS los textos flotantes. Antes 'outlineWidth' creaba un
+            // material nuevo por texto y nunca se destruia (100 materiales en 10 s de SCAR).
+            if (s_TextMat == null && tmp.font != null)
+            {
+                s_TextMat = new Material(tmp.font.material) { name = "Texto flotante (contorno)" };
+                s_TextMat.SetFloat(ShaderUtilities.ID_OutlineWidth, 0.2f);
+                s_TextMat.SetColor(ShaderUtilities.ID_OutlineColor, Color.black);
+                s_TextMat.EnableKeyword(ShaderUtilities.Keyword_Outline);
+            }
+            if (s_TextMat != null) tmp.fontSharedMaterial = s_TextMat;
             tmp.rectTransform.sizeDelta = new Vector2(3f, 1f);
             var ft = go.AddComponent<FloatingTextMotion>();
             ft.life = life;
@@ -179,7 +189,7 @@ namespace RickMorty
         public static void Explosion(Vector3 pos, float radius, float force, bool killCreatures, Color smokeColor)
         {
             Burst(pos, new Color(1f, 0.6f, 0.1f), 80, 6f, 0.1f, 0.7f, 0.5f, true);
-            Smoke(pos, smokeColor, 2.5f, 0.3f, 0.7f, 40f);
+            Smoke(pos, smokeColor, 1.6f, 0.3f, 0.45f, 14f);   // menos humo y mas chico: a 80 cm de la cara eran decenas de capas transparentes (caida de cuadros en Quest)
             FlashLight(pos, new Color(1f, 0.8f, 0.5f), 10f, 8f, 0.5f);
             AudioFX.Play("explosion", pos, 1f);
 
@@ -189,7 +199,7 @@ namespace RickMorty
                 var rb = c.attachedRigidbody;
                 // los easter eggs decorativos de los estantes no salen volando (se perdian detras de las cajas)
                 if (rb != null && !rb.isKinematic && rb.GetComponent<EasterEgg>() == null)
-                    rb.AddExplosionForce(force, pos, radius, 0.6f, ForceMode.Impulse);
+                    rb.AddExplosionForce(Mathf.Min(force, 4.5f), pos, radius, 0.4f, ForceMode.VelocityChange);   // igual para todos los pesos: antes un frasco de 100 g salia a 60 m/s por la puerta
                 if (killCreatures && (c.bounds.ClosestPoint(pos) - pos).magnitude < radius * 0.5f)
                 {
                     // el empuje llega lejos, pero solo mata lo que esta cerca del tazon
@@ -252,28 +262,33 @@ namespace RickMorty
     {
         public float radius = 0.4f;
         public float life = 1.5f; // <= 0 = permanente
-        Transform m_Disc;
-        float m_T;
+        Transform m_Disc, m_Inner;
+        float m_T, m_S;
         bool m_Closing;
+
+        static Transform Layer(Transform parent, string name, Material mat, float z)
+        {
+            var q = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            Destroy(q.GetComponent<Collider>());
+            q.name = name;
+            q.transform.SetParent(parent, false);
+            q.transform.localPosition = new Vector3(0, 0, z);
+            q.transform.localScale = Vector3.zero;
+            var r = q.GetComponent<Renderer>();
+            r.sharedMaterial = mat;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+            return q.transform;
+        }
 
         public void Build(float r, float lifeSeconds)
         {
             radius = r;
             life = lifeSeconds;
-            var disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            Destroy(disc.GetComponent<Collider>());
-            disc.name = "Disc";
-            disc.transform.SetParent(transform, false);
-            disc.transform.localRotation = Quaternion.Euler(90, 0, 0);
-            disc.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
-            disc.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(new Color(0.25f, 1f, 0.3f), 3f);
-            m_Disc = disc.transform;
-
-            var inner = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            Destroy(inner.GetComponent<Collider>());
-            inner.transform.SetParent(disc.transform, false);
-            inner.transform.localScale = new Vector3(0.75f, 1.2f, 0.75f);
-            inner.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(new Color(0.7f, 1f, 0.4f), 4f);
+            // Dos capas del remolino (textura generada por codigo) girando en sentidos opuestos.
+            // Antes eran dos cilindros con emision x3/x4: sin HDR se quemaban a blanco y el portal parecia un plato.
+            m_Disc = Layer(transform, "Disc", ProcTex.PortalMaterial, 0f);
+            m_Inner = Layer(transform, "Core", ProcTex.PortalCoreMaterial, -0.004f);
 
             var swirl = FX.Attach(transform, new Color(0.4f, 1f, 0.4f), 40f, 0.05f, 0.4f, 0f, r * 0.8f);
             var sh = swirl.shape;
@@ -286,12 +301,17 @@ namespace RickMorty
             var main = swirl.main;
             main.simulationSpace = ParticleSystemSimulationSpace.Local;
 
-            var light = gameObject.AddComponent<Light>();
-            light.type = LightType.Point;
-            light.color = new Color(0.3f, 1f, 0.3f);
-            light.range = r * 6f;
-            light.intensity = 2.5f;
-            light.shadows = LightShadows.None;
+            // Solo los portales grandes iluminan: una mezcla de 3 ingredientes abre ~7 micro-portales y cada uno
+            // sumaba una luz puntual por pixel sobre la mesa (caro en Quest).
+            if (r >= 0.2f)
+            {
+                var light = gameObject.AddComponent<Light>();
+                light.type = LightType.Point;
+                light.color = new Color(0.3f, 1f, 0.3f);
+                light.range = r * 6f;
+                light.intensity = 1.6f;
+                light.shadows = LightShadows.None;
+            }
 
             AudioFX.Play("portal", transform.position, 0.8f);
         }
@@ -302,11 +322,19 @@ namespace RickMorty
             float target = radius * 2f;
             float s;
             if (m_Closing || (life > 0 && m_T > life - 0.3f))
-                s = Mathf.MoveTowards(m_Disc.localScale.x, 0f, Time.deltaTime * target * 4f);
+                s = Mathf.MoveTowards(m_S, 0f, Time.deltaTime * target * 4f);
             else
-                s = Mathf.MoveTowards(m_Disc.localScale.x, target, Time.deltaTime * target * 5f);
-            m_Disc.localScale = new Vector3(s, 0.02f, s);
-            m_Disc.Rotate(0, 200f * Time.deltaTime, 0, Space.Self);
+                s = Mathf.MoveTowards(m_S, target, Time.deltaTime * target * 5f);
+            m_S = s;
+            // pequeno latido para que se sienta vivo
+            float pulse = 1f + 0.035f * Mathf.Sin(m_T * 7f);
+            m_Disc.localScale = new Vector3(s * 1.12f * pulse, s * 1.12f * pulse, 1f);
+            m_Disc.Rotate(0, 0, 150f * Time.deltaTime, Space.Self);
+            if (m_Inner != null)
+            {
+                m_Inner.localScale = new Vector3(s * 0.74f, s * 0.74f, 1f);
+                m_Inner.Rotate(0, 0, -260f * Time.deltaTime, Space.Self);
+            }
             if ((life > 0 && m_T >= life) || (m_Closing && s <= 0.001f)) Destroy(gameObject);
         }
 

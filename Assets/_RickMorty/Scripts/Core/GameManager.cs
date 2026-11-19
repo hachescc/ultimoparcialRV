@@ -75,6 +75,10 @@ namespace RickMorty
             Burnable.ResetGravity();
             GameDatabase.Load();
             SaveSystem.Load();
+            CardboardPortalGun.ResetStatics();
+            Consumable.ResetStatics();   // "Jugar de nuevo" no debe heredar estado de la partida anterior
+            AudioFX.Prewarm();                    // sintetiza los sonidos ahora (pantalla en negro) y no en plena explosion
+            HudStrip.Ensure();
         }
 
         void OnEnable()
@@ -109,7 +113,15 @@ namespace RickMorty
             GameEvents.RaiseStateChanged(s);
         }
 
-        void SetObjective(string text) => monitor?.SetObjective(text);
+        void SetObjective(string text)
+        {
+            monitor?.SetObjective(text);
+            HudStrip.Instance?.ShowObjective(text);   // lejos del monitor el objetivo aparece unos segundos delante del jugador
+        }
+
+        bool m_WaitingBoxUse;
+        /// <summary>En el tutorial, mientras Rick espera que uses la Caja de Meeseeks, todavia no toca mezclar.</summary>
+        public bool MixBlockedNow => State == GameState.Tutorial && m_WaitingBoxUse;
 
         // =====================================================================
         //  Flujo principal
@@ -133,7 +145,7 @@ namespace RickMorty
         IEnumerator CoIntro()
         {
             SetState(GameState.Intro);
-            SetObjective("...");
+            SetObjective("Escucha a Rick. Sus instrucciones salen en el <b>monitor</b> frente a la mesa.");
             var fx = ScreenFX.Instance;
             fx?.SetFade(Color.black, 1f);
             if (comms != null && rickNPC != null) comms.SpeakerOverride = rickNPC.mouth;
@@ -190,7 +202,7 @@ namespace RickMorty
 
             // 4. Agarrar
             comms?.Say("onb_grab");
-            SetObjective("Vuelve a la mesa y agarra un frasco con el botón <b>Grip</b> (gatillo del dedo medio).");
+            SetObjective("Vuelve a la mesa y agarra un frasco con el botón <b>Grip</b> (el del dedo medio).");
             bool grabbed = false;
             Action<string> onGrab = id => { var d = GameDatabase.GetItem(id); if (d != null && d.IsBase) grabbed = true; };
             GameEvents.ItemGrabbed += onGrab;
@@ -250,7 +262,9 @@ namespace RickMorty
                     Action<string> onAct = id => { if (id == "bola_meeseeks") used = true; };
                     GameEvents.ItemActivated += onAct;
                     float timeout = Time.time + 60f;
+                    m_WaitingBoxUse = true;
                     yield return WaitUntilOrSkip(() => used || Time.time > timeout);
+                    m_WaitingBoxUse = false;
                     GameEvents.ItemActivated -= onAct;
                     if (m_SkipRequested) yield break;
                     yield return new WaitForSeconds(2.5f);
@@ -278,7 +292,7 @@ namespace RickMorty
         IEnumerator CoFreePlay()
         {
             SetState(GameState.FreePlay);
-            SetObjective("Fabrica la <b>PISTOLA DE PORTALES</b> antes de que el FBI entre. Experimenta combinaciones. Mira tu muñeca para ver tus descubrimientos.");
+            SetObjective("Fabrica la <b>PISTOLA DE PORTALES</b> antes de que entre el FBI. Experimenta mezclas.");
             corkBoard?.AddNote("META: Pistola de Portales\n= Portal Gun de cartón\n+ Cristales + ???");
             timer?.StartTimer();
             eventDirector?.Begin();
@@ -337,8 +351,8 @@ namespace RickMorty
         void RevealProgressNotes(string id)
         {
             if (corkBoard == null) return;
-            if (id == "pistola_laser") corkBoard.AddNote("Pistola laser +\nPolvo de Plumbus = ?");
-            if (id == "portal_carton") corkBoard.AddNote("Carton + Cristales +\nun liquido que ENFRIE\n(¿alcohol?)");
+            if (id == "pistola_laser") corkBoard.AddNote("Pistola Láser +\nPolvo de Plumbus = ?");
+            if (id == "portal_carton") corkBoard.AddNote("Cartón + Cristales +\nun líquido que ENFRÍE\n(¿alcohol?)");
             if (id == "aguardiente") corkBoard.AddNote("Aguardiente:\nestabilizador cuántico");
         }
 
@@ -361,8 +375,8 @@ namespace RickMorty
             if (s == null) return null;
             if (!s.IsDiscovered("pistola_laser")) return "La Pistola Láser sale de Ácido Galaxiano + Polvo de Plumbus.";
             if (!s.IsDiscovered("portal_carton")) return "Pistola Láser + Polvo de Plumbus = una Portal Gun de cartón.";
-            if (!s.IsDiscovered("aguardiente")) return "Necesitas un liquido estabilizador: Jugo de Fleeb + Ácido Galaxiano.";
-            return "Pon la Portal Gun de cartón en el soporte de ensamblaje y acercale los Cristales Kalaxianos y el Aguardiente.";
+            if (!s.IsDiscovered("aguardiente")) return "Necesitas un líquido estabilizador: Jugo de Fleeb + Ácido Galaxiano.";
+            return "Pon la Portal Gun de cartón en el soporte de ensamblaje y acércale los Cristales Kalaxianos y el Aguardiente.";
         }
 
         void GiveHint()
@@ -423,9 +437,16 @@ namespace RickMorty
                 FX.Portal(point + normal * 0.03f, Quaternion.LookRotation(-normal), 0.3f, 2f);
                 return;
             }
+            bool wall = Mathf.Abs(normal.y) < 0.5f;
+            if (!wall && normal.y < 0f)
+            {
+                // techo: no se puede cruzar. Portal de adorno y Rick lo dice (antes abria un portal final inalcanzable)
+                FX.Portal(point + normal * 0.03f, Quaternion.LookRotation(-normal), 0.45f, 2.5f);
+                comms?.SayText("¡En el techo no, Morty! Dispárale a una pared... o al piso.");
+                return;
+            }
             if (m_EndPortal != null) Destroy(m_EndPortal);
 
-            bool wall = Mathf.Abs(normal.y) < 0.5f;
             var pos = point + normal * 0.05f;
             if (wall)
             {
@@ -438,6 +459,13 @@ namespace RickMorty
             var trigger = m_EndPortal.AddComponent<BoxCollider>();
             trigger.isTrigger = true;
             trigger.size = new Vector3(1.6f, 2.2f, 0.8f);
+            if (!wall)
+            {
+                // portal en el piso: el disco queda acostado (su -Z local es "arriba"). La zona de victoria debe subir
+                // hasta la cabeza de quien se para encima; antes solo cubria hasta 45 cm y no pasaba nada.
+                trigger.size = new Vector3(1.6f, 1.6f, 2.4f);
+                trigger.center = new Vector3(0, 0, -1.0f);
+            }
             m_EndPortal.AddComponent<EndingPortal>();
             AudioFX.AttachLoop(m_EndPortal, "hum", 0.5f, 8f, 0.5f);
             PlayerRig.Instance?.Haptic(Hand.Both, 1f, 0.6f);

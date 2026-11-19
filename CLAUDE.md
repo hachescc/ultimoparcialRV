@@ -11,7 +11,7 @@
   - Rúbrica: `C:\Users\hugot\Downloads\_TEMP\Proyecto Final VR 2026 (1).pptx`
   - Propuesta: `C:\Users\hugot\Downloads\_TEMP\Juego Rick y Morty escrito (1).docx`
 - No hay Python en la máquina; usar Node o PowerShell para scripts.
-- **Repo git (2026-11-19)**: https://github.com/hachescc/ultimoparcialRV (PRIVADO, rama `main`, cuenta gh `hachescc`). Colaboradores invitados con permiso de escritura (2026-11-19): jusstjuanda, SebssMont, William-Franco08. `.gitignore` deja FUERA: Library/Temp/Logs/UserSettings, .csproj/.slnx/.vscode, `Documentacion/` entera (PDF, web, capturas, MP4, PNG de comparación: el usuario eligió no subirla), `*.mp4`, `_ModelosOriginales/` (solo se sube `sketchfab2/CREDITOS.md`). Sin Git LFS (ningún archivo > 20 MB). Commit/push solo cuando el usuario lo pida.
+- **Repo git (2026-11-19)**: https://github.com/hachescc/ultimoparcialRV (PRIVADO, rama `main`, cuenta gh `hachescc`). Colaboradores invitados con permiso de escritura (2026-11-19): jusstjuanda, SebssMont, William-Franco08. `.gitignore` deja FUERA: Library/Temp/Logs/UserSettings, .csproj/.slnx/.vscode, `Documentacion/` entera (PDF, web, capturas, MP4, PNG de comparación: el usuario eligió no subirla), `*.mp4`, `_ModelosOriginales/` (solo se sube `sketchfab2/CREDITOS.md`). Sin Git LFS (ningún archivo > 20 MB). Commit/push solo cuando el usuario lo pida. **Commits SIN `Co-Authored-By: Claude` ni ninguna marca de IA** (el usuario lo pidió; la historia se rehízo en un solo commit limpio).
 
 ## Rúbrica (resumen, por si se pierde el pptx)
 Obligatorio: Onboarding VR (movimiento, interacciones, agarre, controles); interacciones principales con objetivos claros y progresión; eventos dinámicos (**temporizador, fallo, evento inesperado, sistema reactivo**); **puntuación y progreso verificable**; **cierre claro** con retroalimentación y resultado.
@@ -42,6 +42,18 @@ Garaje de Rick; jugador = Morty. Rick enseña 3 mezclas (Mega-Semilla+Meeseeks �
 - Sin teletransporte (como pide el doc); giro snap por defecto, suave opcional en menú de pausa.
 - No implementé: socket en el hombro para Sr. Pantalones (solo da pistas al agarrarlo), "verter" líquidos (se meten los frascos al tazón), decals de corte real, AudioMixer (uso AudioLowPassFilter en la cámara).
 
+- **Barrido de pulido 2026-11-19 (UI legible en visor)** — criterio: letra ≥ ~1° de alto (Quest 2 ≈ 20 px/°), paneles a 1–2 m, nada a < 0.5 m:
+  - `UI/HudStrip.cs` (nuevo, lo crea `GameManager.Awake`): franja pegada al cuerpo (1.05 m, 0.34 m bajo los ojos, se recentra si giras > 32°). Muestra notificaciones SIEMPRE y subtítulos/objetivo solo si el monitor NO está a la vista (`MonitorInView`: < 3 m y < 36°). `WristWatch.Notify` ahora reenvía a la franja (el cartel de la muñeca queda solo como respaldo).
+  - Reloj: solo "EL FBI ENTRA EN" + tiempo (104 px) + puntaje + colección. Sin subtítulos ni objetivo (eran 0.2–0.5°). Holograma exige además MIRAR el reloj (`gazeDot` 0.74); 6 columnas, escala 0.0006, a 0.62 m de la cabeza, celda resaltada al apuntar y franja de color del objeto.
+  - Monitor en (0, 2.22, 2.95) con Euler(-14,0,0) (inclinado hacia el jugador), objetivo 40–56 px, subtítulo 36–48, con collider. El brazo robótico se movió a x=1.75 porque lo tapaba. `RickComms.Chunk` corta a ~85 caracteres (también en comas).
+  - Pausa: 7 filas con `Layout()` dinámico (botón "Saltar el tutorial de Rick" solo en Intro/Onboarding/Tutorial → `DebugSkipTutorial`), 3 cm entre botones, Reiniciar/Salir piden segundo toque (4 s, tiempo real), se acerca si hay pared (SphereCast), `ScreenFX.ClearForPause()`, pausa sola al perder foco (solo en build: `#if !UNITY_EDITOR`, en editor/batch colgaría el recorrido).
+  - Controles: en visor una sola columna (`XRSettings.isDeviceActive`), en PC las dos. Pantalla final a 1.6 m escala 0.0013, piso invisible 60×60 m (antes se caía de la plataforma de 4×4), créditos a 2.7 m con recorrido = alto real del texto.
+  - Placas fijas con el nombre de cada ingrediente en su soporte (`BuildIngredientRacks`, tamaño 0.27); `ItemLabel` ya no muestra etiqueta flotante para bases en su socket.
+  - Feedback: resalte al apuntar = el hijo "Visual" crece 8 % (`MixableItem.SetHighlight`), sonidos `grab`/`socket`/`plop`, textos flotantes en el tazón ("Mínimo 2 ingredientes", "¡MEZCLA INESTABLE!", "Eso va en el SOPORTE…"), número flotante ±pts en cada cambio de puntaje (`ScoreManager.Popup`), tics los últimos 10 s.
+  - "Voz" de Rick sin audios: ráfaga `rick_blip` (hasta 3 por fragmento) desde donde esté Rick; antes la intro/tutorial eran mudos. `AudioFX.Prewarm()` en Awake; caída logarítmica 0.8–14 m.
+  - Comer exige 0.4 s en la boca (`PlayerHead.mouthDwell`; antes acercarse el Aguardiente para mirarlo se lo tomaba). Borrachera/VHS sin distorsión de lente ni grano (color). Destello de explosión corto y tibio (`Flash` usa el alpha del color como tope). Viñeta a 0.5 m (antes 14 cm: disparidad entre ojos). Texto central de ScreenFX a 1 m con placa oscura.
+- **Visual propio 2026-11-19**: portal = remolino verde procedural (`Core/ProcTex.cs`, dos capas girando; antes disco blanco quemado por emisión sin HDR); cielo Poly Haven (`Textures/sky/sky_partly_cloudy.jpg`, `SkyMaterial()` en el builder, `SkyRotation`); bandeja de salida y soporte de ensamblaje metálicos con aro luminoso; halo suave del tazón y planos técnicos dibujados (`ProcTex.BuildSoftGlow/BuildBlueprint` → PNG en `Textures/Generadas` vía `TexAsset`/`TexturedMat` del builder); frascos de sólidos con contenido propio (`Models/Env/relleno_<id>.glb`, registro `relleno_<id>`, `ItemFactory.DecorateModel`).
+
 ## Pipeline de modelos (Blender 5.2 headless + glTFast)
 - Blender: `"/c/Program Files/Blender Foundation/Blender 5.2/blender.exe" -b -P <script> -- <args>`. Scripts en `_Tools/blender/`:
   - `contact_sheet.py <dir> <png> [cols] [front|side] [TEXTURE|MATERIAL]` → hoja de miniaturas para elegir/verificar (en `side`, la punta/cañón debe apuntar a la DERECHA).
@@ -61,6 +73,8 @@ Garaje de Rick; jugador = Morty. Rick enseña 3 mezclas (Mega-Semilla+Meeseeks �
   3. Límite: ~6 pedidos seguidos y luego "Too many requests" → espaciar (6 s entre modelos, reintento a los 20 s), lanzarlo como async sin await en la página (javascript_tool corta a los 45 s) y consultar `window.__prog`.
 - `process_models.py`: entradas `SF2` (21 descargas) con opciones nuevas `keep`/`drop` (filtrar mallas por nombre). Para comparar sin tocar el juego: procesar a una carpeta aparte (DST en scratchpad) y `render_compare.py <Models_actual> <Models_nuevo> <out> ids` (Workbench; fija como activo el nodo de imagen del Base Color, si no salen negros los modelos con textura de emisión). `inspect_mats.py` y `dump_textures.py` para depurar materiales.
 - Créditos/licencias de las descargas: `_ModelosOriginales/sketchfab2/CREDITOS.md` (CC-BY → acreditar; camioneta es CC-BY-NC, válido para proyecto de clase).
+- **Ronda 3 (2026-11-19)**: `SF3 = "sketchfab3/"` en process_models.py. Aplicados: `hombre_eyeholes` (luchador "Máscara Ritual", drop del ring, rot Z 45; se instancia por registro en `Consumable.CoEyeholes` + `EyeholeManShake`), `tio_steve` ("Pink Monster"), y utilería en la mitad sur del garaje (`Revamp()` → `Clutter`: gabinete, barril, llantas, bicicleta con `png=True` por el alpha de los radios). Descartados: casco (venía negro), esfera del dragón (estrellas en un plano interno), TV (escaneo oscuro), escalera (licencia NoDerivs). Créditos en `_ModelosOriginales/sketchfab3/CREDITOS.md` y en `EndScreen.credits`. Comparación: `Documentacion/comparacion_modelos_3.png`.
+- `generate_models.py`: `uvbox(o, size)` (UV en metros para texturizar en Unity con `RickMortyModelPass.Retex(modelo, "nombre_material", texId, tinte, variante)` — así se texturizó la casa del vecino: materiales `vec_pared/vec_techo/vec_zocalo`), `finish(..., max_tris=)`, y los 4 `relleno_*` (caja unidad 1×1×1, pivote abajo).
 - Repisas del modelo de estantería: 0.21, 0.64, 1.08, 1.51, 1.94, 2.38 m. Lavandería reacomodada (lavadora z=0, secadora z=1.05, lavadero z=2.6). Casa del vecino: 2 ventanas-diana (x=4.5 y 10.5), la tercera se eliminó.
 
 ## Documentación para el equipo
@@ -96,10 +110,19 @@ Garaje de Rick; jugador = Morty. Rick enseña 3 mezclas (Mega-Semilla+Meeseeks �
 - En pruebas automáticas, un frasco liberado de su socket es recapturado al instante si sigue dentro del trigger → desactivar `socketActive` antes de moverlo.
 - El smoke test guarda partidas en `%USERPROFILE%\AppData\LocalLow\UAO Immersive Solutions\Rick y Morty - Mezclas de otra dimension\rickmorty_save.json` → borrarlo después de probar.
 
+- **OpenXR**: `RickMortySetup.EnableFeature` fallaba en silencio y el repo quedó con Meta Quest Support y los perfiles Touch en `m_enabled: 0` (el APK habría salido sin controles; el simulador no lo delata). Tras cambios de paquetes, correr el menú 1 y verificar en `Assets/XR/Settings/OpenXR Package Settings.asset` que MetaQuestFeature Android y OculusTouchControllerProfile (Android/Standalone) estén en 1.
+- Botón MEZCLAR: el `XRPokeFilter` sin configurar acepta solo empuje en +Z (horizontal). Se resolvió en `MixButton` con `hoverEntered` de un `XRPokeInteractor` (tocar = presionar, si la mano llega desde arriba).
+- Rig de Starter Assets: trae Jump (botón A), Climb, Grab Move y teletransporte activos → `CleanUpRig()` del builder los apaga, anula `m_TeleportInteractor` del ControllerInputActionManager (si no, el sample lo re-enciende), `enableTurnAround=false`, `moveSpeed=1.8`.
+- Recorrido automático: los eventos aleatorios pueden robar un ingrediente justo cuando el guion lo necesita → `WaitItem(id, 30)` antes de usar una base. Para simular "mirar el reloj" hay que poner también `gazeDot = -2`.
+- Descargas con el navegador integrado: si el panel está OCULTO se descartan sin error → `mcp__ccd_view__show_pane("preview")` antes de descargar.
+- Scripts con comillas simples/backticks: escribirlos con la herramienta Write (un heredoc dentro de Bash falló con "unexpected EOF").
+- Fixed Timestep = 1/72 (antes 0.02), near clip 0.05, sombras a 12 m, fluorescentes rango 5, los portales de radio < 0.2 no llevan luz.
+
 ## Estado / sin verificar
-- Smoke test en Play: 0 errores (mezcla válida, explosión, 37 objetos, eventos, final, guardado).
+- Smoke test en Play: 0 errores (mezcla válida, explosión, 37 objetos, eventos, final, guardado). Recorrido automático tras el barrido del 2026-11-19: 126 capturas, 0 errores.
 - **NO probado en Quest real**: alturas, poke del botón MEZCLAR (dirección del XRPokeFilter), gesto de mirar el reloj, sensación de agarre, rendimiento.
-- Todo visual = placeholders. Voces = solo subtítulos (audio opcional por id). SFX sintetizados.
+- Voces = solo subtítulos + ráfaga `rick_blip` (audio real opcional por id en Resources/Audio/Rick). SFX sintetizados. Sin música.
+- Las correcciones de legibilidad/comodidad del 2026-11-19 salen de medir el código (grados de letra, distancias), NO de probar en el visor: confirmar en Quest.
 - Créditos en `EndScreen.credits` tienen `[Companero 1]`, `[Tu nombre]` → pedir nombres reales.
 
 ## Pendientes
@@ -111,6 +134,8 @@ Garaje de Rick; jugador = Morty. Rick enseña 3 mezclas (Mega-Semilla+Meeseeks �
   - **Ronda 2 (aplicada 2026-11-16, aprobó todo)**: `RickMortyModelPass.Revamp()`: casas_barrio1/2 alternadas en lugar de las 8 "CasaHorizonte" (x=30, yaw -90); 13 árboles, 6 arbustos, buzón, 10 farolas (brazo hacia la calle: yaw 180 en la acera oeste, 0 en la este), hidrante (todo FUERA del patio de juego entre garaje y vecino); caneca sobre el agujero negro (se ocultan Fondo/Pared, se conserva el núcleo); botón de emergencia como hijo del `Cap` (baja al presionar; SphereCollider subido a y=0.1); reloj Antique Wall Clock; aro nuevo en (4.62, 3.95, 0.5). Texturas Poly Haven en `Assets/_RickMorty/Textures/<id>/` vía `TexMat`/`ApplyTex` (repetición según tamaño de la cara; materiales `Materials/Generated/Tex_<id>_<NxM>.mat` se REUTILIZAN, nunca borrarlos con la escena abierta → magenta). Paredes del garaje con wood_plank_wall (quedó más oscuro que antes).
 - Modelos: integrados (46/46 items + 54 en escena). Posibles mejoras: modelo de Rick caleño propio, capibara con más detalle, texturas para casas generadas.
 - Al final el usuario pedirá quitar peso innecesario de todo el juego (candidatos: `_ModelosOriginales/` 230 MB fuera de Assets, `Assets/Scenes/SampleScene`, `TutorialInfo`, `Readme.asset`, samples XRI no usados como Hands Demo — no importados).
+- Siguen generados (no hubo modelo descargable bueno): Sr. Pantalones, casco de Snowball, cereal Eyeholes, esfera del dragón, puerta del garaje, casa del vecino (ya texturizada).
+- No hecho del barrido: paleta única en UIKit y animación de apertura de paneles, textos flotantes de NPC más grandes, tono de sala/ambiente, pool de partículas (`FX.Burst` crea un GameObject por golpe), asignaciones del tazón a 10 Hz. El diálogo `rick_leaving` (guion de los compañeros, 41 s) no se recortó: existe el botón de saltar.
 - Voces de Rick, música `Resources/Audio/Music/bgm`.
 - Probar en Quest y ajustar.
 
@@ -130,3 +155,4 @@ Garaje de Rick; jugador = Morty. Rick enseña 3 mezclas (Mega-Semilla+Meeseeks �
 - **2026-11-16** — Pantalla de controles (Y / B). Usuario pidió video MP4 del gameplay a 720p → FilmRecorder + modo película del ShowcaseRunner (ver Documentación).
 - **2026-11-16** — Video `Documentacion/RickMorty_Gameplay.mp4` entregado: 6:24 min, 1280x720@30 + audio, 120 MB, 13 partes (inicio → tutorial con explosión → juego libre → eventos → easter eggs → exterior → victoria + créditos → derrota por tiempo). Render ≈15 min. Bug encontrado: espera del plano colgada en pausa (timeScale 0).
 - **2026-11-19** — Creé el repo privado `hachescc/ultimoparcialRV` con `.gitignore` de Unity + exclusiones de material de trabajo; commit inicial (1414 archivos, ~52 MB) y push.
+- **2026-11-19** — Barrido de pulido con dos revisiones independientes (bugs/Quest y UI/legibilidad, usando como referencia las guías públicas de los plugins oficiales Meta VR y Unity, que el usuario aún no activa). Corregido: OpenXR sin controles, botón MEZCLAR, caída en la sala final, objetos perdidos (frascos/pistola), portal final en el piso, katana, farmeo de mezclas, rig con salto/teletransporte, y toda la UI rehecha para leerse en el visor (franja HUD, reloj, monitor, holograma, pausa, final). Visual: portal, cielo, mesa, casa del vecino, contenido de frascos. Ronda 3 de Sketchfab (6 modelos aplicados). Sin commit todavía (el usuario no lo ha pedido).

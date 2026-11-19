@@ -12,11 +12,24 @@ namespace RickMorty
         public bool burnMarks;
 
         float m_NextMark;
+        Vector3 m_LastPos;
+        float m_OwnSpeed;
+
+        void OnEnable() => m_LastPos = transform.position;
+
+        void FixedUpdate()
+        {
+            // Agarrada, el arma es un cuerpo cinematico que la mano "teletransporta": la fisica le reporta
+            // velocidad 0 y los golpes no contaban. Medimos su velocidad real por el cambio de posicion.
+            float v = (transform.position - m_LastPos).magnitude / Mathf.Max(Time.fixedDeltaTime, 0.0001f);
+            m_OwnSpeed = Mathf.Lerp(m_OwnSpeed, v, 0.5f);
+            m_LastPos = transform.position;
+        }
 
         void OnCollisionEnter(Collision c)
         {
             if (!Item.IsHeld) return;
-            float speed = c.relativeVelocity.magnitude;
+            float speed = Mathf.Max(c.relativeVelocity.magnitude, m_OwnSpeed);
             if (speed < minSpeed) return;
             var creature = c.collider.GetComponentInParent<Creature>();
             if (creature != null)

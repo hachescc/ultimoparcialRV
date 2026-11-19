@@ -8,6 +8,7 @@ namespace RickMorty
     public class CardboardPortalGun : ItemBehaviour
     {
         static bool s_Commented;
+        public static void ResetStatics() => s_Commented = false;
         float m_Next;
 
         protected override void OnActivate()

@@ -157,7 +157,7 @@ namespace RickMorty.EditorTools
         // ------------------------------------------------------------------ texturas (Poly Haven, CC0)
 
         /// <summary>Material URP Lit con textura de color + normal, repetida 'tiling' veces. Se guarda como asset.</summary>
-        static Material TexMat(string id, Vector2 tiling, Color tint, float smooth = 0.15f)
+        static Material TexMat(string id, Vector2 tiling, Color tint, float smooth = 0.15f, string variant = "")
         {
             string dir = RickMortySetup.Root + "/Textures/" + id + "/";
             var col = AssetDatabase.LoadAssetAtPath<Texture2D>(dir + id + "_color.jpg");
@@ -170,7 +170,7 @@ namespace RickMorty.EditorTools
             }
             var nor = AssetDatabase.LoadAssetAtPath<Texture2D>(np);
             // Reutilizar el asset si ya existe (borrarlo dejaba en magenta a las superficies que ya lo usaban)
-            string path = $"{RickMortySetup.Root}/Materials/Generated/Tex_{id}_{tiling.x:0.#}x{tiling.y:0.#}.mat";
+            string path = $"{RickMortySetup.Root}/Materials/Generated/Tex_{id}{variant}_{tiling.x:0.#}x{tiling.y:0.#}.mat";
             var m = AssetDatabase.LoadAssetAtPath<Material>(path);
             bool isNew = m == null;
             if (isNew) m = new Material(Shader.Find("Universal Render Pipeline/Lit"));
@@ -188,6 +188,23 @@ namespace RickMorty.EditorTools
             if (isNew) AssetDatabase.CreateAsset(m, path);
             else EditorUtility.SetDirty(m);
             return m;
+        }
+
+        /// <summary>Cambia por una textura los materiales de un modelo cuyo nombre empieza por 'matName'
+        /// (el modelo debe traer UV en metros: ver uvbox() en generate_models.py).</summary>
+        static void Retex(GameObject model, string matName, string texId, Color tint, string variant, float smooth = 0.15f)
+        {
+            if (model == null) return;
+            var mat = TexMat(texId, Vector2.one, tint, smooth, variant);
+            if (mat == null) return;
+            foreach (var r in model.GetComponentsInChildren<Renderer>(true))
+            {
+                var mats = r.sharedMaterials;
+                bool any = false;
+                for (int i = 0; i < mats.Length; i++)
+                    if (mats[i] != null && mats[i].name.StartsWith(matName)) { mats[i] = mat; any = true; }
+                if (any) r.sharedMaterials = mats;
+            }
         }
 
         /// <summary>Texturiza una caja: la repeticion sale del tamano real de su cara mas grande.</summary>
@@ -267,6 +284,22 @@ namespace RickMorty.EditorTools
             }
             Place("hidrante", 13.45f, 0.07f, -5.5f, 30);
 
+            // --- Utileria del garaje (ronda 3): la mitad sur estaba vacia. Todo contra las paredes, lejos de la mesa.
+            if (garage != null)
+            {
+                void Clutter(string id, Vector3 p, Quaternion r)
+                {
+                    if (!Exists(id)) return;
+                    var m = Model(id, garage.transform, p, r);
+                    AddBox(m);
+                    MakeStatic(m);
+                }
+                Clutter("gabinete", new Vector3(-0.5f, 0, -2.55f), Quaternion.identity);                 // contra la pared sur, de frente al cuarto
+                Clutter("barril", new Vector3(-3.45f, 0, -2.5f), Quaternion.Euler(0, 35, 0));           // esquina suroeste
+                Clutter("llantas", new Vector3(3.4f, 0, -2.5f), Quaternion.Euler(0, 20, 0));            // esquina sureste
+                Clutter("bicicleta", new Vector3(1.9f, 0, -2.72f), Quaternion.Euler(0, 90, 9));         // recostada en la pared sur
+            }
+
             // --- Garaje: caneca del agujero negro (conserva el nucleo morado), boton MEZCLAR y reloj
             var bin = GameObject.Find("Agujero Negro (Basura)");
             if (bin != null && Exists("caneca"))
@@ -324,7 +357,7 @@ namespace RickMorty.EditorTools
             if (arm != null && Exists("brazo_robotico"))
             {
                 Hide(arm);
-                Model("brazo_robotico", arm.transform, new Vector3(0, 3.0f, 2.25f), Quaternion.Euler(180, 30, 0));
+                Model("brazo_robotico", arm.transform, new Vector3(1.75f, 3.0f, 2.75f), Quaternion.Euler(180, -40, 0));   // a la derecha: en el centro tapaba el monitor visto desde la mesa
             }
             var tool = Find(g + "/CajaHerramientas");
             if (tool != null && Exists("caja_herramientas"))
@@ -550,7 +583,11 @@ namespace RickMorty.EditorTools
                     if (t.name.StartsWith("Label")) continue;
                     Hide(t.gameObject);
                 }
-                Model("casa_vecino", nb.transform, new Vector3(7.5f, 0, 13.5f), Quaternion.Euler(0, 180, 0));
+                var nbModel = Model("casa_vecino", nb.transform, new Vector3(7.5f, 0, 13.5f), Quaternion.Euler(0, 180, 0));
+                // revoque rosado, tejas y zocalo de concreto (el GLB trae UV en metros)
+                Retex(nbModel, "vec_pared", "painted_plaster_wall", new Color(1.45f, 0.98f, 1.08f), "_vecino");
+                Retex(nbModel, "vec_techo", "roof_09", new Color(1.05f, 0.62f, 0.55f), "_vecino");
+                Retex(nbModel, "vec_zocalo", "concrete_pavement", new Color(0.85f, 0.83f, 0.8f), "_vecino");
             }
             if (Exists("valla"))
             {

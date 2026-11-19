@@ -18,6 +18,7 @@ namespace RickMorty
         bool m_Running;
         bool m_HintGiven;
         MixableItem m_RealGun;
+        float m_GunLostTime;
 
         public static FinalAssemblyStation Instance { get; private set; }
         void Awake() { Instance = this; }
@@ -49,6 +50,15 @@ namespace RickMorty
             {
                 var p = m_RealGun.transform.position;
                 if (p.y < -3f || (p - transform.position).sqrMagnitude > 45f * 45f) ReturnGun(m_RealGun);
+                else
+                {
+                    // quieta fuera de la cinta del FBI o en un techo: inalcanzable → vuelve sola a los 4 s
+                    var area = PlayAreaBoundary.Instance;
+                    bool lost = (p.y > 2.3f || (area != null && !area.IsInside(p)))
+                        && m_RealGun.Body != null && m_RealGun.Body.linearVelocity.sqrMagnitude < 0.02f && !m_RealGun.Body.isKinematic;
+                    m_GunLostTime = lost ? m_GunLostTime + Time.deltaTime : 0f;
+                    if (m_GunLostTime > 4f) { m_GunLostTime = 0f; ReturnGun(m_RealGun); }
+                }
             }
             if (Done || m_Running || socket == null) return;
             // el ensamblaje final solo existe en el juego libre (no en intro/tutorial ni despues del final)

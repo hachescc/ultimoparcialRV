@@ -163,8 +163,19 @@ namespace RickMorty
                     ? clipLen * chunk.Length / Mathf.Max(1, total)
                     : Mathf.Max(minChunkSeconds, chunk.Length * secondsPerChar);
                 float t = 0;
+                // Sin grabaciones de voz, cada fragmento arranca con una rafaga corta tipo radio desde donde esta Rick
+                // (antes, en la intro y el tutorial no sonaba NADA y el jugador no notaba que habia una linea nueva).
+                float nextBlip = clip == null && !dog ? 0f : float.MaxValue;
+                int blips = 0;
+                float voicePitch = speaker == "Rick" ? 1f : 1.55f;
                 while (t < dur)
                 {
+                    if (t >= nextBlip && blips < 3)
+                    {
+                        blips++;
+                        nextBlip = t + 0.62f;
+                        AudioFX.Play("rick_blip", src != null ? src.position : transform.position, 0.42f, voicePitch * UnityEngine.Random.Range(0.92f, 1.1f));
+                    }
                     t += Time.deltaTime;
                     if (src != null && m_Voice.isPlaying) m_Voice.transform.position = src.position;
                     yield return null;
@@ -172,8 +183,9 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Divide un texto largo en fragmentos de ~110 caracteres por oraciones.</summary>
-        static List<string> Chunk(string text, int max = 110)
+        /// <summary>Divide un texto largo en fragmentos de ~85 caracteres por oraciones (y por comas si una oracion es muy larga):
+        /// asi caben con letra grande en el monitor y en la franja de avisos.</summary>
+        static List<string> Chunk(string text, int max = 85)
         {
             var result = new List<string>();
             if (string.IsNullOrEmpty(text)) return result;
@@ -184,6 +196,8 @@ namespace RickMorty
                 sb.Append(text[i]);
                 char c = text[i];
                 bool end = (c == '.' || c == '!' || c == '?' || c == ')') && (i + 1 >= text.Length || text[i + 1] == ' ');
+                // oraciones largas: tambien se cortan en la coma o los dos puntos (si ya llevan buen tramo)
+                if (!end && (c == ',' || c == ';' || c == ':') && sb.Length > 55 && i + 1 < text.Length && text[i + 1] == ' ') end = true;
                 if (end)
                 {
                     sentences.Add(sb.ToString().Trim());

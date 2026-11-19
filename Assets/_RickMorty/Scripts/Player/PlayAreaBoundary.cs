@@ -19,6 +19,10 @@ namespace RickMorty
         float m_Cooldown;
         float m_NextWarning;
 
+        public static PlayAreaBoundary Instance { get; private set; }
+        void Awake() => Instance = this;
+        void OnDestroy() { if (Instance == this) Instance = null; }
+
         [Tooltip("Zona interior con paredes fisicas (el garaje): ahi no se muestran avisos")]
         public Bounds safeInterior;
 
@@ -71,7 +75,7 @@ namespace RickMorty
         {
             AudioFX.Play("sniper", rig.HeadPosition + Vector3.up * 3f, 1f);
             ScreenFX.Instance?.Flash(new Color(0.8f, 0, 0), 0.4f, 1.2f);
-            ScreenFX.Instance?.ShowCenterText(UIKit.TitleTag("¡FRANCOTIRADOR DEL FBI!"), Color.white, 2f);
+            ScreenFX.Instance?.ShowCenterText(UIKit.TitleTag("¡FRANCOTIRADOR DEL FBI!") + $"\n<size=60%>-{penaltyPoints} pts  ·  -{penaltySeconds:0} s</size>", Color.white, 2.6f);
             rig.Haptic(Hand.Both, 1f, 0.4f);
             GameEvents.RaisePenalty("Saliste de la cinta del FBI", penaltyPoints);
             GameTimer.Instance?.AddTime(-penaltySeconds);

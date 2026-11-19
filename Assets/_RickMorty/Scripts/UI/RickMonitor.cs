@@ -28,17 +28,20 @@ namespace RickMorty
             var screen = UIKit.Panel("Screen", root, new Color(0.015f, 0.05f, 0.03f, 1f), Vector2.zero, Vector2.one, new Vector2(18, 18), new Vector2(-18, -18));
             var s = screen.transform;
 
-            m_Title = UIKit.Line("Title", s, "COMUNICADOR INTERDIMENSIONAL", 34, UIKit.Neon, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.86f), new Vector2(0.62f, 1f), 22, 6);
+            // Tamanos pensados para leerse a ~1.7 m (objetivo y subtitulos por encima de 1.2 grados de altura de letra).
+            // Antes: objetivo 40 px y subtitulo 34 px = 0.7-0.8 grados, por debajo del minimo legible en Quest.
+            m_Title = UIKit.Line("Title", s, "COMUNICADOR", 34, UIKit.Neon, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.865f), new Vector2(0.42f, 1f), 22, 6);
             UIKit.AsTitle(m_Title);
-            m_Status = UIKit.Line("Status", s, "", 34, Color.white, TextAlignmentOptions.MidlineRight, new Vector2(0.6f, 0.86f), new Vector2(1f, 1f), 22, 6);
-            UIKit.Panel("Sep", s, new Color(0.3f, 0.9f, 0.4f, 0.45f), new Vector2(0, 0.855f), new Vector2(1, 0.86f), new Vector2(22, 0), new Vector2(-22, 0), false);
+            m_Status = UIKit.Line("Status", s, "", 52, Color.white, TextAlignmentOptions.MidlineRight, new Vector2(0.4f, 0.855f), new Vector2(1f, 1f), 22, 2);
+            m_Status.fontStyle = FontStyles.Bold;
+            UIKit.Panel("Sep", s, new Color(0.3f, 0.9f, 0.4f, 0.45f), new Vector2(0, 0.85f), new Vector2(1, 0.855f), new Vector2(22, 0), new Vector2(-22, 0), false);
 
-            UIKit.Line("ObjLabel", s, "OBJETIVO", 24, new Color(1f, 0.8f, 0.3f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.76f), new Vector2(1, 0.84f), 22, 0);
-            m_Objective = UIKit.Block("Objective", s, "", 26, 40, Color.white, new Vector2(0, 0.45f), new Vector2(1, 0.76f), 22);
+            UIKit.Line("ObjLabel", s, "OBJETIVO", 30, new Color(1f, 0.8f, 0.3f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.765f), new Vector2(1, 0.845f), 22, 0);
+            m_Objective = UIKit.Block("Objective", s, "", 40, 56, Color.white, new Vector2(0, 0.455f), new Vector2(1, 0.77f), 22);
 
-            var radio = UIKit.Panel("RadioBox", s, new Color(0.3f, 0.75f, 1f, 0.1f), new Vector2(0, 0.03f), new Vector2(1, 0.42f), new Vector2(14, 0), new Vector2(-14, 0));
-            UIKit.Line("SubLabel", radio.transform, "RADIO DE RICK", 22, UIKit.Cyan, TextAlignmentOptions.TopLeft, new Vector2(0, 0.8f), new Vector2(1, 1), 14, 6);
-            m_Subtitle = UIKit.Block("Subtitle", radio.transform, "", 24, 34, new Color(0.9f, 1f, 0.95f), new Vector2(0, 0), new Vector2(1, 0.8f), 14);
+            var radio = UIKit.Panel("RadioBox", s, new Color(0.3f, 0.75f, 1f, 0.1f), new Vector2(0, 0.025f), new Vector2(1, 0.44f), new Vector2(14, 0), new Vector2(-14, 0));
+            UIKit.Line("SubLabel", radio.transform, "RADIO DE RICK", 28, UIKit.Cyan, TextAlignmentOptions.TopLeft, new Vector2(0, 0.8f), new Vector2(1, 1), 14, 4);
+            m_Subtitle = UIKit.Block("Subtitle", radio.transform, "", 36, 48, new Color(0.9f, 1f, 0.95f), new Vector2(0, 0), new Vector2(1, 0.82f), 14);
         }
 
         void Start()

@@ -57,6 +57,7 @@ CFG = [
 # ---------- Reemplazos descargados de Sketchfab (2026-11-16) para modelos que antes se generaban ----------
 # Fuente: _ModelosOriginales/sketchfab2/<id>.glb (autores y licencias en _ModelosOriginales/sketchfab2/CREDITOS.md)
 SF2 = "sketchfab2/"
+SF3 = "sketchfab3/"
 CFG += [
     dict(id="mini_cronenberg", src=SF2 + "mini_cronenberg.glb", fit=('max', 0.27), pivot='center', tris=8000, tex=512),
     dict(id="vhs_balistica", src=SF2 + "vhs_balistica.glb", fit=('w', 0.19), pivot='center', tex=512),
@@ -92,6 +93,14 @@ CFG += [
     dict(id="farola", src=SF2 + "farola.glb", dir="Env", fit=('h', 5.0), pivot='bottom', tris=2500, tex=512),
     dict(id="hidrante", src=SF2 + "hidrante.glb", dir="Env", fit=('h', 0.75), pivot='bottom', tex=512),
     dict(id="reloj_pared", src=SF2 + "reloj_pared.glb", dir="Env", fit=('max', 0.32), pivot='center', tex=512),
+    # --- Ronda 3 (2026-11-19): personajes que seguian generados + utileria del garaje
+    dict(id="hombre_eyeholes", src=SF3 + "hombre_eyeholes.glb", dir="Env", drop=["Ring", "Icosphere"], rot=(0, 0, 45), fit=('h', 2.05), pivot='bottom', tris=12000, tex=1024),
+    dict(id="tio_steve", src=SF3 + "tio_steve.glb", fit=('max', 0.34), pivot='center', tris=8000, tex=512),
+    dict(id="casco_snowball", src=SF3 + "casco_snowball.glb", rot=(0, 0, 180), fit=('max', 0.31), pivot='center', color=(0.72, 0.76, 0.8), rough=0.3, tex=512),
+    dict(id="barril", src=SF3 + "barril.glb", dir="Env", fit=('h', 0.9), pivot='bottom', tex=1024),
+    dict(id="llantas", src=SF3 + "llantas.glb", dir="Env", fit=('h', 0.82), pivot='bottom', tex=1024),
+    dict(id="gabinete", src=SF3 + "gabinete.glb", dir="Env", fit=('h', 1.35), pivot='bottom', tris=9000, tex=1024),
+    dict(id="bicicleta", src=SF3 + "bicicleta.glb", dir="Env", fit=('len', 1.75), pivot='bottom', tex=512, png=True),
 ]
 # Ingredientes que comparten modelo
 ALIASES = {"mega_semilla": ["fleeb", "acido", "materia_oscura"], "meeseeks": ["plumbus_polvo", "esporas", "kalaxianos", "marihuana", "semen"], "bola_meeseeks": ["caja_contrabando"]}

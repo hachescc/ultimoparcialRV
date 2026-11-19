@@ -34,13 +34,16 @@ namespace RickMorty
         void Build()
         {
             var items = new List<ItemDef>(GameDatabase.Discoverables);
+            // 6 columnas con celdas mas grandes y panel mas lejos (0.62 m): antes 7x6 con letra de 0.4-0.6 grados
+            // a 44 cm de los ojos (demasiado cerca y demasiado denso).
+            columns = 6;
             int rows = Mathf.CeilToInt(items.Count / (float)columns);
-            float cellW = 118, cellH = 58, pad = 6;
+            float cellW = 152, cellH = 80, pad = 6;
             float w = columns * (cellW + pad) + pad + 20;
             float gridH = rows * (cellH + pad) + pad;
-            float h = gridH + 70 + 110;
+            float h = gridH + 70 + 130;
 
-            m_Canvas = UIKit.WorldCanvas("HologramCanvas", transform, new Vector2(w, h), 0.00048f, true);
+            m_Canvas = UIKit.WorldCanvas("HologramCanvas", transform, new Vector2(w, h), Scale, true);
             m_Group = m_Canvas.gameObject.AddComponent<CanvasGroup>();
             var root = m_Canvas.transform;
             UIKit.Fill("Marco", root, new Color(0.35f, 0.85f, 1f, 0.9f));
@@ -61,20 +64,37 @@ namespace RickMorty
                     new Vector2(pad + cx * (cellW + pad), -(pad + cy * (cellH + pad)) - cellH),
                     new Vector2(pad + cx * (cellW + pad) + cellW, -(pad + cy * (cellH + pad))));
                 cellBg.raycastTarget = true;
-                var label = UIKit.Text("Label", cellBg.transform, "???", 15, new Color(0.55f, 0.62f, 0.72f), TextAlignmentOptions.Center,
-                    Vector2.zero, Vector2.one, new Vector2(4, 2), new Vector2(-4, -2));
-                label.enableAutoSizing = true; label.fontSizeMin = 10; label.fontSizeMax = 15; label.overflowMode = TextOverflowModes.Ellipsis;
+                // franja con el color del objeto (aparece al descubrirlo): se reconoce de un vistazo sin leer
+                var chip = UIKit.Panel("Chip", cellBg.transform, def.Color, new Vector2(0, 0), new Vector2(0, 1), new Vector2(5, 8), new Vector2(13, -8));
+                chip.enabled = false;
+                m_Chips[def.id] = chip;
+                var label = UIKit.Text("Label", cellBg.transform, "???", 23, new Color(0.55f, 0.62f, 0.72f), TextAlignmentOptions.Center,
+                    Vector2.zero, Vector2.one, new Vector2(17, 3), new Vector2(-5, -3));
+                label.enableAutoSizing = true; label.fontSizeMin = 17; label.fontSizeMax = 23; label.overflowMode = TextOverflowModes.Ellipsis;
                 m_Cells[def.id] = (cellBg, label);
                 var id = def.id;
-                UIKit.OnHover(cellBg.gameObject, () => { m_PointerCount++; m_LastPointerTime = Time.time; ShowDetail(id); },
-                    () => { m_PointerCount = Mathf.Max(0, m_PointerCount - 1); m_LastPointerTime = Time.time; });
+                UIKit.OnHover(cellBg.gameObject, () => { m_PointerCount++; m_LastPointerTime = Time.time; ShowDetail(id); Highlight(id, true); },
+                    () => { m_PointerCount = Mathf.Max(0, m_PointerCount - 1); m_LastPointerTime = Time.time; Highlight(id, false); });
             }
 
-            var detailBg = UIKit.Panel("DetailBg", root, new Color(0.01f, 0.03f, 0.06f, 0.95f), new Vector2(0, 0), new Vector2(1, 0), new Vector2(10, 10), new Vector2(-10, 110));
-            m_Detail = UIKit.Text("Detail", detailBg.transform, "Apunta con la mano derecha a un objeto descubierto para ver su receta.", 21, new Color(0.92f, 0.97f, 1f),
+            var detailBg = UIKit.Panel("DetailBg", root, new Color(0.01f, 0.03f, 0.06f, 0.95f), new Vector2(0, 0), new Vector2(1, 0), new Vector2(10, 10), new Vector2(-10, 130));
+            m_Detail = UIKit.Text("Detail", detailBg.transform, "Apunta con la mano derecha a un objeto descubierto para ver su receta.", 26, new Color(0.92f, 0.97f, 1f),
                 TextAlignmentOptions.MidlineLeft, Vector2.zero, Vector2.one, new Vector2(12, 6), new Vector2(-12, -6));
 
             m_Canvas.gameObject.SetActive(false);
+        }
+
+        const float Scale = 0.0006f;
+        readonly Dictionary<string, Image> m_Chips = new Dictionary<string, Image>();
+        static readonly Color CellKnown = new Color(0.1f, 0.42f, 0.24f, 0.97f), CellUnknown = new Color(0.08f, 0.12f, 0.2f, 0.95f);
+
+        /// <summary>Celda bajo el puntero: se aclara para que se note cual se esta senalando.</summary>
+        void Highlight(string id, bool on)
+        {
+            if (!m_Cells.TryGetValue(id, out var cell)) return;
+            var score = ScoreManager.Instance;
+            var baseColor = score != null && score.IsDiscovered(id) ? CellKnown : CellUnknown;
+            cell.bg.color = on ? Color.Lerp(baseColor, Color.white, 0.32f) : baseColor;
         }
 
         void ShowDetail(string id)
@@ -101,7 +121,8 @@ namespace RickMorty
                 if (known) count++;
                 kv.Value.label.text = known ? GameDatabase.NameOf(kv.Key) : (everKnown ? "?? (ya visto)" : "???");
                 kv.Value.label.color = known ? Color.white : new Color(0.55f, 0.62f, 0.72f);
-                kv.Value.bg.color = known ? new Color(0.1f, 0.42f, 0.24f, 0.97f) : new Color(0.08f, 0.12f, 0.2f, 0.95f);
+                kv.Value.bg.color = known ? CellKnown : CellUnknown;
+                if (m_Chips.TryGetValue(kv.Key, out var chip)) chip.enabled = known;
             }
             m_Header.text = $"HOLOGRAMA DE DESCUBRIMIENTOS  {count}/{m_Cells.Count}";
         }
@@ -119,15 +140,15 @@ namespace RickMorty
             if (m_Canvas.gameObject.activeSelf != active) m_Canvas.gameObject.SetActive(active);
             if (!active) { m_PointerCount = 0; return; }
             m_Group.alpha = m_Alpha;
-            m_Canvas.transform.localScale = Vector3.one * 0.00048f * Mathf.Lerp(0.6f, 1f, m_Alpha);
+            m_Canvas.transform.localScale = Vector3.one * Scale * Mathf.Lerp(0.6f, 1f, m_Alpha);
 
-            // Flota ~20 cm sobre la muneca, mirando a la cabeza
+            // Se proyecta mas alla de la muneca, a ~62 cm de la cabeza (lectura comoda) y un poco por encima de la mano
             if (head != null)
             {
                 var anchor = transform.parent != null ? transform.parent.position : transform.position;
-                var toHead = head.position - anchor;
-                toHead.y = 0;
-                var pos = anchor + Vector3.up * 0.22f + toHead.normalized * -0.05f;
+                var fromHead = anchor - head.position;
+                if (fromHead.sqrMagnitude < 0.0001f) fromHead = head.forward;
+                var pos = head.position + fromHead.normalized * 0.62f + Vector3.up * 0.2f;
                 m_Canvas.transform.position = pos;
                 var dir = pos - head.position;
                 if (dir.sqrMagnitude > 0.0001f) m_Canvas.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
