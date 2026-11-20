@@ -18,19 +18,20 @@ namespace RickMorty
         public Transform playerSpot;
         [TextArea(5, 20)]
         public string credits =
-            "RICK & MORTY\ny las mezclas de otra dimensión\n\n" +
-            "Proyecto Final - Fundamentos de Realidad Virtual 2026\nUAO Immersive Solutions\n\n" +
-            "Diseño del juego\n[Compañero 1]\n[Compañero 2]\n\n" +
-            "Desarrollo Unity / XR\n[Tu nombre]\n\n" +
-            "Hecho con Unity 6 + XR Interaction Toolkit\n\n" +
-            "Modelos 3D de Sketchfab (CC-BY)\n" +
-            "Yury Misiyuk · Brian Fox · amt16 · Guilherme Navarro\nDemonic Arts · JMGameDev · NexusB · Senpai-3689\n" +
-            "Carlos_SR22 · artoire · Ruslan Gadzhiev · sixonetwo\nPieter Ferreira · Kevin.Popescu · PolyProps3D\n" +
-            "SpatialNeglect (CC-BY-NC) · assetfactory · widthRider\nJamie McFarlane · Simlion · AleixoAlonso · marishka1611\n" +
-            "BRT_GAMES · rickmaolly · Miljan Bojovic · DJMaesen\nDaniel · Glowbox 3D · bez_glaza · Lora · 3DGunsmith\n" +
-            "Julio_Mendez · June's Cloud · Daniyal Malik · ZiemniaQ\njimbogies · wasabicats\n\n" +
-            "Texturas: Poly Haven (CC0)\n\n" +
-            "Rick and Morty es propiedad de sus creadores.\nProyecto académico sin fines de lucro.\n\n" +
+            "<size=150%><font=\"Titulos SDF\"><color=#7DFF6A>RICK & MORTY</color></font></size>\ny las mezclas de otra dimensión\n\n" +
+            "<size=75%>Proyecto Final\nFundamentos de Realidad Virtual 2026\nUAO Immersive Solutions</size>\n\n" +
+            "<size=75%><color=#9FD8FF>UN JUEGO DE</color></size>\n" +
+            "<size=125%>William Franco L.\nHugo Chavarro Escobar\nJuan David Muñoz S.\nSebastian Montero I.</size>\n\n" +
+            "<size=70%>Hecho con Unity 6 y XR Interaction Toolkit</size>\n\n" +
+            // La lista de autores es obligatoria (licencias CC-BY) pero va en letra chica y corrida, para que no opaque al equipo
+            "<size=75%><color=#9FD8FF>MODELOS 3D DE SKETCHFAB (CC-BY)</color></size>\n" +
+            "<size=52%><color=#B8C8C0>Yury Misiyuk, Brian Fox, amt16, Guilherme Navarro, Demonic Arts, JMGameDev, NexusB, Senpai-3689, " +
+            "Carlos_SR22, artoire, Ruslan Gadzhiev, sixonetwo, Pieter Ferreira, Kevin.Popescu, PolyProps3D, " +
+            "SpatialNeglect (CC-BY-NC), assetfactory, widthRider, Jamie McFarlane, Simlion, AleixoAlonso, marishka1611, " +
+            "BRT_GAMES, rickmaolly, Miljan Bojovic, DJMaesen, Daniel, Glowbox 3D, bez_glaza, Lora, 3DGunsmith, " +
+            "Julio_Mendez, June's Cloud, Daniyal Malik, ZiemniaQ, jimbogies, wasabicats.\n" +
+            "Texturas y cielo: Poly Haven (CC0)</color></size>\n\n" +
+            "<size=60%>Rick and Morty es propiedad de sus creadores.\nProyecto académico sin fines de lucro.</size>\n\n" +
             "Ningún capibara fue lastimado...\nesperamos.";
 
         Canvas m_Results, m_Credits;

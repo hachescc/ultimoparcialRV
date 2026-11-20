@@ -18,7 +18,7 @@ namespace RickMorty
         {
             "Botón rojo = MEZCLAR\nMínimo 2 ingredientes",
             "Líquidos: IZQUIERDA\nSólidos: DERECHA",
-            "Basura → agujero negro\n(al lado de la mesa)",
+            "La basura va al\nagujero negro\n(al lado de la mesa)",
             "NO tocar al capibara.\nEstá meditando."
         };
 

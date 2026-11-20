@@ -168,7 +168,7 @@ namespace RickMorty
             m_VignetteLabel.text = "Viñeta de confort: " + (vig ? "ACTIVADA" : "DESACTIVADA");
             m_TurnLabel.text = "Giro: " + (SaveSystem.Data.smoothTurn ? "SUAVE" : "POR PASOS");
             var s = SaveSystem.Data;
-            m_Info.text = $"Mejor puntaje: {s.bestScore}   ·   Partidas: {s.runsPlayed}   ·   Colección: {s.collection.Count}/{GameDatabase.DiscoverableCount}";
+            m_Info.text = $"Mejor puntaje: {s.bestScore}     Partidas: {s.runsPlayed}     Colección: {s.collection.Count}/{GameDatabase.DiscoverableCount}";
         }
 
         public void Toggle()

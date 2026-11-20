@@ -1004,7 +1004,7 @@ namespace RickMorty.EditorTools
                     foreach (var yaw in new[] { 90f, -90f })
                     {
                         var r = rot * Quaternion.Euler(0, yaw, 0);
-                        var lbl = Label("FBI · NO PASAR", g, p + Vector3.up * 1.05f - r * Vector3.forward * 0.01f, r, 0.9f, new Color(1f, 0.85f, 0.1f), 2f);
+                        var lbl = Label("FBI - NO PASAR", g, p + Vector3.up * 1.05f - r * Vector3.forward * 0.01f, r, 0.9f, new Color(1f, 0.85f, 0.1f), 2f);
                         lbl.fontSharedMaterial = FrontFaceFontMaterial(lbl.font);
                     }
                 }

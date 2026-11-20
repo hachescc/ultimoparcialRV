@@ -30,11 +30,11 @@ namespace RickMorty
             "<color=#7DFF6A>Botón Y</color> (izq.)   esta pantalla de controles";
 
         const string Pc =
-            "<color=#5FD0E8>W A S D</color>   caminar · <color=#5FD0E8>Q / E</color> bajar / subir\n" +
+            "<color=#5FD0E8>W A S D</color>   caminar, <color=#5FD0E8>Q / E</color> bajar / subir\n" +
             "<color=#5FD0E8>Clic derecho + mouse</color>   mirar alrededor\n" +
             "<color=#5FD0E8>Tab</color>   cambiar entre cabeza y manos\n" +
             "<color=#5FD0E8>[  /  ]</color>   mover la mano izquierda / derecha\n" +
-            "<color=#5FD0E8>G</color>   agarrar · <color=#5FD0E8>T</color>   gatillo (usar)\n" +
+            "<color=#5FD0E8>G</color>   agarrar, <color=#5FD0E8>T</color>   gatillo (usar)\n" +
             "<color=#5FD0E8>M</color>  o  <color=#5FD0E8>P</color>   pausa\n" +
             "<color=#5FD0E8>B</color>   esta pantalla de controles";
 
@@ -56,7 +56,7 @@ namespace RickMorty
                 yield return null;
             yield return new WaitForSeconds(3f);
             bool vr = UnityEngine.XR.XRSettings.isDeviceActive;
-            WristWatch.Instance?.Notify(vr ? "Botón Y (mano izquierda)\nver los controles" : "Botón Y  ·  tecla B\nver los controles", UIKit.Cyan, 5f);
+            WristWatch.Instance?.Notify(vr ? "Botón Y (mano izquierda)\nver los controles" : "Botón Y o tecla B\nver los controles", UIKit.Cyan, 5f);
         }
 
         void OnEnable() => m_Toggle.Enable();
@@ -87,7 +87,7 @@ namespace RickMorty
                 Column(root, "EN EL PC (SIMULADOR XR)", Pc, 0.51f, 0.98f, new Color(0.05f, 0.12f, 0.17f));
             }
 
-            UIKit.Line("Hint", root, vr ? "Botón Y para cerrar" : "Botón Y  ·  tecla B  ·  para cerrar", 26, new Color(0.75f, 0.85f, 0.8f), TextAlignmentOptions.Center,
+            UIKit.Line("Hint", root, vr ? "Botón Y para cerrar" : "Botón Y o tecla B para cerrar", 26, new Color(0.75f, 0.85f, 0.8f), TextAlignmentOptions.Center,
                 new Vector2(0, 0.01f), new Vector2(1, 0.08f), 10, 0);
             m_Canvas.gameObject.SetActive(false);
         }

@@ -166,7 +166,7 @@ namespace RickMorty
             {
                 RickComms.Instance?.Say("final_use_station");
                 AudioFX.Play("beep", transform.position, 0.6f, 0.6f);
-                FX.FloatingText(transform.position + Vector3.up * 0.45f, "Eso va en el SOPORTE DE ENSAMBLAJE →", new Color(0.5f, 1f, 0.5f), 0.7f, 3f, 0.15f);
+                FX.FloatingText(transform.position + Vector3.up * 0.45f, "Eso va en el SOPORTE DE ENSAMBLAJE", new Color(0.5f, 1f, 0.5f), 0.7f, 3f, 0.15f);
                 return;
             }
 

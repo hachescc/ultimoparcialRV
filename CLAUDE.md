@@ -125,7 +125,7 @@ Garaje de Rick; jugador = Morty. Rick enseña 3 mezclas (Mega-Semilla+Meeseeks �
 - **NO probado en Quest real**: alturas, poke del botón MEZCLAR (dirección del XRPokeFilter), gesto de mirar el reloj, sensación de agarre, rendimiento.
 - Voces = solo subtítulos + ráfaga `rick_blip` (audio real opcional por id en Resources/Audio/Rick). SFX sintetizados. Sin música.
 - Las correcciones de legibilidad/comodidad del 2026-11-19 salen de medir el código (grados de letra, distancias), NO de probar en el visor: confirmar en Quest.
-- Créditos en `EndScreen.credits` tienen `[Companero 1]`, `[Tu nombre]` → pedir nombres reales.
+- Créditos (`EndScreen.credits`): "Un juego de" William Franco L., Hugo Chavarro Escobar, Juan David Muñoz S., Sebastian Montero I. Autores de modelos en letra chica separados por comas.
 
 ## Pendientes
 - Plugins oficiales sugeridos al usuario (directorio de Anthropic): **Meta VR** (hz-unity-code-review, hz-unity-project-analyzer, hz-unity-device-readiness, hz-quest-verify-first) y **Unity** (optimize-text-mesh-pro, urp-postprocessing). Si los activa, usarlos para otra pasada de revisión.
@@ -159,3 +159,4 @@ Garaje de Rick; jugador = Morty. Rick enseña 3 mezclas (Mega-Semilla+Meeseeks �
 - **2026-11-19** — Creé el repo privado `hachescc/ultimoparcialRV` con `.gitignore` de Unity + exclusiones de material de trabajo; commit inicial (1414 archivos, ~52 MB) y push.
 - **2026-11-19** — Barrido de pulido con dos revisiones independientes (bugs/Quest y UI/legibilidad, usando como referencia las guías públicas de los plugins oficiales Meta VR y Unity, que el usuario aún no activa). Corregido: OpenXR sin controles, botón MEZCLAR, caída en la sala final, objetos perdidos (frascos/pistola), portal final en el piso, katana, farmeo de mezclas, rig con salto/teletransporte, y toda la UI rehecha para leerse en el visor (franja HUD, reloj, monitor, holograma, pausa, final). Visual: portal, cielo, mesa, casa del vecino, contenido de frascos. Ronda 3 de Sketchfab (6 modelos aplicados). Commit `c33eb16` subido a `main` (104 archivos). Pendiente: nombres reales para los créditos (el usuario los pasa después).
 - **2026-11-19** — El usuario abrió Unity y vio los avisos de Project Validation: arreglados 4 (ver Trampas), 2 opcionales se dejan. Sin commit todavía.
+- **2026-11-19** — Nombres reales en los créditos y rediseño (caben en una pantalla). El usuario pidió que los textos del juego no se vean "de IA": **en textos visibles al jugador NO usar punto medio (·), rayas largas (— –), flechas (→) ni comillas tipográficas**; usar comas, "o", "y", saltos de línea. Revisar con `scratchpad/scan.js` (busca esos signos en cadenas de C# y en los JSON). `LEEME_RickMorty.md` y `MODELOS_SKETCHFAB.md` todavía los tienen (no son texto del juego).
