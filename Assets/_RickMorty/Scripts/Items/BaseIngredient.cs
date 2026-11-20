@@ -21,7 +21,17 @@ namespace RickMorty
         Renderer[] m_Renderers;
         Collider[] m_Colliders;
         bool m_Returning;
-        float m_AwayTime;
+        float m_AwayTime, m_LooseTime;
+
+        bool NearWorkSpot()
+        {
+            var gm = GameManager.Instance;
+            if (gm == null) return false;
+            var p = transform.position;
+            if (gm.mixingBowl != null && (gm.mixingBowl.transform.position - p).sqrMagnitude < 0.38f * 0.38f) return true;
+            if (gm.finalStation != null && (gm.finalStation.transform.position - p).sqrMagnitude < 0.45f * 0.45f) return true;
+            return false;
+        }
 
         void Awake()
         {
@@ -79,6 +89,13 @@ namespace RickMorty
                 && m_Item.Body != null && m_Item.Body.linearVelocity.sqrMagnitude < 0.02f;
             m_AwayTime = stray ? m_AwayTime + Time.deltaTime : 0f;
             if (m_AwayTime > 15f) { m_AwayTime = 0f; ReturnHome(false, 0f); }
+
+            // Soltado sobre la mesa (acostado o parado fuera de su soporte): a los 6 s vuelve a su puesto.
+            // No aplica dentro del tazon ni junto al soporte de ensamblaje, donde se dejan a proposito.
+            bool loose = !m_Item.IsHeld && !m_Item.InSocket && !m_Item.Unavailable && !stray
+                && m_Item.Body != null && m_Item.Body.linearVelocity.sqrMagnitude < 0.02f && !NearWorkSpot();
+            m_LooseTime = loose ? m_LooseTime + Time.deltaTime : 0f;
+            if (m_LooseTime > 6f) { m_LooseTime = 0f; ReturnHome(false, 0f); }
         }
 
         public void ReturnHome(bool fromFloor, float delay)

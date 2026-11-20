@@ -10,7 +10,7 @@ namespace RickMorty
         public static GameTimer Instance { get; private set; }
 
         [Tooltip("Segundos de juego libre antes de que el FBI entre")]
-        public float duration = 900f;
+        public float duration = 600f;   // 10 min (15 se hacia largo segun las pruebas del equipo)
 
         public float Remaining { get; private set; }
         public bool Running { get; private set; }

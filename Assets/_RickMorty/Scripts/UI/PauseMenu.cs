@@ -22,7 +22,13 @@ namespace RickMorty
         GameObject m_Dim;
         TextMeshProUGUI m_VignetteLabel, m_TurnLabel, m_Info, m_RestartLabel, m_QuitLabel;
         readonly System.Collections.Generic.List<RectTransform> m_Rows = new System.Collections.Generic.List<RectTransform>();
-        RectTransform m_SkipRow;
+        RectTransform m_SkipRow, m_HintRow;
+
+        void AskHint()
+        {
+            Close();
+            GameManager.Instance?.RequestHint();
+        }
         int m_Confirm;            // 1 = reiniciar, 2 = salir (esperando el segundo toque)
         float m_ConfirmUntil;
         const string RestartText = "Reiniciar partida", QuitText = "Salir del juego";
@@ -138,6 +144,7 @@ namespace RickMorty
             Row(UIKit.Button("Resume", root, "Reanudar", Close, Vector2.zero, Vector2.one, fontSize: 30f));
             Row(UIKit.Button("Controls", root, "Ver controles", () => ControlsPanel.Instance?.Open(), Vector2.zero, Vector2.one, color: new Color(0.2f, 0.42f, 0.25f, 0.95f), fontSize: 30f));
             m_SkipRow = Row(UIKit.Button("Skip", root, "Saltar el tutorial de Rick", SkipTutorial, Vector2.zero, Vector2.one, color: new Color(0.42f, 0.3f, 0.55f, 0.95f), fontSize: 30f));
+            m_HintRow = Row(UIKit.Button("Hint", root, "Pedir una pista a Rick (-25 pts)", AskHint, Vector2.zero, Vector2.one, color: new Color(0.5f, 0.42f, 0.12f, 0.95f), fontSize: 30f));
             var v = UIKit.Button("Vignette", root, "", ToggleVignette, Vector2.zero, Vector2.one, color: new Color(0.15f, 0.3f, 0.5f, 0.95f), fontSize: 30f);
             Row(v);
             m_VignetteLabel = v.GetComponentInChildren<TextMeshProUGUI>();
@@ -185,6 +192,8 @@ namespace RickMorty
             // el boton de saltar solo tiene sentido mientras Rick explica
             if (m_SkipRow != null)
                 m_SkipRow.gameObject.SetActive(gm != null && (gm.State == GameState.Intro || gm.State == GameState.Onboarding || gm.State == GameState.Tutorial));
+            // pedir pista solo en el juego libre (en el tutorial Rick ya dice que hacer)
+            if (m_HintRow != null) m_HintRow.gameObject.SetActive(gm != null && gm.State == GameState.FreePlay);
             Layout();
             // un destello o fundido congelado por la pausa taparia el menu: se limpian
             ScreenFX.Instance?.ClearForPause();

@@ -19,7 +19,7 @@ namespace RickMorty
         public bool IsOpen => m_Canvas != null && m_Canvas.gameObject.activeSelf;
 
         const string Quest =
-            "<color=#7DFF6A>Joystick izquierdo</color>   caminar\n" +
+            "<color=#7DFF6A>Joystick izquierdo</color>   caminar (presionado: correr)\n" +
             "<color=#7DFF6A>Joystick derecho</color>   girar (por pasos o suave)\n" +
             "<color=#7DFF6A>Grip</color> (el del dedo medio)   agarrar y soltar\n" +
             "<color=#7DFF6A>Gatillo</color> (índice)   usar lo que tienes en la mano\n" +
@@ -33,7 +33,7 @@ namespace RickMorty
             "<color=#5FD0E8>W A S D</color>   caminar, <color=#5FD0E8>Q / E</color> bajar / subir\n" +
             "<color=#5FD0E8>Clic derecho + mouse</color>   mirar alrededor\n" +
             "<color=#5FD0E8>Tab</color>   cambiar entre cabeza y manos\n" +
-            "<color=#5FD0E8>[  /  ]</color>   mover la mano izquierda / derecha\n" +
+            "<color=#5FD0E8>,  /  .</color>  (coma y punto)   mover la mano izquierda / derecha\n" +
             "<color=#5FD0E8>G</color>   agarrar, <color=#5FD0E8>T</color>   gatillo (usar)\n" +
             "<color=#5FD0E8>M</color>  o  <color=#5FD0E8>P</color>   pausa\n" +
             "<color=#5FD0E8>B</color>   esta pantalla de controles";

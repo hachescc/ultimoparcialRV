@@ -14,3 +14,4 @@ Todos con licencia CC Attribution (CC-BY 4.0): hay que nombrar al autor (ya est√
 Descargados pero NO usados: casco_snowball ("Sci fi Dome Helm", infectedfury): ven√≠a negro y el casco generado se reconoce mejor; esfera_dragon ("Four star Dragon Ball", biskui): las estrellas van en un plano dentro de una esfera transparente; tv_vieja: escaneo oscuro sin pantalla reconocible.
 
 Cielo: Poly Haven "Kloofendal 48d Partly Cloudy (Pure Sky)", CC0.
+| Manos del jugador | First Person hands rigged | davidfischer | CC Attribution | https://sketchfab.com/3d-models/547a45535f0c4fe787948f7a7a6a88db |

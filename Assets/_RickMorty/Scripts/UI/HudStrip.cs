@@ -91,6 +91,12 @@ namespace RickMorty
             m_ObjUntil = Time.unscaledTime + objectiveSeconds;
         }
 
+        /// <summary>Vuelve a mostrar el objetivo actual unos segundos (recordatorio cuando el jugador no avanza).</summary>
+        public void Remind()
+        {
+            if (!string.IsNullOrEmpty(m_Objective)) m_ObjUntil = Time.unscaledTime + objectiveSeconds;
+        }
+
         bool MonitorInView()
         {
             var mon = RickMonitor.Instance;

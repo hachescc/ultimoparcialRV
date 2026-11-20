@@ -29,7 +29,7 @@ namespace RickMorty
             "Carlos_SR22, artoire, Ruslan Gadzhiev, sixonetwo, Pieter Ferreira, Kevin.Popescu, PolyProps3D, " +
             "SpatialNeglect (CC-BY-NC), assetfactory, widthRider, Jamie McFarlane, Simlion, AleixoAlonso, marishka1611, " +
             "BRT_GAMES, rickmaolly, Miljan Bojovic, DJMaesen, Daniel, Glowbox 3D, bez_glaza, Lora, 3DGunsmith, " +
-            "Julio_Mendez, June's Cloud, Daniyal Malik, ZiemniaQ, jimbogies, wasabicats.\n" +
+            "Julio_Mendez, June's Cloud, Daniyal Malik, ZiemniaQ, jimbogies, wasabicats, davidfischer.\n" +
             "Texturas y cielo: Poly Haven (CC0)</color></size>\n\n" +
             "<size=60%>Rick and Morty es propiedad de sus creadores.\nProyecto académico sin fines de lucro.</size>\n\n" +
             "Ningún capibara fue lastimado...\nesperamos.";

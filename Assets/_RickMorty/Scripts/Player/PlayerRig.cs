@@ -1,3 +1,4 @@
+using UnityEngine.InputSystem;
 using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
@@ -15,6 +16,31 @@ namespace RickMorty
     public class PlayerRig : MonoBehaviour
     {
         public static PlayerRig Instance { get; private set; }
+
+        [Header("Correr (palanca izquierda presionada)")]
+        public float walkSpeed = 2.0f;
+        public float runSpeed = 3.4f;
+        UnityEngine.InputSystem.InputAction m_Run;
+        UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider m_Move;
+
+        void OnEnable()
+        {
+            m_Run = new UnityEngine.InputSystem.InputAction("Correr", UnityEngine.InputSystem.InputActionType.Button);
+            m_Run.AddBinding("<XRController>{LeftHand}/thumbstickClicked");
+            m_Run.AddBinding("<XRController>{LeftHand}/primary2DAxisClick");
+            m_Run.AddBinding("<Keyboard>/f");
+            m_Run.Enable();
+        }
+
+        void OnDisable() { m_Run?.Disable(); m_Run?.Dispose(); m_Run = null; }
+
+        void LateUpdate()
+        {
+            if (m_Move == null) m_Move = GetComponentInChildren<UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider>(true);
+            if (m_Move == null || m_Run == null) return;
+            float target = m_Run.IsPressed() ? runSpeed : walkSpeed;
+            m_Move.moveSpeed = Mathf.MoveTowards(m_Move.moveSpeed, target, Time.deltaTime * 6f);
+        }
 
         public XROrigin origin;
         public Transform head;
@@ -46,6 +72,9 @@ namespace RickMorty
             // El XR Body Transformer ajusta la altura del CharacterController a la cabeza; un step offset
             // pequeno evita el error "Step Offset must be less or equal..." cuando la altura es baja.
             if (m_CC != null) m_CC.stepOffset = Mathf.Min(m_CC.stepOffset, 0.1f);
+            // manos en vez del modelo del control (pedido del equipo)
+            if (leftHand != null && leftHand.GetComponent<HandVisual>() == null) leftHand.gameObject.AddComponent<HandVisual>().left = true;
+            if (rightHand != null && rightHand.GetComponent<HandVisual>() == null) rightHand.gameObject.AddComponent<HandVisual>().left = false;
             if (leftHand != null && leftHaptics == null) leftHaptics = leftHand.GetComponentInChildren<HapticImpulsePlayer>();
             if (rightHand != null && rightHaptics == null) rightHaptics = rightHand.GetComponentInChildren<HapticImpulsePlayer>();
         }

@@ -1109,6 +1109,18 @@ namespace RickMorty.EditorTools
                 simRoot.tag = "EditorOnly";
                 var sim = (GameObject)PrefabUtility.InstantiatePrefab(simPrefab);
                 sim.transform.SetParent(simRoot.transform, false);
+                // En el PC, WASD mueve la "cabeza" simulada: a 0.2 se sentia muy lento (comentario del equipo)
+                foreach (var mb in sim.GetComponentsInChildren<MonoBehaviour>(true))
+                {
+                    if (mb == null) continue;
+                    var so = new SerializedObject(mb);
+                    var px = so.FindProperty("m_TranslateXSpeed");
+                    if (px == null) continue;
+                    px.floatValue = 0.42f;
+                    var pz = so.FindProperty("m_TranslateZSpeed"); if (pz != null) pz.floatValue = 0.42f;
+                    var py = so.FindProperty("m_TranslateYSpeed"); if (py != null) py.floatValue = 0.3f;
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                }
                 sim.SetActive(false);
                 simRoot.AddComponent<EditorSimulatorToggle>().simulator = sim;
             }

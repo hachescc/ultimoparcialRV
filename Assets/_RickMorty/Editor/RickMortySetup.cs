@@ -290,6 +290,8 @@ namespace RickMorty.EditorTools
             Link("meeseeks_npc", $"{Root}/Models/Env/meeseeks_npc.glb");
             Link("rick_caleno", $"{Root}/Models/Env/rick.glb", 0.15f / 1.75f);
             Link("hombre_eyeholes", $"{Root}/Models/Env/hombre_eyeholes.glb");
+            foreach (var id in new[] { "mano_l_abierta", "mano_l_cerrada", "mano_r_abierta", "mano_r_cerrada" })
+                Link(id, $"{Root}/Models/Env/{id}.glb");
             foreach (var id in new[] { "kalaxianos", "esporas", "plumbus_polvo", "marihuana" })
                 Link("relleno_" + id, $"{Root}/Models/Env/relleno_{id}.glb");
             EditorUtility.SetDirty(reg);

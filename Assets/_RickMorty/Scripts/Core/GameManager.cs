@@ -79,6 +79,7 @@ namespace RickMorty
             Consumable.ResetStatics();   // "Jugar de nuevo" no debe heredar estado de la partida anterior
             AudioFX.Prewarm();                    // sintetiza los sonidos ahora (pantalla en negro) y no en plena explosion
             HudStrip.Ensure();
+            StartCoroutine(CoObjectiveReminders());
         }
 
         void OnEnable()
@@ -297,7 +298,7 @@ namespace RickMorty
             timer?.StartTimer();
             eventDirector?.Begin();
             m_LastProgressTime = Time.time;
-            m_NextHintTime = Time.time + 90f;
+            m_NextHintTime = Time.time + 60f;   // primera pista al minuto sin avanzar (antes 90 s)
             m_LastDiscoveryCount = score != null ? score.Discovered.Count : 0;
             if (music != null && music.clip != null && !music.isPlaying) music.Play();
 
@@ -307,11 +308,11 @@ namespace RickMorty
                 {
                     m_LastDiscoveryCount = score.Discovered.Count;
                     m_LastProgressTime = Time.time;
-                    m_NextHintTime = Mathf.Max(m_NextHintTime, Time.time + 60f);
+                    m_NextHintTime = Mathf.Max(m_NextHintTime, Time.time + 50f);
                 }
                 if (State == GameState.FreePlay && Time.time > m_NextHintTime)
                 {
-                    m_NextHintTime = Time.time + 100f;
+                    m_NextHintTime = Time.time + 70f;
                     GiveHint();
                 }
                 yield return new WaitForSeconds(1f);
@@ -386,6 +387,33 @@ namespace RickMorty
             comms?.Say("hint_intro");
             comms?.SayText(hint);
             corkBoard?.AddNote("PISTA: " + hint);
+            // la pista tambien sale delante del jugador (antes solo la decia Rick y quedaba en el corcho)
+            HudStrip.Instance?.Notify("<size=70%>PISTA DE RICK</size>\n" + hint, new Color(1f, 0.85f, 0.35f), 9f);
+            AudioFX.Play2D("watch_ping", 0.6f);
+        }
+
+        float m_NextAskedHint;
+
+        /// <summary>El jugador pide una pista desde el menu de pausa. Cuesta pocos puntos para que no sea gratis.</summary>
+        public bool RequestHint()
+        {
+            if (State != GameState.FreePlay || Time.time < m_NextAskedHint) return false;
+            m_NextAskedHint = Time.time + 20f;
+            m_NextHintTime = Time.time + 75f;
+            GameEvents.RaisePenalty("Pista pedida a Rick", 25);
+            GiveHint();
+            return true;
+        }
+
+        /// <summary>En el onboarding y el tutorial: si el jugador se queda quieto, se le recuerda que hacer.</summary>
+        IEnumerator CoObjectiveReminders()
+        {
+            while (!m_Finished)
+            {
+                yield return new WaitForSeconds(25f);
+                if (State == GameState.Onboarding || State == GameState.Tutorial)
+                    HudStrip.Instance?.Remind();
+            }
         }
 
         // =====================================================================

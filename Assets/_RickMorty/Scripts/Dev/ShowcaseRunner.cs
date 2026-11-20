@@ -156,6 +156,11 @@ namespace RickMorty.Dev
             GM.rig.TeleportTo(GM.playerStart.position, Vector3.forward);
             Shot("Agarrar un frasco", "Paso 4: agarrar un frasco con el grip. Liquidos a la izquierda, solidos a la derecha, cada uno en su soporte (socket XR).",
                 new Vector3(0, 1.45f, 1.15f), new Vector3(0, 0.95f, 2.05f), 65); yield return null; // film
+            {
+                var mid = GM.rig.leftHand.position * 0.5f + GM.rig.rightHand.position * 0.5f;
+                Shot("Manos del jugador", "Las manos reemplazan al modelo del control: abiertas normalmente y en puno al apretar el Grip o sostener algo.",
+                    GM.rig.head.position + new Vector3(0, -0.1f, -0.15f), mid, 50); yield return null; // film
+            }
             GameEvents.RaiseItemGrabbed("acido");
             Comms()?.StopAll();
             yield return WaitState(GameState.Tutorial, 30f);
