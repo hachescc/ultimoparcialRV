@@ -1,6 +1,7 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
-using System.Collections.Generic;
 
 namespace RickMorty
 {
@@ -8,25 +9,38 @@ namespace RickMorty
     public class EditorSimulatorToggle : MonoBehaviour
     {
         public GameObject simulator;
+        public float waitForHeadsetSeconds = 2f;
 
         public static bool SimulatorOn;
 
         void Awake()
         {
-#if UNITY_EDITOR
-            bool hmd = HeadsetRunning();
-            if (simulator != null) simulator.SetActive(!hmd);
-            SimulatorOn = simulator != null && !hmd;
-            if (hmd) Debug.Log("[RickMorty] Visor detectado: simulador desactivado.");
-            else Debug.Log("[RickMorty] Sin visor: usando XR Interaction Simulator (mouse/teclado).");
-#else
             SimulatorOn = false;
+#if UNITY_EDITOR
+            if (simulator != null) simulator.SetActive(false);
+#else
             Destroy(gameObject);
 #endif
         }
 
-        System.Collections.IEnumerator Start()
+        IEnumerator Start()
         {
+            float until = Time.realtimeSinceStartup + waitForHeadsetSeconds;
+            while (Time.realtimeSinceStartup < until)
+            {
+                if (HeadsetRunning())
+                {
+                    Debug.Log("[RickMorty] Visor detectado: se juega con las gafas.");
+                    yield break;
+                }
+                yield return null;
+            }
+
+            SimulatorOn = true;
+            if (simulator != null) simulator.SetActive(true);
+            if (PlayerRig.Instance != null) PlayerRig.Instance.UsePcMode();
+            Debug.Log("[RickMorty] Sin visor: usando XR Interaction Simulator (mouse/teclado).");
+
             yield return null;
             yield return null;
             HideByName("InputSelectionWindow");
@@ -47,6 +61,7 @@ namespace RickMorty
             var displays = new List<XRDisplaySubsystem>();
             SubsystemManager.GetSubsystems(displays);
             foreach (var d in displays) if (d.running) return true;
+            if (InputDevices.GetDeviceAtXRNode(XRNode.Head).isValid) return true;
             return XRSettings.isDeviceActive;
         }
 

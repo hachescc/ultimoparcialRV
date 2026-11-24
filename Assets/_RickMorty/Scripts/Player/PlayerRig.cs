@@ -51,9 +51,9 @@ namespace RickMorty
         XRBaseInputInteractor[] m_PcInteractors;
         XRBaseInputInteractor.InputTriggerType[] m_OriginalTriggers;
 
-        void Start()
+        public void UsePcMode()
         {
-            if (!EditorSimulatorToggle.SimulatorOn) return;
+            if (m_PcInteractors != null) return;
             m_PcInteractors = GetComponentsInChildren<XRBaseInputInteractor>(true);
             m_OriginalTriggers = new XRBaseInputInteractor.InputTriggerType[m_PcInteractors.Length];
             for (int i = 0; i < m_PcInteractors.Length; i++)
