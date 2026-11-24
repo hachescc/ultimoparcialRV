@@ -27,5 +27,19 @@ namespace RickMorty
             Destroy(gameObject);
 #endif
         }
+
+        System.Collections.IEnumerator Start()
+        {
+            yield return null;
+            yield return null;
+            HideByName("InputSelectionWindow");
+            HideByName("InputSelectionClosedWindow");
+        }
+
+        static void HideByName(string objectName)
+        {
+            var found = GameObject.Find(objectName);
+            if (found != null) found.SetActive(false);
+        }
     }
 }

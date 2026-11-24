@@ -56,6 +56,8 @@ namespace RickMorty
             m_PcInteractors = GetComponentsInChildren<XRBaseInputInteractor>(true);
             foreach (var interactor in m_PcInteractors)
                 interactor.selectActionTrigger = XRBaseInputInteractor.InputTriggerType.Toggle;
+            foreach (var nearFar in GetComponentsInChildren<NearFarInteractor>(true))
+                nearFar.farAttachMode = UnityEngine.XR.Interaction.Toolkit.Attachment.InteractorFarAttachMode.Far;
         }
 
         void ReleaseFixedThings()
