@@ -1,6 +1,3 @@
-# Renderiza pares "actual vs nuevo" de modelos con la misma camara/luz (vista 3/4 desde el frente).
-# Uso: blender -b -P render_compare.py -- <dir_actual_Models> <dir_nuevo_Models> <salida_png_dir> id1,id2,...
-# Busca <dir>/Items/<id>.glb o <dir>/Env/<id>.glb. Frente del modelo = -Y (convencion del proyecto).
 import bpy, sys, os, math
 from mathutils import Vector
 
@@ -22,7 +19,6 @@ def render(path, out):
     sc = bpy.context.scene
     bpy.ops.import_scene.gltf(filepath=path)
     bpy.context.view_layer.update()
-    # Workbench muestra el nodo de imagen ACTIVO: que sea el del color base (no emision/normal)
     for m in bpy.data.materials:
         if m.use_nodes:
             for n in m.node_tree.nodes:
@@ -38,7 +34,7 @@ def render(path, out):
     rad = max((mx - mn).length / 2, 1e-4)
     cam_d = bpy.data.cameras.new("c"); cam_d.lens = 50
     cam = bpy.data.objects.new("c", cam_d); sc.collection.objects.link(cam)
-    dirv = Vector((0.75, -1.0, 0.55)).normalized()          # frente-derecha-arriba
+    dirv = Vector((0.75, -1.0, 0.55)).normalized()
     dist = rad / math.tan(math.radians(36) / 2) * 1.05
     cam.location = ctr + dirv * dist
     cam.rotation_euler = (-dirv).to_track_quat('-Z', 'Y').to_euler()

@@ -6,17 +6,10 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace RickMorty.EditorTools
 {
-    /// <summary>
-    /// Segundo paso del builder: reemplaza los placeholders de primitivas por los modelos reales
-    /// de Assets/_RickMorty/Models/Env (descargados y optimizados, o generados en Blender).
-    /// Oculta los renderers del placeholder pero conserva sus colliders y componentes de juego.
-    /// Si un modelo no existe, el placeholder queda como estaba.
-    /// </summary>
     public static class RickMortyModelPass
     {
         const string EnvDir = RickMortySetup.Root + "/Models/Env/";
 
-        // Alturas de las repisas del modelo de estanteria (medidas en Blender)
         static readonly float[] ShelfLevels = { 0.21f, 0.64f, 1.08f, 1.51f, 1.94f, 2.38f };
 
         public static void Apply()
@@ -37,8 +30,6 @@ namespace RickMorty.EditorTools
 
         static int s_Placed;
 
-        // ------------------------------------------------------------------ helpers
-
         static GameObject Model(string id, Transform parent, Vector3 worldPos, Quaternion worldRot, float scale = 1f)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(EnvDir + id + ".glb");
@@ -53,7 +44,6 @@ namespace RickMorty.EditorTools
             return go;
         }
 
-        /// <summary>Texto "pintado" sobre un modelo (sin fondo), hijo del modelo para que siga su rotacion.</summary>
         static void Sticker(GameObject model, string text, Vector3 localPos, Quaternion localRot, float fontSize, Color color)
         {
             if (model == null) return;
@@ -73,7 +63,6 @@ namespace RickMorty.EditorTools
             t.enableWordWrapping = false;
         }
 
-        /// <summary>Marca un modelo de fondo como estatico (static batching: menos draw calls en Quest).</summary>
         static GameObject MakeStatic(GameObject go)
         {
             if (go == null) return null;
@@ -106,7 +95,6 @@ namespace RickMorty.EditorTools
             if (go != null) Object.DestroyImmediate(go);
         }
 
-        /// <summary>Reemplaza el collider de un objeto por una caja ajustada a su modelo.</summary>
         static void RefitCollider(GameObject host, GameObject model)
         {
             foreach (var c in host.GetComponents<Collider>()) Object.DestroyImmediate(c);
@@ -122,7 +110,6 @@ namespace RickMorty.EditorTools
             box.size = new Vector3(Mathf.Abs(sz.x), Mathf.Abs(sz.y), Mathf.Abs(sz.z));
         }
 
-        /// <summary>Easter egg o prop con componentes: oculta el placeholder y le cuelga el modelo.</summary>
         static GameObject Dress(GameObject host, string id, Vector3? worldPos = null, Quaternion? worldRot = null, bool refit = true)
         {
             if (host == null || !Exists(id)) return null;
@@ -154,9 +141,6 @@ namespace RickMorty.EditorTools
             box.size = new Vector3(Mathf.Abs(sz.x), Mathf.Abs(sz.y), Mathf.Abs(sz.z));
         }
 
-        // ------------------------------------------------------------------ texturas (Poly Haven, CC0)
-
-        /// <summary>Material URP Lit con textura de color + normal, repetida 'tiling' veces. Se guarda como asset.</summary>
         static Material TexMat(string id, Vector2 tiling, Color tint, float smooth = 0.15f, string variant = "")
         {
             string dir = RickMortySetup.Root + "/Textures/" + id + "/";
@@ -169,7 +153,6 @@ namespace RickMorty.EditorTools
                 imp.SaveAndReimport();
             }
             var nor = AssetDatabase.LoadAssetAtPath<Texture2D>(np);
-            // Reutilizar el asset si ya existe (borrarlo dejaba en magenta a las superficies que ya lo usaban)
             string path = $"{RickMortySetup.Root}/Materials/Generated/Tex_{id}{variant}_{tiling.x:0.#}x{tiling.y:0.#}.mat";
             var m = AssetDatabase.LoadAssetAtPath<Material>(path);
             bool isNew = m == null;
@@ -190,8 +173,6 @@ namespace RickMorty.EditorTools
             return m;
         }
 
-        /// <summary>Cambia por una textura los materiales de un modelo cuyo nombre empieza por 'matName'
-        /// (el modelo debe traer UV en metros: ver uvbox() en generate_models.py).</summary>
         static void Retex(GameObject model, string matName, string texId, Color tint, string variant, float smooth = 0.15f)
         {
             if (model == null) return;
@@ -207,31 +188,27 @@ namespace RickMorty.EditorTools
             }
         }
 
-        /// <summary>Texturiza una caja: la repeticion sale del tamano real de su cara mas grande.</summary>
         static void ApplyTex(GameObject go, string id, float tileMeters, Color tint, float smooth = 0.15f)
         {
             if (go == null) return;
             var r = go.GetComponent<Renderer>();
             if (r == null) return;
             var s = go.transform.lossyScale;
-            Vector2 face = s.y <= Mathf.Min(s.x, s.z) ? new Vector2(s.x, s.z)      // piso / techo
-                         : s.x <= s.z ? new Vector2(s.z, s.y)                       // pared delgada en X
-                         : new Vector2(s.x, s.y);                                   // pared delgada en Z
+            Vector2 face = s.y <= Mathf.Min(s.x, s.z) ? new Vector2(s.x, s.z)
+                         : s.x <= s.z ? new Vector2(s.z, s.y)
+                         : new Vector2(s.x, s.y);
             var m = TexMat(id, new Vector2(Mathf.Max(1, Mathf.Round(face.x / tileMeters)), Mathf.Max(1, Mathf.Round(face.y / tileMeters))), tint, smooth);
             if (m != null) r.sharedMaterial = m;
         }
 
-        // ------------------------------------------------------------------ ronda 2: revamp del entorno
-
         static void Revamp()
         {
-            // --- Texturas: garaje y exterior
             var garage = Find("Entorno/Garaje");
             if (garage != null)
                 foreach (Transform t in garage.transform)
                 {
                     if (t.name == "Piso") ApplyTex(t.gameObject, "garage_floor", 2f, Color.white, 0.25f);
-                    else if (t.name.StartsWith("Pared")) ApplyTex(t.gameObject, "wood_plank_wall", 1.5f, new Color(1.5f, 1.38f, 1.25f));   // >1: aclara la madera (quedaba muy oscuro el garaje)
+                    else if (t.name.StartsWith("Pared")) ApplyTex(t.gameObject, "wood_plank_wall", 1.5f, new Color(1.5f, 1.38f, 1.25f));
                 }
             const string ex = "Entorno/Exterior";
             var ext = Find(ex);
@@ -241,16 +218,14 @@ namespace RickMorty.EditorTools
                 if (t.name == "Cesped") ApplyTex(t.gameObject, "leafy_grass", 3f, new Color(0.78f, 1f, 0.72f));
                 else if (t.name == "Calle") ApplyTex(t.gameObject, "asphalt_02", 4f, new Color(0.85f, 0.85f, 0.85f));
                 else if (t.name.StartsWith("Acera")) ApplyTex(t.gameObject, "concrete_pavement", 1f, Color.white);
-                else if (t.name.StartsWith("Fachada")) ApplyTex(t.gameObject, "painted_plaster_wall", 1.5f, new Color(1.5f, 1.47f, 1.42f));   // >1: la textura es gris, la fachada debe verse blanca
+                else if (t.name.StartsWith("Fachada")) ApplyTex(t.gameObject, "painted_plaster_wall", 1.5f, new Color(1.5f, 1.47f, 1.42f));
                 else if (t.name == "TechoGaraje") ApplyTex(t.gameObject, "roof_09", 2f, new Color(0.75f, 0.62f, 0.55f));
             }
-            // casa del vecino: conserva el modelo (sus ventanas son parte del juego) pero con revoque rosado y tejas
             var nbBody = Find(ex + "/Casa del Vecino/Cuerpo");
             if (nbBody != null) ApplyTex(nbBody, "painted_plaster_wall", 1.5f, new Color(1f, 0.72f, 0.78f));
             var nbRoof = Find(ex + "/Casa del Vecino/Techo");
             if (nbRoof != null) ApplyTex(nbRoof, "roof_09", 2f, new Color(1f, 0.55f, 0.5f));
 
-            // --- Casas del barrio (reemplazan las cajas del horizonte, mirando a la calle)
             if (Exists("casa_barrio1") && Exists("casa_barrio2"))
             {
                 int k = 0;
@@ -264,7 +239,6 @@ namespace RickMorty.EditorTools
                 foreach (var h in Children(ex, "TechoHorizonte")) Hide(h);
             }
 
-            // --- Vegetacion y mobiliario urbano (fuera de las zonas de juego: patio entre garaje y vecino libre)
             void Place(string id, float x, float y, float z, float yaw, float scale = 1f)
             {
                 if (Exists(id)) MakeStatic(Model(id, ext.transform, new Vector3(x, y, z), Quaternion.Euler(0, yaw, 0), scale));
@@ -279,12 +253,11 @@ namespace RickMorty.EditorTools
             Place("buzon", -5.6f, 0, -8.8f, 180);
             for (float z = -32f; z <= 32f; z += 16f)
             {
-                Place("farola", 13.15f, 0.07f, z, 180);      // el brazo de la farola apunta a -X del modelo
+                Place("farola", 13.15f, 0.07f, z, 180);
                 Place("farola", 22.85f, 0.07f, z + 8f, 0);
             }
             Place("hidrante", 13.45f, 0.07f, -5.5f, 30);
 
-            // --- Utileria del garaje (ronda 3): la mitad sur estaba vacia. Todo contra las paredes, lejos de la mesa.
             if (garage != null)
             {
                 void Clutter(string id, Vector3 p, Quaternion r)
@@ -294,13 +267,12 @@ namespace RickMorty.EditorTools
                     AddBox(m);
                     MakeStatic(m);
                 }
-                Clutter("gabinete", new Vector3(-0.5f, 0, -2.55f), Quaternion.identity);                 // contra la pared sur, de frente al cuarto
-                Clutter("barril", new Vector3(-3.45f, 0, -2.5f), Quaternion.Euler(0, 35, 0));           // esquina suroeste
-                Clutter("llantas", new Vector3(3.4f, 0, -2.5f), Quaternion.Euler(0, 20, 0));            // esquina sureste
-                Clutter("bicicleta", new Vector3(1.9f, 0, -2.72f), Quaternion.Euler(0, 90, 9));         // recostada en la pared sur
+                Clutter("gabinete", new Vector3(-0.5f, 0, -2.55f), Quaternion.identity);
+                Clutter("barril", new Vector3(-3.45f, 0, -2.5f), Quaternion.Euler(0, 35, 0));
+                Clutter("llantas", new Vector3(3.4f, 0, -2.5f), Quaternion.Euler(0, 20, 0));
+                Clutter("bicicleta", new Vector3(1.9f, 0, -2.72f), Quaternion.Euler(0, 90, 9));
             }
 
-            // --- Garaje: caneca del agujero negro (conserva el nucleo morado), boton MEZCLAR y reloj
             var bin = GameObject.Find("Agujero Negro (Basura)");
             if (bin != null && Exists("caneca"))
             {
@@ -314,7 +286,6 @@ namespace RickMorty.EditorTools
                 var cap = btn.transform.Find("Cap");
                 foreach (Transform t in btn.transform)
                     if (t.name == "Base" || t.name == "Cap") Hide(t.gameObject);
-                // hijo del Cap: al presionar, MixButton baja el Cap y el modelo baja con el
                 Model("boton_rojo", cap != null ? cap : btn.transform, btn.transform.position, btn.transform.rotation);
                 var sc = btn.GetComponent<SphereCollider>();
                 if (sc != null) { sc.center = new Vector3(0, 0.1f, 0); sc.radius = 0.065f; }
@@ -327,8 +298,6 @@ namespace RickMorty.EditorTools
             }
         }
 
-        // ------------------------------------------------------------------ zonas
-
         static void Desk()
         {
             const string g = "Entorno/Mesa de Trabajo";
@@ -338,7 +307,6 @@ namespace RickMorty.EditorTools
                 foreach (var p in Children(g, "Pata")) Hide(p);
                 Kill(Find(g + "/Repisa"));
                 Model("mesa", Find(g).transform, new Vector3(0, 0, 2.0f), Quaternion.Euler(0, 180, 0));
-                // repisa inferior del modelo (a 0.31 m): colision invisible para apoyar cosas
                 var shelf = new GameObject("RepisaInferior (colision)");
                 shelf.transform.SetParent(Find(g).transform, false);
                 shelf.transform.position = new Vector3(0, 0.29f, 2.0f);
@@ -357,7 +325,7 @@ namespace RickMorty.EditorTools
             if (arm != null && Exists("brazo_robotico"))
             {
                 Hide(arm);
-                Model("brazo_robotico", arm.transform, new Vector3(1.75f, 3.0f, 2.75f), Quaternion.Euler(180, -40, 0));   // a la derecha: en el centro tapaba el monitor visto desde la mesa
+                Model("brazo_robotico", arm.transform, new Vector3(1.75f, 3.0f, 2.75f), Quaternion.Euler(180, -40, 0));
             }
             var tool = Find(g + "/CajaHerramientas");
             if (tool != null && Exists("caja_herramientas"))
@@ -367,7 +335,6 @@ namespace RickMorty.EditorTools
                 AddBox(m);
             }
             Dress(Find("Casco Iron Man (easter egg)"), "casco_ironman", new Vector3(0.3f, 0.33f, 2.05f), Quaternion.Euler(0, 200, 0));
-            // "Chatarra": 5 cubos grises sueltos en la repisa inferior que se veian de placeholder → 2 cajitas de carton
             if (Exists("caja_carton"))
             {
                 foreach (var c in Children(g, "Chatarra")) Kill(c);
@@ -405,18 +372,14 @@ namespace RickMorty.EditorTools
             if (ttBox != null)
             {
                 Kill(Find(g + "/Label_TIME TRAVEL"));
-                // el collider del placeholder (oculto) debe coincidir con la caja nueva: si sobresale,
-                // empuja al Cubo Prison Realm (que va encima) fuera de la repisa
                 var ttHost = Find(g + "/Caja TIME TRAVEL STUFF");
                 if (ttHost != null)
                 {
                     ttHost.transform.position = new Vector3(1.3f, L(3) + 0.1565f, 3.62f);
                     ttHost.transform.localScale = new Vector3(0.45f, 0.313f, 0.353f);
                 }
-                // rotulo escrito con marcador en la cara que mira al cuarto (+Z local del modelo)
                 Sticker(ttBox, "TIME TRAVEL\nSTUFF", new Vector3(0, 0.16f, 0.181f), Quaternion.Euler(0, 180, -4), 0.55f, new Color(0.12f, 0.08f, 0.05f));
             }
-            // frascos de formol apoyados en la repisa: se mueven juntas todas sus piezas (vidrio, formol, tapa, muestras)
             float jarDy = float.NaN;
             foreach (var j in Children(g, "FrascoConserva")) { jarDy = L(5) + 0.1f - j.transform.position.y; break; }
             if (!float.IsNaN(jarDy))
@@ -428,7 +391,6 @@ namespace RickMorty.EditorTools
                 foreach (var b in Children(g, n))
                 {
                     b.transform.position = new Vector3(b.transform.position.x, L(5) + 0.14f, b.transform.position.z);
-                    // la caja lisa gris se veia de placeholder: modelo de carton (mismo tamano aprox.), collider intacto
                     if (Exists("caja_carton"))
                     {
                         Hide(b);
@@ -448,7 +410,6 @@ namespace RickMorty.EditorTools
             const string g = "Entorno/Lavanderia";
             var grp = Find(g);
             if (grp == null || !Exists("lavadora")) return;
-            // Los modelos reales son mas anchos: se reacomoda la lavanderia a lo largo de la pared izquierda
             void Appliance(string name, string id, float z, Vector3 colliderSize, bool fillShell = false)
             {
                 var host = Find(g + "/" + name);
@@ -458,8 +419,6 @@ namespace RickMorty.EditorTools
                 Hide(host);
                 if (fillShell)
                 {
-                    // El modelo de lavadora no tiene caras arriba/atras: la caja crema del placeholder,
-                    // un poco mas chica, rellena el hueco (sin sus hijos, que son la puerta vieja)
                     host.GetComponent<Renderer>().enabled = true;
                     host.transform.localScale = new Vector3(colliderSize.x * 0.94f, colliderSize.y * 0.985f, colliderSize.z * 0.94f);
                     host.transform.position = new Vector3(-3.64f, colliderSize.y * 0.985f / 2, z);
@@ -503,7 +462,6 @@ namespace RickMorty.EditorTools
                 if (c != null) c.ear = null;
                 if (m != null)
                 {
-                    // gafas VR (el modelo descargado no las trae): carcasa negra + visor azul + correa
                     var vr = new GameObject("Gafas VR").transform;
                     vr.SetParent(m.transform, false);
                     vr.localPosition = new Vector3(0, 0.6f, 0.43f);
@@ -547,7 +505,7 @@ namespace RickMorty.EditorTools
             var panel = Find("Entorno/Garaje/PuertaGaraje/Panel");
             var root = new GameObject("PanelMovil (bisagra)").transform;
             root.SetParent(door.transform, false);
-            root.localPosition = new Vector3(0, 2.5f, 0);   // bisagra en el borde superior
+            root.localPosition = new Vector3(0, 2.5f, 0);
             panel.transform.SetParent(root, true);
             Hide(panel);
             Model("puerta_garaje", root, new Vector3(4.02f, 0, 0.5f), Quaternion.Euler(0, 90, 0));
@@ -565,7 +523,7 @@ namespace RickMorty.EditorTools
             {
                 foreach (var n in new[] { "Tablero", "Aro" })
                     foreach (var o in Children(g, n)) Hide(o);
-                Model("aro", grp.transform, new Vector3(4.62f, 3.95f, 0.5f), Quaternion.Euler(0, 90, 0));   // el tablero queda en la fachada (x=4.16); el aro sobresale hacia la entrada
+                Model("aro", grp.transform, new Vector3(4.62f, 3.95f, 0.5f), Quaternion.Euler(0, 90, 0));
             }
             var house = Find(g + "/Casa Smith");
             if (house != null && Exists("casa_smith"))
@@ -584,7 +542,6 @@ namespace RickMorty.EditorTools
                     Hide(t.gameObject);
                 }
                 var nbModel = Model("casa_vecino", nb.transform, new Vector3(7.5f, 0, 13.5f), Quaternion.Euler(0, 180, 0));
-                // revoque rosado, tejas y zocalo de concreto (el GLB trae UV en metros)
                 Retex(nbModel, "vec_pared", "painted_plaster_wall", new Color(1.45f, 0.98f, 1.08f), "_vecino");
                 Retex(nbModel, "vec_techo", "roof_09", new Color(1.05f, 0.62f, 0.55f), "_vecino");
                 Retex(nbModel, "vec_zocalo", "concrete_pavement", new Color(0.85f, 0.83f, 0.8f), "_vecino");
@@ -617,7 +574,6 @@ namespace RickMorty.EditorTools
                 {
                     Hide(t.gameObject);
                     var m = Model("camioneta", grp.transform, new Vector3(p.x, 0, p.z), Quaternion.Euler(0, p.z > 0 ? 180 : 0, 0));
-                    // rotulos FBI amarillos a ambos lados (el modelo descargado es una SUV negra sin marcas)
                     foreach (var s in new[] { -1f, 1f })
                         Sticker(m, "FBI", new Vector3(s * 1.07f, 1.05f, -0.3f), Quaternion.Euler(0, s * -90f, 0), 5f, new Color(1f, 0.85f, 0.1f));
                 }
@@ -628,7 +584,6 @@ namespace RickMorty.EditorTools
         static void Rick()
         {
             if (!Exists("rick")) return;
-            // se busca por su componente (no por nombre: renombrar el objeto dejaba a Rick con el cuerpo de primitivas)
             var npc = Object.FindFirstObjectByType<RickNPC>();
             var rick = npc != null ? npc.gameObject : null;
             if (rick != null)

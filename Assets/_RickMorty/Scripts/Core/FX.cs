@@ -4,11 +4,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Efectos visuales placeholder creados por codigo: particulas, humo, destellos,
-    /// textos flotantes, manchas (decals) y portales.
-    /// Lo usan: casi todos los scripts de objetos, NPC y mezclas para mostrar efectos.
-    /// </summary>
     public static class FX
     {
         static int s_DecalCount;
@@ -85,7 +80,6 @@ namespace RickMorty
             return ps;
         }
 
-        /// <summary>Particulas continuas pegadas a un objeto (burbujas, chispas, humo toxico).</summary>
         public static ParticleSystem Attach(Transform parent, Color color, float rate = 6f, float size = 0.02f, float speed = 0.1f, float gravity = -0.05f, float radius = 0.03f, bool additive = true)
         {
             var go = new GameObject("FX_Loop");
@@ -143,8 +137,6 @@ namespace RickMorty
             tmp.color = color;
             tmp.alignment = TextAlignmentOptions.Center;
             tmp.fontStyle = FontStyles.Bold;
-            // Un solo material con contorno para TODOS los textos flotantes. Antes 'outlineWidth' creaba un
-            // material nuevo por texto y nunca se destruia (100 materiales en 10 s de SCAR).
             if (s_TextMat == null && tmp.font != null)
             {
                 s_TextMat = new Material(tmp.font.material) { name = "Texto flotante (contorno)" };
@@ -177,7 +169,6 @@ namespace RickMorty
 
         internal static void DecalRemoved() => s_DecalCount = Mathf.Max(0, s_DecalCount - 1);
 
-        /// <summary>Portal verde (disco con espiral de particulas). Se usa para respawn, Rick y el final.</summary>
         public static PortalVisual Portal(Vector3 pos, Quaternion rot, float radius = 0.4f, float life = 1.5f)
         {
             var go = new GameObject("FX_Portal");
@@ -190,7 +181,7 @@ namespace RickMorty
         public static void Explosion(Vector3 pos, float radius, float force, bool killCreatures, Color smokeColor)
         {
             Burst(pos, new Color(1f, 0.6f, 0.1f), 80, 6f, 0.1f, 0.7f, 0.5f, true);
-            Smoke(pos, smokeColor, 1.6f, 0.3f, 0.45f, 14f);   // menos humo y mas chico: a 80 cm de la cara eran decenas de capas transparentes (caida de cuadros en Quest)
+            Smoke(pos, smokeColor, 1.6f, 0.3f, 0.45f, 14f);
             FlashLight(pos, new Color(1f, 0.8f, 0.5f), 10f, 8f, 0.5f);
             AudioFX.Play("explosion", pos, 1f);
 
@@ -198,12 +189,10 @@ namespace RickMorty
             foreach (var c in cols)
             {
                 var rb = c.attachedRigidbody;
-                // los easter eggs decorativos de los estantes no salen volando (se perdian detras de las cajas)
                 if (rb != null && !rb.isKinematic && rb.GetComponent<EasterEgg>() == null)
-                    rb.AddExplosionForce(Mathf.Min(force, 4.5f), pos, radius, 0.4f, ForceMode.VelocityChange);   // igual para todos los pesos: antes un frasco de 100 g salia a 60 m/s por la puerta
+                    rb.AddExplosionForce(Mathf.Min(force, 4.5f), pos, radius, 0.4f, ForceMode.VelocityChange);
                 if (killCreatures && (c.bounds.ClosestPoint(pos) - pos).magnitude < radius * 0.5f)
                 {
-                    // el empuje llega lejos, pero solo mata lo que esta cerca del tazon
                     var cr = c.GetComponentInParent<Creature>();
                     if (cr != null) cr.Kill(DamageType.Explosion, true);
                 }
@@ -211,10 +200,6 @@ namespace RickMorty
         }
     }
 
-    /// <summary>
-    /// Apaga poco a poco una luz de destello y luego la destruye.
-    /// Lo usan: FX.FlashLight (se agrega sola a la luz del destello).
-    /// </summary>
     public class LightFader : MonoBehaviour
     {
         public float duration = 0.4f;
@@ -231,10 +216,6 @@ namespace RickMorty
         }
     }
 
-    /// <summary>
-    /// Hace subir un texto flotante, lo gira hacia la camara y lo desvanece.
-    /// Lo usan: FX.FloatingText (numeros de puntaje, avisos del tazon, danos).
-    /// </summary>
     public class FloatingTextMotion : MonoBehaviour
     {
         public float life = 1.5f, rise = 0.4f;
@@ -259,10 +240,6 @@ namespace RickMorty
         }
     }
 
-    /// <summary>
-    /// Tiempo de vida de una mancha (decal): la borra al terminar y avisa a FX para llevar la cuenta.
-    /// Lo usan: FX.Decal (manchas de sangre, quemaduras, pintura verde).
-    /// </summary>
     public class DecalLife : MonoBehaviour
     {
         public float life = 30f;
@@ -270,14 +247,10 @@ namespace RickMorty
         void OnDestroy() => FX.DecalRemoved();
     }
 
-    /// <summary>
-    /// Visual de portal: disco verde + anillo + espiral giratoria.
-    /// Lo usan: FX.Portal, y por ahi GameManager, el tazon, los frascos base, Rick y las pistolas de portales.
-    /// </summary>
     public class PortalVisual : MonoBehaviour
     {
         public float radius = 0.4f;
-        public float life = 1.5f; // <= 0 = permanente
+        public float life = 1.5f;
         Transform m_Disc, m_Inner;
         float m_T, m_S;
         bool m_Closing;
@@ -301,8 +274,6 @@ namespace RickMorty
         {
             radius = r;
             life = lifeSeconds;
-            // Dos capas del remolino (textura generada por codigo) girando en sentidos opuestos.
-            // Antes eran dos cilindros con emision x3/x4: sin HDR se quemaban a blanco y el portal parecia un plato.
             m_Disc = Layer(transform, "Disc", ProcTex.PortalMaterial, 0f);
             m_Inner = Layer(transform, "Core", ProcTex.PortalCoreMaterial, -0.004f);
 
@@ -317,8 +288,6 @@ namespace RickMorty
             var main = swirl.main;
             main.simulationSpace = ParticleSystemSimulationSpace.Local;
 
-            // Solo los portales grandes iluminan: una mezcla de 3 ingredientes abre ~7 micro-portales y cada uno
-            // sumaba una luz puntual por pixel sobre la mesa (caro en Quest).
             if (r >= 0.2f)
             {
                 var light = gameObject.AddComponent<Light>();
@@ -342,7 +311,6 @@ namespace RickMorty
             else
                 s = Mathf.MoveTowards(m_S, target, Time.deltaTime * target * 5f);
             m_S = s;
-            // pequeno latido para que se sienta vivo
             float pulse = 1f + 0.035f * Mathf.Sin(m_T * 7f);
             m_Disc.localScale = new Vector3(s * 1.12f * pulse, s * 1.12f * pulse, 1f);
             m_Disc.Rotate(0, 0, 150f * Time.deltaTime, Space.Self);

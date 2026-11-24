@@ -3,12 +3,6 @@ using UnityEngine.InputSystem;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Atajos de prueba (solo Editor / Development Build):
-    /// F1 saltar tutorial, F2 kit de ensamblaje final, F3 +60 s, F4 evento inesperado,
-    /// F5 spawnear objeto aleatorio, F6 terminar (victoria), F7 forzar game over.
-    /// Lo usan: el equipo al probar (teclas F1 a F7); lo agrega el builder de escena.
-    /// </summary>
     public class DebugCheats : MonoBehaviour
     {
         void Update()

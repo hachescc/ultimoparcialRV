@@ -1,5 +1,3 @@
-# Imprime dimensiones (Blender, Z arriba), triangulos, armaduras/huesos de cada GLB.
-# Uso: blender -b -P inspect.py -- <carpeta> [filtro]
 import bpy, sys, os
 from mathutils import Vector
 

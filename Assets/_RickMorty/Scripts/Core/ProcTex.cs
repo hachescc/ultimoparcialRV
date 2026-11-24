@@ -2,17 +2,11 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Texturas generadas por codigo (una sola vez, se reutilizan). Evitan depender de archivos de imagen
-    /// para efectos simples: el remolino del portal, el halo del tazon y los planos tecnicos.
-    /// Lo usan: FX.Portal (remolino) y el builder de escena (halo y planos, guardados como PNG).
-    /// </summary>
     public static class ProcTex
     {
         static Texture2D s_Swirl;
         static Material s_PortalMat, s_PortalCoreMat;
 
-        /// <summary>Remolino verde del portal (estilo Rick y Morty): espiral con borde irregular y centro claro.</summary>
         public static Texture2D PortalSwirl
         {
             get
@@ -31,7 +25,6 @@ namespace RickMorty
                     float u = (x + 0.5f) / n * 2f - 1f, v = (y + 0.5f) / n * 2f - 1f;
                     float r = Mathf.Sqrt(u * u + v * v);
                     float a = Mathf.Atan2(v, u);
-                    // dos brazos de espiral gruesos + una capa fina que gira al reves
                     float s1 = 0.5f + 0.5f * Mathf.Sin(a * 2f + r * 9.5f);
                     float s2 = 0.5f + 0.5f * Mathf.Sin(a * 5f - r * 17f + 1.3f);
                     float s3 = 0.5f + 0.5f * Mathf.Sin(a * 9f + r * 31f);
@@ -40,16 +33,13 @@ namespace RickMorty
                     float core = Mathf.Pow(Mathf.Clamp01(1f - r * 1.35f), 1.6f);
                     Color c = Color.Lerp(dark, mid, val);
                     c = Color.Lerp(c, hot, Mathf.Clamp01(Mathf.Pow(val, 4f) * 0.75f + core * 0.9f));
-                    // borde ondulado, como salpicado
                     float edge = r + 0.055f * Mathf.Sin(a * 7f) + 0.035f * Mathf.Sin(a * 13f + 1.7f) + 0.02f * Mathf.Sin(a * 23f + 0.4f);
                     float alpha = 1f - Mathf.SmoothStep(0.80f, 0.93f, edge);
-                    // borde mas claro (aro de energia)
                     float rim = Mathf.Clamp01(1f - Mathf.Abs(edge - 0.80f) / 0.07f);
                     c = Color.Lerp(c, hot, rim * 0.55f);
                     c.a = alpha;
                     px[y * n + x] = c;
                 }
-                // motas claras
                 for (int i = 0; i < 90; i++)
                 {
                     float rr = Mathf.Sqrt((float)rnd.NextDouble()) * 0.74f, aa = (float)rnd.NextDouble() * Mathf.PI * 2f;
@@ -71,7 +61,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Resplandor radial suave (para el brillo del tazon: un halo, no un disco de color plano).</summary>
         public static Texture2D BuildSoftGlow(int n = 128)
         {
             var t = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp, name = "SoftGlow" };
@@ -118,7 +107,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Plano tecnico azul (cuadricula + silueta de la pistola de portales + cotas). variant cambia el dibujo.</summary>
         public static Texture2D BuildBlueprint(int variant = 0)
         {
             const int w = 384, h = 288;
@@ -136,27 +124,23 @@ namespace RickMorty
             }
             var ink = new Color32(225, 240, 255, 255);
             var soft = new Color32(150, 195, 245, 255);
-            // marco y cajetin
             Poly(px, w, h, ink, 2, 10, 10, w - 12, 10, w - 12, h - 12, 10, h - 12, 10, 10);
             Poly(px, w, h, ink, 1, w - 130, 10, w - 130, 52, w - 12, 52);
             for (int i = 0; i < 3; i++) Line(px, w, h, w - 122, 20 + i * 11, w - 30 - rnd.Next(40), 20 + i * 11, soft, 2);
             if (variant % 2 == 0)
             {
-                // pistola de portales de perfil: cuerpo, empunadura, cupula y punta
                 Poly(px, w, h, ink, 2, 70, 150, 250, 150, 275, 165, 275, 195, 250, 210, 70, 210, 70, 150);
                 Poly(px, w, h, ink, 2, 95, 150, 80, 80, 125, 72, 140, 150);
                 Circle(px, w, h, 200, 222, 26, ink, 2);
                 Poly(px, w, h, ink, 2, 275, 172, 315, 172, 315, 188, 275, 188);
                 Circle(px, w, h, 110, 180, 9, soft, 2);
                 Circle(px, w, h, 140, 180, 9, soft, 2);
-                // cotas
                 Poly(px, w, h, soft, 1, 70, 232, 70, 250); Poly(px, w, h, soft, 1, 315, 232, 315, 250);
                 Line(px, w, h, 70, 242, 315, 242, soft, 1);
                 Line(px, w, h, 330, 150, 330, 210, soft, 1);
             }
             else
             {
-                // esquema de un portal: circulos concentricos, ejes y una espiral
                 Circle(px, w, h, 150, 150, 86, ink, 2);
                 Circle(px, w, h, 150, 150, 62, soft, 1);
                 Circle(px, w, h, 150, 150, 30, soft, 1);
@@ -170,13 +154,11 @@ namespace RickMorty
                 }
                 for (int i = 0; i < 6; i++) Line(px, w, h, 270, 230 - i * 16, 300 + rnd.Next(55), 230 - i * 16, soft, 2);
             }
-            // "texto" manuscrito arriba
             for (int i = 0; i < 4; i++) Line(px, w, h, 26 + i * 62, h - 34, 26 + i * 62 + 30 + rnd.Next(22), h - 34, ink, 3);
             t.SetPixels32(px); t.Apply(true, false);
             return t;
         }
 
-        /// <summary>Material compartido del disco del portal (sin luz, transparente, dos caras).</summary>
         public static Material PortalMaterial
         {
             get
@@ -190,7 +172,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Capa interior del portal: mismo remolino, mas transparente (gira al reves).</summary>
         public static Material PortalCoreMaterial
         {
             get

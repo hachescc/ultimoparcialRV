@@ -6,11 +6,6 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Boton fisico XR (se presiona con el dedo/poke, con agarre o con el rayo).
-    /// Al presionarlo llama a MixingBowl.Mix().
-    /// Lo usan: el jugador; lo crea el builder de escena junto al tazon (campo bowl).
-    /// </summary>
     [RequireComponent(typeof(XRSimpleInteractable))]
     public class MixButton : MonoBehaviour
     {
@@ -28,8 +23,6 @@ namespace RickMorty
             m_Interactable = GetComponent<XRSimpleInteractable>();
             m_Interactable.selectEntered.AddListener(OnSelect);
             m_Interactable.activated.AddListener(_ => Press(null));
-            // Tocar el boton con la mano ya lo presiona. El XRPokeFilter por defecto solo aceptaba un empuje
-            // HORIZONTAL (eje Z): al presionar hacia abajo, como cualquier boton, no pasaba nada.
             m_Interactable.hoverEntered.AddListener(OnHover);
             if (cap != null) m_CapRest = cap.localPosition;
         }
@@ -40,7 +33,6 @@ namespace RickMorty
         {
             if (args.interactorObject is XRPokeInteractor poke)
             {
-                // solo cuenta si la mano llega desde arriba o de frente (no al rozarlo por debajo de la mesa)
                 var tip = poke.attachTransform != null ? poke.attachTransform.position : poke.transform.position;
                 if (tip.y >= transform.position.y - 0.02f) Press(args.interactorObject);
             }

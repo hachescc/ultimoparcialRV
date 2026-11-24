@@ -1,5 +1,3 @@
-# Lista materiales de un GLB: color base, metal/rugosidad, texturas conectadas y extensiones.
-# Uso: blender -b -P inspect_mats.py -- <archivo.glb>
 import bpy, sys
 argv = sys.argv[sys.argv.index("--") + 1:]
 bpy.ops.wm.read_factory_settings(use_empty=True)

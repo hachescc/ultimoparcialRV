@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Casco traductor de Snowball: si te lo pones (tocar la cabeza) todo suena grave y los
-    /// insultos de Rick por la radio se convierten en ladridos furiosos.
-    /// Lo usan: ItemFactory (behaviour "helmet_snowball") y PlayerHead (se lo pone al tocar la cabeza).
-    /// </summary>
     public class SnowballHelmet : ItemBehaviour, IHeadInteractable
     {
         public float duration = 40f;
@@ -23,7 +18,7 @@ namespace RickMorty
         {
             m_Worn = true;
             Item.ForceRelease();
-            Item.Unavailable = true;   // puesto en la cabeza no lo puede tocar el guantelete ni un Meeseeks
+            Item.Unavailable = true;
             yield return null;
             Body.isKinematic = true;
             foreach (var c in GetComponentsInChildren<Collider>()) c.enabled = false;
@@ -49,8 +44,7 @@ namespace RickMorty
 
         void OnDestroy()
         {
-            // si lo destruyen puesto, que el sonido no quede amortiguado para siempre
-            var fx = ScreenFX.Instance;   // sin ?. : al descargar la escena ScreenFX puede estar destruido (fake null)
+            var fx = ScreenFX.Instance;
             if (m_Worn && fx != null) fx.SetMuffled(false);
         }
     }

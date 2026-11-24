@@ -10,21 +10,12 @@ using UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Mano del jugador (izquierda, derecha o ambas) para vibraciones y agarres.
-    /// Lo usan: PlayerRig.Haptic y todo lo que hace vibrar los controles.
-    /// </summary>
     public enum Hand { Left, Right, Both }
 
-    /// <summary>
-    /// Punto de acceso al jugador (XR Origin): cabeza, manos, haptica, correr y teletransporte.
-    /// Lo usan: casi todos los scripts por PlayerRig.Instance (posicion de la cabeza, vibracion, reaparicion).
-    /// </summary>
     public class PlayerRig : MonoBehaviour
     {
         public static PlayerRig Instance { get; private set; }
 
-        [Header("Correr (palanca izquierda presionada)")]
         public float walkSpeed = 2.0f;
         public float runSpeed = 3.4f;
         InputAction m_Run;
@@ -43,7 +34,6 @@ namespace RickMorty
 
         void LateUpdate()
         {
-            // Correr: la velocidad sube poco a poco hasta runSpeed mientras se presiona el boton
             if (m_Move == null) m_Move = GetComponentInChildren<ContinuousMoveProvider>(true);
             if (m_Move != null && m_Run != null)
             {
@@ -58,9 +48,6 @@ namespace RickMorty
             }
         }
 
-        // ---------- Solo en el PC (simulador) ----------
-        // Con teclado es incomodo mantener G presionada mientras se mira con el mouse, asi que en el PC
-        // agarrar funciona como interruptor: G agarra y G otra vez suelta (modo Toggle de XRI).
         XRBaseInputInteractor[] m_PcInteractors;
 
         void Start()
@@ -71,8 +58,6 @@ namespace RickMorty
                 interactor.selectActionTrigger = XRBaseInputInteractor.InputTriggerType.Toggle;
         }
 
-        // Los botones y objetos fijos (XRSimpleInteractable) no se cargan: se sueltan solos apenas se presionan,
-        // si no, el siguiente G los "soltaba" en vez de agarrar otra cosa.
         void ReleaseFixedThings()
         {
             if (m_PcInteractors == null) return;
@@ -85,10 +70,6 @@ namespace RickMorty
             }
         }
 
-        // ---------- Solo en el PC (simulador) ----------
-        // El simulador mueve la "cabeza" con WASD sin pasar por el CharacterController, asi que se
-        // atravesaban paredes. Aqui deshacemos ese movimiento y lo repetimos con el CharacterController,
-        // que si choca con las paredes. Las manos son hijas del rig, asi que siguen a la camara.
         Vector3 m_LastHeadLocal;
         bool m_HasLastHead;
 
@@ -103,10 +84,10 @@ namespace RickMorty
             m_LastHeadLocal = headLocal;
             if (step.sqrMagnitude < 0.000001f) return;
 
-            transform.position -= step;      // vuelve a donde estaba
+            transform.position -= step;
             Physics.SyncTransforms();
-            if (m_Run != null && m_Run.IsPressed()) step *= runSpeed / walkSpeed;   // tecla F: correr
-            m_CC.Move(step);                 // y camina lo mismo, pero chocando
+            if (m_Run != null && m_Run.IsPressed()) step *= runSpeed / walkSpeed;
+            m_CC.Move(step);
         }
 
         public XROrigin origin;
@@ -136,8 +117,6 @@ namespace RickMorty
             if (origin == null) origin = GetComponent<XROrigin>();
             if (head == null && origin != null && origin.Camera != null) head = origin.Camera.transform;
             m_CC = GetComponent<CharacterController>();
-            // El XR Body Transformer ajusta la altura del CharacterController a la cabeza; un step offset
-            // pequeno evita el error "Step Offset must be less or equal..." cuando la altura es baja.
             if (m_CC != null) m_CC.stepOffset = Mathf.Min(m_CC.stepOffset, 0.1f);
             if (leftHand != null && leftHaptics == null) leftHaptics = leftHand.GetComponentInChildren<HapticImpulsePlayer>();
             if (rightHand != null && rightHaptics == null) rightHaptics = rightHand.GetComponentInChildren<HapticImpulsePlayer>();
@@ -179,7 +158,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Mueve al jugador para que sus pies queden en 'feet' mirando hacia 'forward'.</summary>
         public void TeleportTo(Vector3 feet, Vector3? forward = null)
         {
             if (origin == null) { transform.position = feet; return; }
@@ -189,11 +167,9 @@ namespace RickMorty
                 var f = forward.Value; f.y = 0;
                 if (f.sqrMagnitude > 0.001f) origin.MatchOriginUpCameraForward(Vector3.up, f.normalized);
             }
-            // Desplaza el origen de modo que la cabeza (proyectada al piso) quede en 'feet'
             var headFloor = HeadPosition; headFloor.y = origin.transform.position.y;
             var delta = feet - headFloor;
             origin.transform.position += delta;
-            // Sin desactivar el CharacterController: solo sincronizamos la fisica con el nuevo transform
             Physics.SyncTransforms();
         }
     }

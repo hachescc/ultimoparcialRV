@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Rick Orientoso (Caleno): te sigue por la mesa. Rechaza el Token de Fortnite y si le
-    /// pones la Camiseta del America se vuelve hiperactivo cantando barras.
-    /// Lo usan: ItemFactory (behaviour "creature_caleno"); GameManager no lo borra al terminar.
-    /// </summary>
     public class RickCaleno : CreatureMover
     {
         float m_HyperUntil;
@@ -68,7 +63,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Dice una linea de dialogues.json (el hablante sale del archivo: Rick Caleno).</summary>
         static void Say(string id)
         {
             if (RickComms.Instance != null) RickComms.Instance.Say(id);

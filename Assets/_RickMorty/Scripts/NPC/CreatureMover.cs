@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Movimiento simple de criaturas sobre el suelo (deambular o perseguir un objetivo)
-    /// usando la velocidad del Rigidbody. No se mueve mientras el jugador la sostiene.
-    /// Lo usan: ItemFactory (criaturas que deambulan) y sus hijos: FakeUncleSteve, MeeseeksNPC y RickCaleno.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class CreatureMover : MonoBehaviour
     {

@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Dakimakura / Peluche de Teto: escudos perfectos e irrompibles (repelen al Tio Steve).
-    /// Lo usan: ItemFactory (behaviour "shield") y FakeUncleSteve (no abraza si choca con un escudo).
-    /// </summary>
     public class Shield : ItemBehaviour
     {
         void OnCollisionEnter(Collision c)

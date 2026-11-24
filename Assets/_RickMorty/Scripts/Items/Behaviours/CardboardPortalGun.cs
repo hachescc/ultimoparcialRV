@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Portal Gun de carton: interaccion de burla. Saca una banderita "BANG!" y mancha de verde la pared.
-    /// Lo usan: ItemFactory (behaviour "cardboard_gun") y GameManager (ResetStatics al empezar).
-    /// </summary>
     public class CardboardPortalGun : ItemBehaviour
     {
         static bool s_Commented;

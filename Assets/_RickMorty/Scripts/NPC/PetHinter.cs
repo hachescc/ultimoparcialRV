@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Sr. Pantalones de Popo de bolsillo: si lo sostienes te da pistas o se burla de tus mezclas.
-    /// Lo usan: ItemFactory (behaviour "creature_pet").
-    /// </summary>
     public class PetHinter : ItemBehaviour
     {
         float m_Next;
@@ -37,7 +33,6 @@ namespace RickMorty
                 Say("pantalones_idle");
         }
 
-        /// <summary>Dice una linea de dialogues.json (el hablante sale del archivo: Sr. Pantalones).</summary>
         static void Say(string id)
         {
             if (RickComms.Instance != null) RickComms.Instance.Say(id);

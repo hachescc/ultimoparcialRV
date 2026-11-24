@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Holograma translucido de Rick proyectado desde el brazo robotico en la escena final.
-    /// Lo usan: GameManager (Show y Hide en el dialogo final); lo crea el builder de escena.
-    /// </summary>
     public class RickHologram : MonoBehaviour
     {
         public Renderer[] parts;

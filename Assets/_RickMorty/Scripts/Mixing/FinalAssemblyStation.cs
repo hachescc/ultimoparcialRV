@@ -3,16 +3,9 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Soporte de ensamblaje final. Socket que solo acepta la Portal Gun de carton. Con la
-    /// pistola asegurada, se le acercan los Cristales Kalaxianos y el Aguardiente: el carton
-    /// arde con chispas verdes, levita, destello cegador y se transmuta en la Pistola de Portales real.
-    /// Lo usan: GameManager (referencia) y BlackHoleTrash (no se traga la pistola); lo crea el builder de escena.
-    /// </summary>
     public class FinalAssemblyStation : MonoBehaviour
     {
         public IngredientSocket socket;
-        [Tooltip("Radio alrededor del socket donde deben estar los otros dos ingredientes")]
         public float zoneRadius = 0.35f;
 
         public bool Done { get; private set; }
@@ -25,7 +18,6 @@ namespace RickMorty
         void Awake() { Instance = this; }
         void OnDestroy() { if (Instance == this) Instance = null; }
 
-        /// <summary>Devuelve la Pistola de Portales real al soporte por un micro-portal (no se puede perder).</summary>
         public static void ReturnGun(MixableItem gun)
         {
             if (gun == null) return;
@@ -35,7 +27,7 @@ namespace RickMorty
             FX.Portal(gun.transform.position, Quaternion.identity, 0.15f, 0.8f);
             gun.Body.linearVelocity = Vector3.zero;
             gun.Body.angularVelocity = Vector3.zero;
-            gun.Body.isKinematic = true;   // flota sobre el soporte hasta que la vuelvan a agarrar
+            gun.Body.isKinematic = true;
             gun.transform.SetPositionAndRotation(home, Quaternion.LookRotation(Vector3.right));
             gun.Body.position = home;
             FX.Portal(home, Quaternion.identity, 0.15f, 0.8f);
@@ -44,7 +36,6 @@ namespace RickMorty
 
         void Update()
         {
-            // la pistola real no puede quedar fuera del mundo ni del perimetro
             var gm0 = GameManager.Instance;
             bool ended = gm0 != null && gm0.IsFinished;
             if (m_RealGun != null && !m_RealGun.IsHeld && !ended)
@@ -53,7 +44,6 @@ namespace RickMorty
                 if (p.y < -3f || (p - transform.position).sqrMagnitude > 45f * 45f) ReturnGun(m_RealGun);
                 else
                 {
-                    // quieta fuera de la cinta del FBI o en un techo: inalcanzable, asi que vuelve sola a los 4 s
                     var area = PlayAreaBoundary.Instance;
                     bool lost = (p.y > 2.3f || (area != null && !area.IsInside(p)))
                         && m_RealGun.Body != null && m_RealGun.Body.linearVelocity.sqrMagnitude < 0.02f && !m_RealGun.Body.isKinematic;
@@ -62,7 +52,6 @@ namespace RickMorty
                 }
             }
             if (Done || m_Running || socket == null) return;
-            // el ensamblaje final solo existe en el juego libre (no en intro/tutorial ni despues del final)
             var gmState = GameManager.Instance != null ? GameManager.Instance.State : GameState.FreePlay;
             if (gmState != GameState.FreePlay) return;
             var gun = socket.HeldItem;
@@ -97,16 +86,14 @@ namespace RickMorty
             socket.socketActive = false;
             gun.Unavailable = true;
             gun.ForceRelease();
-            if (gun.Grab != null) gun.Grab.enabled = false;   // no se puede arrancar del aire mientras se transmuta
+            if (gun.Grab != null) gun.Grab.enabled = false;
             yield return null;
             gun.Body.isKinematic = true;
 
-            // El carton arde con chispas verdes
             var sparks = FX.Attach(gun.transform, new Color(0.4f, 1f, 0.3f), 80f, 0.03f, 1.5f, 0.5f, 0.1f);
             AudioFX.Play("zap", pos, 1f);
             PlayerRig.Instance?.HapticPattern(Hand.Both, 0.5f, 10, 0.08f, 0.05f);
 
-            // Levita y tiembla
             var start = gun.transform.position;
             float t = 0;
             while (t < 2f)
@@ -117,7 +104,6 @@ namespace RickMorty
                 yield return null;
             }
 
-            // Destello cegador
             ScreenFX.Instance?.Flash(Color.white, 0.6f, 2f);
             AudioFX.Play("explosion", pos, 0.6f, 1.5f);
             FX.FlashLight(pos, new Color(0.5f, 1f, 0.5f), 15f, 10f, 1f);
@@ -127,7 +113,7 @@ namespace RickMorty
             yield return new WaitForSeconds(0.4f);
 
             var real = ItemFactory.Spawn("pistola_portales", final, Quaternion.LookRotation(Vector3.right));
-            real.Body.isKinematic = true; // flota hasta que el jugador la agarre
+            real.Body.isKinematic = true;
             real.Grab.selectExited.AddListener(_ => real.Body.isKinematic = false);
             m_RealGun = real;
             FX.Burst(final, new Color(0.5f, 1f, 0.5f), 80, 2.5f, 0.04f, 1f, 0f, true);

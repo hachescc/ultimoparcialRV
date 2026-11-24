@@ -6,11 +6,6 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Cualquier objeto del juego que se puede agarrar y mezclar en el tazon.
-    /// Mantiene un registro global para el tazon, el guantelete, los Meeseeks, etc.
-    /// Lo usan: el tazon, el soporte final, sockets, frascos base, criaturas, Meeseeks, guantelete, basurero y GameManager.
-    /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class MixableItem : MonoBehaviour
     {
@@ -23,7 +18,6 @@ namespace RickMorty
         public Rigidbody Body { get; private set; }
         public BaseIngredient Base { get; private set; }
 
-        /// <summary>No disponible (regresando por portal, robado, siendo destruido...)</summary>
         public bool Unavailable { get; set; }
 
         public bool IsBase => Def != null && Def.IsBase;
@@ -39,7 +33,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Sostenido por una mano del jugador (no por un socket).</summary>
         public bool IsHeld
         {
             get
@@ -93,7 +86,6 @@ namespace RickMorty
             SetHighlight(false);
             if (args.interactorObject is XRSocketInteractor)
             {
-                // "clic" al encajar en un soporte (no al arrancar la escena, cuando todos los frascos se acomodan a la vez)
                 if (Time.timeSinceLevelLoad > 2f) AudioFX.Play("socket", transform.position, 0.35f);
                 return;
             }
@@ -107,7 +99,6 @@ namespace RickMorty
             if (!(args.interactorObject is XRSocketInteractor)) IgnorePlayerBody(false);
         }
 
-        /// <summary>Lo que tienes en la mano no choca con tu propio cuerpo (una espada te empujaba al caminar).</summary>
         void IgnorePlayerBody(bool ignore)
         {
             var rig = PlayerRig.Instance;
@@ -118,8 +109,6 @@ namespace RickMorty
                 if (c != null) Physics.IgnoreCollision(body, c, ignore);
         }
 
-        // ---- Resalte: el objeto que la mano puede agarrar crece un 8 %. Antes solo habia una vibracion y,
-        // con varios frascos juntos, no se sabia cual iba a agarrarse.
         Transform m_Visual;
         Vector3 m_VisualScale;
         int m_Hovers;
@@ -154,7 +143,6 @@ namespace RickMorty
             GameEvents.RaiseItemActivated(itemId);
         }
 
-        /// <summary>Fuerza a soltar el objeto (mano o socket).</summary>
         public void ForceRelease()
         {
             if (Grab != null && Grab.isSelected && Grab.interactionManager != null)
@@ -167,7 +155,6 @@ namespace RickMorty
             PlayerRig.Instance.Haptic(HoldingHand, amplitude, duration);
         }
 
-        /// <summary>Consumir en una mezcla/explosion: los base regresan a su lugar, el resto se destruye.</summary>
         public void Consume(float baseReturnDelay = 0.3f, bool dust = true)
         {
             if (Base != null)

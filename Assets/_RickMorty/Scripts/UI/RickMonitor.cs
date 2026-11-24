@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Monitor del garaje: muestra el objetivo actual, los subtitulos de Rick, el tiempo
-    /// del FBI y el puntaje. Complementa al reloj para que se lea comodo en VR.
-    /// Lo usan: GameManager (SetObjective), HudStrip (mira si el monitor esta a la vista) y RickComms (subtitulos).
-    /// </summary>
     public class RickMonitor : MonoBehaviour
     {
         public static RickMonitor Instance { get; private set; }
@@ -27,15 +22,12 @@ namespace RickMorty
             var screen = UIKit.Panel("Screen", root, new Color(0.015f, 0.05f, 0.03f, 1f), Vector2.zero, Vector2.one, new Vector2(18, 18), new Vector2(-18, -18));
             var s = screen.transform;
 
-            // Tamanos pensados para leerse a ~1.7 m (objetivo y subtitulos por encima de 1.2 grados de altura de letra).
-            // Antes: objetivo 40 px y subtitulo 34 px = 0.7-0.8 grados, por debajo del minimo legible en Quest.
             m_Title = UIKit.Line("Title", s, "COMUNICADOR", 34, UIKit.Neon, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.865f), new Vector2(0.42f, 1f), 22, 6);
             UIKit.AsTitle(m_Title);
             m_Status = UIKit.Line("Status", s, "", 52, Color.white, TextAlignmentOptions.MidlineRight, new Vector2(0.4f, 0.855f), new Vector2(1f, 1f), 22, 2);
             m_Status.fontStyle = FontStyles.Bold;
             UIKit.Panel("Sep", s, new Color(0.3f, 0.9f, 0.4f, 0.45f), new Vector2(0, 0.85f), new Vector2(1, 0.855f), new Vector2(22, 0), new Vector2(-22, 0), false);
 
-            // el titulo "OBJETIVO" va dentro del mismo texto (como linea aparte salia una franja rara en vez de letras)
             m_Objective = UIKit.Block("Objective", s, "", 40, 56, Color.white, new Vector2(0, 0.455f), new Vector2(1, 0.84f), 22);
 
             var radio = UIKit.Panel("RadioBox", s, new Color(0.3f, 0.75f, 1f, 0.1f), new Vector2(0, 0.025f), new Vector2(1, 0.44f), new Vector2(14, 0), new Vector2(-14, 0));
@@ -75,7 +67,7 @@ namespace RickMorty
             bool showTimer = t != null && (t.Running || t.Remaining < t.duration);
             int secs = showTimer ? Mathf.CeilToInt(t.Remaining) : -1;
             int pts = s != null ? s.Score : 0;
-            if (secs == m_LastSecs && pts == m_LastScore) return;   // solo reescribe cuando cambia (sin basura por cuadro)
+            if (secs == m_LastSecs && pts == m_LastScore) return;
             m_LastSecs = secs; m_LastScore = pts;
             string timer = showTimer ? "FBI " + GameTimer.Format(t.Remaining) + "   " : "";
             m_Status.text = timer + (s != null ? s.Score + " pts" : "");

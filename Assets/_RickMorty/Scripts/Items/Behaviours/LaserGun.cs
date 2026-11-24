@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Pistola laser: dispara un rayo que rebota hasta 3 veces en las paredes.
-    /// Lo usan: ItemFactory (behaviour "laser").
-    /// </summary>
     public class LaserGun : ItemBehaviour
     {
         public int maxBounces = 3;

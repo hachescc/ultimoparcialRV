@@ -5,18 +5,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Flujo principal del juego (maquina de estados):
-    /// Intro, Onboarding (controles), Tutorial (3 mezclas de Rick), Rick se va,
-    /// Juego libre con temporizador del FBI y eventos inesperados, Ensamblaje de la Pistola de
-    /// Portales, Portal final, Resultados y creditos. Fallo: el FBI entra si se acaba el tiempo.
-    /// Lo usan: casi todos los sistemas (tazon, soporte final, puntaje, pausa, NPC) por GameManager.Instance.
-    /// </summary>
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance { get; private set; }
 
-        [Header("Sistemas")]
         public PlayerRig rig;
         public RickComms comms;
         public RickMonitor monitor;
@@ -29,7 +21,6 @@ namespace RickMorty
         public EventDirector eventDirector;
         public EndScreen endScreen;
 
-        [Header("Escena")]
         public GarageDoor garageDoor;
         public RickNPC rickNPC;
         public RickHologram rickHologram;
@@ -40,16 +31,12 @@ namespace RickMorty
         public Transform[] quantumSpots;
         public AudioSource music;
 
-        [Header("Pruebas")]
-        [Tooltip("Saltar intro y tutorial (directo al juego libre)")]
         public bool skipTutorial;
 
         public GameState State { get; private set; } = GameState.Intro;
 
-        /// <summary>La partida ya termino (victoria o atrapado por el FBI).</summary>
         public bool IsFinished => State == GameState.Ending || State == GameState.GameOver;
 
-        /// <summary>Una mision del tutorial: que hay que fabricar, que se muestra y que dice Rick al fallar o acertar.</summary>
         class Mission
         {
             public string target, objective, failLine, successLine, ensureItem;
@@ -64,7 +51,7 @@ namespace RickMorty
         };
 
         int m_MissionIndex = -1;
-        int m_MissionResult; // 0 = esperando, 1 = exito, -1 = fallo
+        int m_MissionResult;
         bool m_SkipRequested;
         bool m_GunCreated;
         GameObject m_EndPortal;
@@ -80,8 +67,8 @@ namespace RickMorty
             GameDatabase.Load();
             SaveSystem.Load();
             CardboardPortalGun.ResetStatics();
-            Consumable.ResetStatics();   // "Jugar de nuevo" no debe heredar estado de la partida anterior
-            AudioFX.Prewarm();                    // sintetiza los sonidos ahora (pantalla en negro) y no en plena explosion
+            Consumable.ResetStatics();
+            AudioFX.Prewarm();
             HudStrip.Ensure();
             StartCoroutine(CoObjectiveReminders());
         }
@@ -97,7 +84,6 @@ namespace RickMorty
 
         void OnDisable()
         {
-            // por si se reinicia en medio del tutorial (los eventos de GameEvents son static)
             GameEvents.ItemGrabbed -= OnOnboardingGrab;
             GameEvents.ItemActivated -= OnBoxActivated;
             if (timer != null)
@@ -115,29 +101,22 @@ namespace RickMorty
 
         void SetState(GameState s)
         {
-            // una vez terminado (victoria o FBI) nada puede devolver el juego a otro estado
             if (m_Finished && s != GameState.Ending && s != GameState.GameOver) return;
             State = s;
             GameEvents.RaiseStateChanged(s);
         }
 
-        /// <summary>Devuelve el texto del visor o el del PC (teclado y mouse) segun como se este jugando.</summary>
         public static string VrOrPc(string visor, string pc) => EditorSimulatorToggle.SimulatorOn ? pc : visor;
 
         void SetObjective(string text)
         {
             text = text.Replace("{MEZCLAR}", VrOrPc("toca con la mano el botón rojo <b>MEZCLAR</b>", "apunta al botón rojo <b>MEZCLAR</b> y presiona <b>G</b>"));
             if (monitor != null) monitor.SetObjective(text);
-            if (HudStrip.Instance != null) HudStrip.Instance.ShowObjective(text);   // lejos del monitor el objetivo aparece unos segundos delante del jugador
+            if (HudStrip.Instance != null) HudStrip.Instance.ShowObjective(text);
         }
 
         bool m_WaitingBoxUse;
-        /// <summary>En el tutorial, mientras Rick espera que uses la Caja de Meeseeks, todavia no toca mezclar.</summary>
         public bool MixBlockedNow => State == GameState.Tutorial && m_WaitingBoxUse;
-
-        // =====================================================================
-        //  Flujo principal
-        // =====================================================================
 
         IEnumerator CoMain()
         {
@@ -175,7 +154,6 @@ namespace RickMorty
         {
             SetState(GameState.Onboarding);
 
-            // 1. Mirar el reloj
             if (comms != null) comms.Say("onb_watch");
             SetObjective(VrOrPc("Levanta tu <b>muñeca izquierda</b> y mira el Reloj Multiversal.",
                 "Mira hacia abajo a tu <b>mano izquierda</b> (mantén <b>clic derecho</b> y mueve el mouse) para ver el Reloj Multiversal."));
@@ -183,7 +161,6 @@ namespace RickMorty
             if (m_SkipRequested) yield break;
             Good();
 
-            // 2. Caminar
             if (comms != null) comms.Say("onb_move");
             SetObjective(VrOrPc("Usa el <b>joystick izquierdo</b> para caminar hasta el <b>círculo verde</b>.",
                 "Camina con <b>W A S D</b> hasta el <b>círculo verde</b>."));
@@ -193,7 +170,6 @@ namespace RickMorty
             if (m_SkipRequested) yield break;
             Good();
 
-            // 3. Girar
             if (comms != null) comms.Say("onb_turn");
             SetObjective(VrOrPc("Usa el <b>joystick derecho</b> para girar. Mira a tu alrededor.",
                 "Mantén <b>clic derecho</b> y mueve el mouse para mirar a tu alrededor."));
@@ -210,7 +186,6 @@ namespace RickMorty
             if (m_SkipRequested) yield break;
             Good();
 
-            // 4. Agarrar
             if (comms != null) comms.Say("onb_grab");
             SetObjective(VrOrPc("Vuelve a la mesa y agarra un frasco con el botón <b>Grip</b> (el del dedo medio).",
                 "Vuelve a la mesa, apunta a un frasco y presiona <b>G</b> para agarrarlo (G otra vez lo suelta)."));
@@ -223,10 +198,9 @@ namespace RickMorty
             yield return WaitForRick();
         }
 
-        bool m_GrabbedBase;   // onboarding: el jugador ya agarro un frasco de ingrediente base
-        bool m_BoxUsed;       // tutorial: el jugador ya uso la Caja de Meeseeks
+        bool m_GrabbedBase;
+        bool m_BoxUsed;
 
-        /// <summary>Onboarding, paso "caminar": la cabeza del jugador llego al circulo verde.</summary>
         bool PlayerReachedMarker()
         {
             if (onboardingMarker == null || rig == null) return true;
@@ -234,14 +208,12 @@ namespace RickMorty
             return d.magnitude < 0.55f;
         }
 
-        /// <summary>Onboarding, paso "agarrar": solo cuenta si lo agarrado es un ingrediente base.</summary>
         void OnOnboardingGrab(string id)
         {
             var d = GameDatabase.GetItem(id);
             if (d != null && d.IsBase) m_GrabbedBase = true;
         }
 
-        /// <summary>Tutorial: el jugador apreto el gatillo con la Caja de Meeseeks.</summary>
         void OnBoxActivated(string id)
         {
             if (id == "bola_meeseeks") m_BoxUsed = true;
@@ -260,8 +232,6 @@ namespace RickMorty
                 {
                     EnsureMissionItem(mission);
                     m_MissionResult = 0;
-                    // revisa cada 2 s que el objeto de la mision siga existiendo (si lo botan a la basura
-                    // o se lo lleva un Meeseeks, la mision 3 quedaba imposible)
                     float nextEnsure = Time.time + 2f;
                     yield return WaitUntilOrSkip(() =>
                     {
@@ -274,7 +244,6 @@ namespace RickMorty
                     if (comms != null) comms.Say(mission.failLine, true);
                     if (mission.respawnOnFail)
                     {
-                        // "Te arrastre a una dimension identica": pantalla blanca y reaparicion
                         if (ScreenFX.Instance != null) ScreenFX.Instance.SetFade(Color.white, 1f);
                         yield return new WaitForSeconds(1.2f);
                         if (rig != null && playerStart != null) rig.TeleportTo(playerStart.position, playerStart.forward);
@@ -288,7 +257,6 @@ namespace RickMorty
 
                 if (m_MissionIndex == 0)
                 {
-                    // Onboarding del gatillo: usar la caja de Meeseeks recien creada
                     yield return WaitForRick();
                     if (comms != null) comms.Say("onb_trigger");
                     SetObjective(VrOrPc("Agarra la <b>Caja de Meeseeks</b> y presiona el <b>gatillo</b> (índice) para usarla.",
@@ -333,7 +301,7 @@ namespace RickMorty
             if (corkBoard != null) corkBoard.AddNote("META: Pistola de Portales\n= Portal Gun de cartón\n+ Cristales + ???");
             if (timer != null) timer.StartTimer();
             if (eventDirector != null) eventDirector.Begin();
-            m_NextHintTime = Time.time + 60f;   // primera pista al minuto sin avanzar (antes 90 s)
+            m_NextHintTime = Time.time + 60f;
             m_LastDiscoveryCount = score != null ? score.Discovered.Count : 0;
             if (music != null && music.clip != null && !music.isPlaying) music.Play();
 
@@ -353,11 +321,6 @@ namespace RickMorty
             }
         }
 
-        // =====================================================================
-        //  Mezclas
-        // =====================================================================
-
-        /// <summary>El tazon pregunta si la mezcla esta permitida (en el tutorial solo vale la pedida).</summary>
         public bool EvaluateMix(RecipeDef recipe, List<string> ids)
         {
             if (State == GameState.Tutorial && m_MissionIndex >= 0 && m_MissionIndex < m_Missions.Count)
@@ -377,7 +340,6 @@ namespace RickMorty
                 if (comms != null) comms.Say("explosion_random", true);
                 return;
             }
-            // Comentario de Rick si existe una linea "found_<id>"
             var line = GameDatabase.GetLine("found_" + recipe.result);
             if (line != null && comms != null) comms.Say("found_" + recipe.result);
             RevealProgressNotes(recipe.result);
@@ -400,10 +362,6 @@ namespace RickMorty
             ItemFactory.Spawn(m.ensureItem, p + Vector3.up * 0.15f, Quaternion.identity);
         }
 
-        // =====================================================================
-        //  Pistas
-        // =====================================================================
-
         public string CurrentHintText()
         {
             var s = score;
@@ -424,14 +382,12 @@ namespace RickMorty
                 comms.SayText(hint);
             }
             if (corkBoard != null) corkBoard.AddNote("PISTA: " + hint);
-            // la pista tambien sale delante del jugador (antes solo la decia Rick y quedaba en el corcho)
             if (HudStrip.Instance != null) HudStrip.Instance.Notify("<size=70%>PISTA DE RICK</size>\n" + hint, new Color(1f, 0.85f, 0.35f), 9f);
             AudioFX.Play2D("watch_ping", 0.6f);
         }
 
         float m_NextAskedHint;
 
-        /// <summary>El jugador pide una pista desde el menu de pausa. Cuesta pocos puntos para que no sea gratis.</summary>
         public bool RequestHint()
         {
             if (State != GameState.FreePlay || Time.time < m_NextAskedHint) return false;
@@ -442,7 +398,6 @@ namespace RickMorty
             return true;
         }
 
-        /// <summary>En el onboarding y el tutorial: si el jugador se queda quieto, se le recuerda que hacer.</summary>
         IEnumerator CoObjectiveReminders()
         {
             while (!m_Finished)
@@ -453,10 +408,6 @@ namespace RickMorty
             }
         }
 
-        // =====================================================================
-        //  Final
-        // =====================================================================
-
         public void StopMusic()
         {
             if (music != null) music.Stop();
@@ -464,7 +415,7 @@ namespace RickMorty
 
         public void OnPortalGunCreated(MixableItem gun)
         {
-            if (m_GunCreated || m_Finished) return;   // si el FBI ya entro durante la transmutacion, no revive la partida
+            if (m_GunCreated || m_Finished) return;
             m_GunCreated = true;
             SetState(GameState.PortalGunReady);
             GameEvents.RaiseBonus("¡Pistola de Portales creada!", 1000);
@@ -509,7 +460,6 @@ namespace RickMorty
             bool wall = Mathf.Abs(normal.y) < 0.5f;
             if (!wall && normal.y < 0f)
             {
-                // techo: no se puede cruzar. Portal de adorno y Rick lo dice (antes abria un portal final inalcanzable)
                 FX.Portal(point + normal * 0.03f, Quaternion.LookRotation(-normal), 0.45f, 2.5f);
                 if (comms != null) comms.SayText("¡En el techo no, Morty! Dispárale a una pared... o al piso.");
                 return;
@@ -530,8 +480,6 @@ namespace RickMorty
             trigger.size = new Vector3(1.6f, 2.2f, 0.8f);
             if (!wall)
             {
-                // portal en el piso: el disco queda acostado (su -Z local es "arriba"). La zona de victoria debe subir
-                // hasta la cabeza de quien se para encima; antes solo cubria hasta 45 cm y no pasaba nada.
                 trigger.size = new Vector3(1.6f, 1.6f, 2.4f);
                 trigger.center = new Vector3(0, 0, -1.0f);
             }
@@ -573,7 +521,6 @@ namespace RickMorty
             if (timer != null) timer.Stop();
             if (eventDirector != null) eventDirector.Stop();
             if (PauseMenu.Instance != null) PauseMenu.Instance.Close();
-            // fuera criaturas y Meeseeks: el Tio Steve podia abrazarte encima de la pantalla de resultados
             foreach (var c in FindObjectsByType<CreatureMover>(FindObjectsSortMode.None))
                 if (c != null && c.GetComponent<RickCaleno>() == null) Destroy(c.gameObject);
             foreach (var m in FindObjectsByType<MeeseeksNPC>(FindObjectsSortMode.None))
@@ -614,7 +561,7 @@ namespace RickMorty
         RunRecord BuildRunRecord(bool victory)
         {
             int finalScore = score != null ? score.Score : 0;
-            if (victory && timer != null) finalScore += Mathf.RoundToInt(timer.Remaining * 2f); // bono por tiempo restante
+            if (victory && timer != null) finalScore += Mathf.RoundToInt(timer.Remaining * 2f);
             return new RunRecord
             {
                 date = DateTime.Now.ToString("yyyy-MM-dd HH:mm"),
@@ -628,10 +575,6 @@ namespace RickMorty
                 easterEggs = score != null ? score.EasterEggs.Count : 0,
             };
         }
-
-        // =====================================================================
-        //  Utilidades / pruebas
-        // =====================================================================
 
         void Good()
         {
@@ -654,7 +597,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Espera a que Rick termine de hablar (o a que el jugador salte el tutorial).</summary>
         IEnumerator WaitForRick()
         {
             while (!m_SkipRequested && comms != null && comms.IsSpeaking) yield return null;

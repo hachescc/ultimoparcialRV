@@ -6,30 +6,20 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Sistema de dialogos de Rick (radio del reloj). Cola de lineas con subtitulos por
-    /// fragmentos, audio opcional (Resources/Audio/Rick/&lt;id&gt;), pitido + vibracion en la
-    /// muneca y el "modo perro" del casco de Snowball.
-    /// Lo usan: GameManager, el tazon, los NPC que hablan, los eventos y el monitor/franja (SubtitleChanged).
-    /// </summary>
     public class RickComms : MonoBehaviour
     {
         public static RickComms Instance { get; private set; }
 
-        [Tooltip("Desde donde suena la voz (por defecto el reloj de la muñeca)")]
         public Transform voiceSource;
-        [Tooltip("Segundos por caracter para calcular la duracion de un subtitulo")]
         public float secondsPerChar = 0.055f;
         public float minChunkSeconds = 2f;
 
-        /// <summary>(hablante, texto). texto null = limpiar subtitulo.</summary>
         public event Action<string, string> SubtitleChanged;
 
         public bool IsSpeaking => m_Current != null || m_Queue.Count > 0;
         public bool DogMode => Time.time < m_DogUntil;
         public Transform SpeakerOverride { get; set; }
 
-        /// <summary>Una linea en la cola de dialogos (id para el audio, hablante y texto).</summary>
         class Entry
         {
             public string id;
@@ -57,11 +47,9 @@ namespace RickMorty
 
         public void EnableDogMode(float seconds) => m_DogUntil = Time.time + seconds;
 
-        /// <summary>Dice una linea del archivo dialogues.json por id.</summary>
         public void Say(string id, bool interrupt = false)
         {
             var line = GameDatabase.GetLine(id);
-            // En el PC se usa la version "_pc" de la linea si existe (habla de teclas en vez de joysticks)
             if (EditorSimulatorToggle.SimulatorOn && GameDatabase.GetLine(id + "_pc") != null)
                 line = GameDatabase.GetLine(id + "_pc");
             if (line == null)
@@ -131,7 +119,6 @@ namespace RickMorty
                 clip = Resources.Load<AudioClip>("Audio/Rick/" + e.id);
             }
 
-            // Pitido + vibracion del reloj
             var src = SpeakerOverride != null ? SpeakerOverride : voiceSource;
             if (SpeakerOverride == null)
             {
@@ -163,8 +150,6 @@ namespace RickMorty
                     ? clipLen * chunk.Length / Mathf.Max(1, total)
                     : Mathf.Max(minChunkSeconds, chunk.Length * secondsPerChar);
                 float t = 0;
-                // Sin grabaciones de voz, cada fragmento arranca con una rafaga corta tipo radio desde donde esta Rick
-                // (antes, en la intro y el tutorial no sonaba NADA y el jugador no notaba que habia una linea nueva).
                 float nextBlip = clip == null && !dog ? 0f : float.MaxValue;
                 int blips = 0;
                 float voicePitch = speaker == "Rick" ? 1f : 1.55f;
@@ -183,8 +168,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Divide un texto largo en fragmentos de ~85 caracteres por oraciones (y por comas si una oracion es muy larga):
-        /// asi caben con letra grande en el monitor y en la franja de avisos.</summary>
         static List<string> Chunk(string text, int max = 85)
         {
             var result = new List<string>();
@@ -196,7 +179,6 @@ namespace RickMorty
                 sb.Append(text[i]);
                 char c = text[i];
                 bool end = (c == '.' || c == '!' || c == '?' || c == ')') && (i + 1 >= text.Length || text[i + 1] == ' ');
-                // oraciones largas: tambien se cortan en la coma o los dos puntos (si ya llevan buen tramo)
                 if (!end && (c == ',' || c == ';' || c == ':') && sb.Length > 55 && i + 1 < text.Length && text[i + 1] == ' ') end = true;
                 if (end)
                 {

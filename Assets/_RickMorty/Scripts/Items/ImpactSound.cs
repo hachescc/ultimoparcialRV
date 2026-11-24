@@ -2,13 +2,8 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Sonido de impacto segun el material (metalico, carnoso, cristal, madera).
-    /// Lo usan: ItemFactory (se lo pone a todo objeto y elige el material).
-    /// </summary>
     public class ImpactSound : MonoBehaviour
     {
-        /// <summary>Material del objeto, que decide el sonido del golpe.</summary>
         public enum Kind { Wood, Metal, Flesh, Glass }
 
         public Kind kind = Kind.Wood;

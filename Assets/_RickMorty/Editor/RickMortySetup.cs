@@ -15,10 +15,6 @@ using UnityEngine.XR.OpenXR.Features.MetaQuestSupport;
 
 namespace RickMorty.EditorTools
 {
-    /// <summary>
-    /// Paso 1: configura el proyecto (samples de XRI, recursos de TextMeshPro, OpenXR para Quest,
-    /// Player Settings de Android y assets base: materiales y registro de modelos).
-    /// </summary>
     public static class RickMortySetup
     {
         public const string Root = "Assets/_RickMorty";
@@ -40,7 +36,6 @@ namespace RickMorty.EditorTools
             Debug.Log("[RickMorty] Proyecto configurado. Ahora ejecuta 'Rick y Morty/2. Construir escena del garaje'.");
         }
 
-        /// <summary>Entrada para modo batch: Unity -batchmode -executeMethod RickMorty.EditorTools.RickMortySetup.BatchSetup</summary>
         public static void BatchSetup()
         {
             try { SetupProject(); }
@@ -48,15 +43,6 @@ namespace RickMorty.EditorTools
             EditorApplication.Exit(0);
         }
 
-        // ------------------------------------------------------------------
-
-        /// <summary>
-        /// Fuentes del juego (OFL, Google Fonts):
-        ///  - Texto: Chakra Petch SemiBold (+ Bold real para &lt;b&gt;) — aire de aparato de laboratorio, legible en VR.
-        ///  - Titulos: Rubik Wet Paint (verde que chorrea, tipo baba de portal). Va en Resources/Fonts &amp; Materials
-        ///    para usarla desde codigo (UIKit.AsTitle) o con la etiqueta &lt;font="Titulos SDF"&gt;.
-        /// Crea los Font Assets una vez y deja el de texto como fuente por defecto de TMP.
-        /// </summary>
         [MenuItem("Rick y Morty/Aplicar fuente del juego", priority = 21)]
         public static void SetupFont()
         {
@@ -71,21 +57,17 @@ namespace RickMorty.EditorTools
                 title.fallbackFontAssetTable.Add(fa);
                 EditorUtility.SetDirty(title);
             }
-            // Rubik Wet Paint no tiene negrita: si un texto en negrita usaba la fuente de titulos, TMP caia a la
-            // fuente de respaldo (Chakra Petch Bold) y el titulo perdia su estilo. Su "negrita" es ella misma.
             if (title != null && title.fontWeightTable != null && title.fontWeightTable.Length > 7 && title.fontWeightTable[7].regularTypeface != title)
             {
                 title.fontWeightTable[7].regularTypeface = title;
                 EditorUtility.SetDirty(title);
             }
-            // Peso Bold real para <b> (sin esto TMP engorda la letra y se "come" el espacio anterior)
             var bold = LoadOrCreateFont(Root + "/Fonts/ChakraPetch-Bold.ttf", Root + "/Fonts/Chakra Petch Bold SDF.asset", "Chakra Petch Bold SDF");
             if (bold != null && fa.fontWeightTable != null && fa.fontWeightTable.Length > 7 && fa.fontWeightTable[7].regularTypeface != bold)
             {
                 fa.fontWeightTable[7].regularTypeface = bold;
                 EditorUtility.SetDirty(fa);
             }
-            // Fallback a la fuente original de TMP para cualquier simbolo que Fredoka no tenga
             var liberation = AssetDatabase.LoadAssetAtPath<TMPro.TMP_FontAsset>("Assets/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset");
             if (liberation != null && (fa.fallbackFontAssetTable == null || !fa.fallbackFontAssetTable.Contains(liberation)))
             {
@@ -119,7 +101,6 @@ namespace RickMorty.EditorTools
             AssetDatabase.AddObjectToAsset(fa.atlasTextures[0], fa);
             fa.material.name = name + " Material";
             AssetDatabase.AddObjectToAsset(fa.material, fa);
-            // caracteres que usa el juego (se pre-cargan para no generar el atlas en el visor)
             fa.TryAddCharacters(" !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~¡¿áéíóúüñÁÉÍÓÚÜÑ·…–—“”‘’×°", out _);
             EditorUtility.SetDirty(fa);
             return fa;
@@ -202,8 +183,6 @@ namespace RickMorty.EditorTools
         {
             var f = settings.GetFeature<T>();
             if (f != null) { f.enabled = true; EditorUtility.SetDirty(f); }
-            // Antes fallaba en silencio: el repo quedo con Meta Quest Support y los perfiles Touch APAGADOS
-            // (el APK habria salido sin controles). Si pasa, hay que volver a correr el menu 1.
             else Debug.LogError($"[RickMorty] OpenXR: no se encontro la feature {typeof(T).Name}. Vuelve a ejecutar 'Rick y Morty/1. Configurar proyecto' y revisa Project Settings > XR Plug-in Management > OpenXR.");
         }
 
@@ -211,7 +190,7 @@ namespace RickMorty.EditorTools
         {
             try
             {
-                PlayerSettings.runInBackground = true;   // validacion de XR: sin esto la imagen queda pegada a la cabeza al abrir el menu del sistema
+                PlayerSettings.runInBackground = true;
                 PlayerSettings.companyName = "UAO Immersive Solutions";
                 PlayerSettings.productName = "Rick y Morty - Mezclas de otra dimension";
                 PlayerSettings.colorSpace = ColorSpace.Linear;
@@ -257,10 +236,6 @@ namespace RickMorty.EditorTools
             EditorUtility.SetDirty(lib);
         }
 
-        /// <summary>
-        /// Llena el registro id → modelo. Los GLB optimizados viven en Models/Items/&lt;id&gt;.glb
-        /// (los genera _Tools/blender). Un modelo asignado a mano no se sobrescribe.
-        /// </summary>
         [MenuItem("Rick y Morty/Actualizar registro de modelos", priority = 20)]
         public static void CreateVisualRegistry()
         {
@@ -282,11 +257,9 @@ namespace RickMorty.EditorTools
                 e.scale = scale;
                 e.generateBoxCollider = true;
             }
-            // entradas huerfanas (ids viejos que ya no existen, p. ej. uno que quedo con tilde): fuera
             reg.entries.RemoveAll(e => e == null || (e.prefab == null && GameDatabase.GetItem(e.id) == null));
             foreach (var def in GameDatabase.Items)
                 Link(def.id, $"{Root}/Models/Items/{def.id}.glb");
-            // Modelos usados por codigo que no son items
             Link("meeseeks_npc", $"{Root}/Models/Env/meeseeks_npc.glb");
             Link("rick_caleno", $"{Root}/Models/Env/rick.glb", 0.15f / 1.75f);
             Link("hombre_eyeholes", $"{Root}/Models/Env/hombre_eyeholes.glb");
@@ -297,7 +270,6 @@ namespace RickMorty.EditorTools
             Debug.Log($"[RickMorty] Registro de modelos: {reg.entries.Count(e => e.prefab != null)}/{reg.entries.Count} con modelo.");
         }
 
-        /// <summary>Durante la construccion de la escena, guarda cada material generado como asset.</summary>
         public static void BeginPersistMaterials()
         {
             Directory.CreateDirectory(GenMatDir);

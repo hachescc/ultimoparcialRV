@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// La Pistola de Portales real. Al agarrarla por primera vez se dispara la escena final.
-    /// Gatillo: abre un portal donde apuntes. Si apuntas a un objeto suelto lo absorbe y lo
-    /// escupe por un portal en el techo (ciclo infinito de objetos cayendo).
-    /// Lo usan: ItemFactory (behaviour "portal_gun"; la pide FinalAssemblyStation) y GameManager (al agarrarla empieza el final).
-    /// </summary>
     public class RealPortalGun : ItemBehaviour
     {
         public float range = 30f;

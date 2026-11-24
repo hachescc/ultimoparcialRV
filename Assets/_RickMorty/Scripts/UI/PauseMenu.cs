@@ -8,11 +8,6 @@ using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Menu de pausa / opciones (boton Menu del control izquierdo, o tecla P en el simulador).
-    /// Opciones de confort: vineta dinamica y giro suave/por pasos.
-    /// Lo usan: el jugador (boton Menu o tecla P) y GameManager, que la cierra al terminar la partida. La crea el builder de escena.
-    /// </summary>
     public class PauseMenu : MonoBehaviour
     {
         public static PauseMenu Instance { get; private set; }
@@ -32,7 +27,7 @@ namespace RickMorty
             bool given = GameManager.Instance != null && GameManager.Instance.RequestHint();
             if (!given) HudStrip.Instance?.Notify("Rick no te va a dar otra pista todavía", UIKit.Cyan, 3f);
         }
-        int m_Confirm;            // 1 = reiniciar, 2 = salir (esperando el segundo toque)
+        int m_Confirm;
         float m_ConfirmUntil;
         const string RestartText = "Reiniciar partida", QuitText = "Salir del juego";
 
@@ -43,8 +38,6 @@ namespace RickMorty
             return rt;
         }
 
-        /// <summary>Reparte los botones visibles de arriba hacia abajo: 6 cm de alto y 3 cm de separacion
-        /// (antes 1 cm: "Salir" quedaba pegado a "Reiniciar" y era facil equivocarse con el rayo).</summary>
         void Layout()
         {
             const float bh = 0.074f, gap = 0.038f;
@@ -67,7 +60,6 @@ namespace RickMorty
 
         void Update()
         {
-            // la confirmacion de reiniciar/salir caduca sola (tiempo real: el juego esta en pausa)
             if (m_Confirm != 0 && Time.unscaledTime > m_ConfirmUntil) ResetConfirm();
         }
 
@@ -78,7 +70,6 @@ namespace RickMorty
             if (m_QuitLabel != null) m_QuitLabel.text = QuitText;
         }
 
-        /// <summary>Primer toque: pide confirmar. Segundo toque (antes de 4 s): ejecuta.</summary>
         bool Confirmed(int what, TextMeshProUGUI label)
         {
             if (m_Confirm == what && Time.unscaledTime <= m_ConfirmUntil) return true;
@@ -90,8 +81,6 @@ namespace RickMorty
         }
 
 #if !UNITY_EDITOR
-        // En el visor: si aparece el menu del sistema o se quitan el visor, el juego se pausa solo
-        // (antes el reloj del FBI y los eventos seguian corriendo sin que el jugador viera nada).
         void OnApplicationFocus(bool focus) { if (!focus && !IsOpen) Open(); }
         void OnApplicationPause(bool paused) { if (paused && !IsOpen) Open(); }
 #endif
@@ -108,7 +97,7 @@ namespace RickMorty
             m_Toggle.AddBinding("<XRController>{LeftHand}/menu");
             m_Toggle.AddBinding("<Keyboard>/p");
             m_Toggle.performed += _ => Toggle();
-            if (GetComponent<ControlsPanel>() == null) gameObject.AddComponent<ControlsPanel>();   // pantalla de controles (boton Y / tecla B)
+            if (GetComponent<ControlsPanel>() == null) gameObject.AddComponent<ControlsPanel>();
             Build();
         }
 
@@ -117,20 +106,19 @@ namespace RickMorty
         void OnDestroy()
         {
             m_Toggle.Dispose();
-            Time.timeScale = 1f;   // reiniciar desde la pausa no debe dejar el juego congelado
+            Time.timeScale = 1f;
         }
 
         void Build()
         {
-            // Esfera oscura alrededor de la cabeza: atenua el mundo para que se sienta que es un menu
             m_Dim = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             Destroy(m_Dim.GetComponent<Collider>());
             m_Dim.name = "AtenuadorPausa";
             m_Dim.transform.SetParent(transform, false);
-            m_Dim.transform.localScale = Vector3.one * 0.5f;   // radio 25 cm: queda delante de TODO el mundo (la mesa esta a < 1 m)
+            m_Dim.transform.localScale = Vector3.one * 0.5f;
             var dr = m_Dim.GetComponent<Renderer>();
             dr.sharedMaterial = MatLib.Transparent(new Color(0.01f, 0.02f, 0.04f, 0.72f));
-            dr.sortingOrder = 40;   // por encima de los paneles del mundo, por debajo del menu (50)
+            dr.sortingOrder = 40;
             m_Dim.SetActive(false);
 
             m_Canvas = UIKit.WorldCanvas("PauseCanvas", transform, new Vector2(700, 820), 0.001f, true);
@@ -143,7 +131,6 @@ namespace RickMorty
                 new Vector2(0, 0.895f), new Vector2(1, 1), Vector2.zero, Vector2.zero);
             UIKit.AsTitle(title);
 
-            // Las filas se acomodan en Layout() segun cuales esten visibles (el boton de saltar solo existe en el tutorial).
             Row(UIKit.Button("Resume", root, "Reanudar", Close, Vector2.zero, Vector2.one, fontSize: 30f));
             Row(UIKit.Button("Controls", root, "Ver controles", () => ControlsPanel.Instance?.Open(), Vector2.zero, Vector2.one, color: new Color(0.2f, 0.42f, 0.25f, 0.95f), fontSize: 30f));
             m_SkipRow = Row(UIKit.Button("Skip", root, "Saltar la explicación de Rick", SkipTutorial, Vector2.zero, Vector2.one, color: new Color(0.42f, 0.3f, 0.55f, 0.95f), fontSize: 30f));
@@ -192,13 +179,10 @@ namespace RickMorty
             if (gm != null && gm.IsFinished) return;
             RefreshLabels();
             ResetConfirm();
-            // el boton de saltar solo tiene sentido mientras Rick explica
             if (m_SkipRow != null)
                 m_SkipRow.gameObject.SetActive(gm != null && (gm.State == GameState.Intro || gm.State == GameState.Onboarding || gm.State == GameState.Tutorial || gm.State == GameState.RickLeaving));
-            // pedir pista solo en el juego libre (en el tutorial Rick ya dice que hacer)
             if (m_HintRow != null) m_HintRow.gameObject.SetActive(gm != null && gm.State == GameState.FreePlay);
             Layout();
-            // un destello o fundido congelado por la pausa taparia el menu: se limpian
             ScreenFX.Instance?.ClearForPause();
             m_Canvas.gameObject.SetActive(true);
             AudioFX.Play2D("button", 0.4f, 0.8f);
@@ -207,19 +191,16 @@ namespace RickMorty
                 var f = head.forward; f.y = 0;
                 if (f.sqrMagnitude < 0.01f) f = Vector3.forward;
                 f.Normalize();
-                // si hay una pared o un estante a menos de 90 cm, el panel se acerca para no quedar metido adentro
                 float dist = 0.9f;
                 if (Physics.SphereCast(head.position, 0.2f, f, out var hit, 1.2f, ~0, QueryTriggerInteraction.Ignore))
                     dist = Mathf.Clamp(hit.distance - 0.05f, 0.55f, 0.9f);
                 m_Canvas.transform.position = head.position + f * dist;
                 m_Canvas.transform.rotation = Quaternion.LookRotation(f, Vector3.up);
-                m_Dim.transform.SetParent(head, false);   // sigue la cabeza mientras la pausa este abierta
+                m_Dim.transform.SetParent(head, false);
                 m_Dim.transform.localPosition = Vector3.zero;
             }
             m_Dim.SetActive(true);
             if (GameTimer.Instance != null) GameTimer.Instance.Paused = true;
-            // pausa real: se congela el mundo (eventos, criaturas, fisica, locomocion). La UI XR sigue
-            // respondiendo porque los interactores corren en Update, no dependen de deltaTime.
             Time.timeScale = 0f;
         }
 
@@ -253,7 +234,6 @@ namespace RickMorty
             RefreshLabels();
         }
 
-        /// <summary>Cambia el giro del control derecho (suave o por pasos) en el ControllerInputActionManager de los Starter Assets.</summary>
         void ApplyTurnMode(bool smooth)
         {
             if (rightControllerRoot == null) return;

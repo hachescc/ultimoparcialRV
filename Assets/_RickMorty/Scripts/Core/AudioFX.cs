@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Audio espacial con pool de AudioSources. Cada sonido se busca primero en
-    /// Resources/Audio/SFX/&lt;nombre&gt; (para que el equipo ponga sonidos reales) y si no
-    /// existe se sintetiza un placeholder procedural.
-    /// Lo usan: practicamente todos los scripts que suenan (objetos, NPC, UI, eventos).
-    /// </summary>
     public static class AudioFX
     {
         const int PoolSize = 20;
@@ -28,8 +22,6 @@ namespace RickMorty
                 go.transform.SetParent(s_Root);
                 var src = go.AddComponent<AudioSource>();
                 src.playOnAwake = false;
-                // caida logaritmica: lo cercano suena claramente mas fuerte que lo lejano
-                // (con la lineal 1-25 m, un vidrio a 5 m sonaba al 83 % y no se ubicaba de donde venia)
                 src.rolloffMode = AudioRolloffMode.Logarithmic;
                 src.minDistance = 0.8f;
                 src.maxDistance = 14f;
@@ -45,8 +37,6 @@ namespace RickMorty
             "bubbles", "hum", "whoosh", "burp", "laser", "shot", "sniper", "chomp", "scream", "dust", "zap", "snap", "meeseeks", "bark", "room"
         };
 
-        /// <summary>Sintetiza por adelantado los sonidos mas usados. Antes la primera explosion generaba mas de
-        /// 5 segundos de muestras en un solo cuadro y el juego daba un tiron justo en el momento del susto.</summary>
         public static void Prewarm()
         {
             foreach (var n in s_Common) Clip(n);
@@ -85,14 +75,12 @@ namespace RickMorty
             return src;
         }
 
-        /// <summary>Sonido 2D (por ejemplo el reloj o la radio de Rick).</summary>
         public static AudioSource Play2D(string name, float volume = 1f, float pitch = 1f)
         {
             var cam = Camera.main;
             return Play(name, cam != null ? cam.transform.position : Vector3.zero, volume, pitch, false);
         }
 
-        /// <summary>Crea un AudioSource en loop pegado a un objeto (zumbidos, burbujeo...).</summary>
         public static AudioSource AttachLoop(GameObject go, string name, float volume = 0.3f, float maxDistance = 6f, float pitch = 1f)
         {
             var src = go.AddComponent<AudioSource>();
@@ -111,10 +99,6 @@ namespace RickMorty
         }
     }
 
-    /// <summary>
-    /// Sintetizador de efectos placeholder (para no depender de assets externos).
-    /// Lo usan: AudioFX.Clip cuando no hay archivo de audio en Resources.
-    /// </summary>
     public static class SfxSynth
     {
         const int Rate = 22050;
@@ -126,7 +110,6 @@ namespace RickMorty
             switch (name)
             {
                 case "beep": d = Tone(880, 0.12f, Wave.Sine, 0.5f); break;
-                // "voz" de Rick sin grabaciones: rafaga de pitidos graves tipo radio, para que cada linea SUENE
                 case "rick_blip": d = Concat(Tone(210, 0.05f, Wave.Saw, 0.22f), Silence(0.035f), Tone(175, 0.05f, Wave.Saw, 0.22f), Silence(0.03f), Tone(240, 0.045f, Wave.Saw, 0.2f), Silence(0.04f), Tone(190, 0.06f, Wave.Saw, 0.22f), Silence(0.03f), Tone(225, 0.05f, Wave.Saw, 0.2f)); break;
                 case "grab": d = Decay(Mix(Noise(rng, 0.06f, 0.35f, 30f, 0.2f), Tone(320, 0.06f, Wave.Sine, 0.3f)), 18f); break;
                 case "plop": d = Mix(Sweep(520, 180, 0.12f, Wave.Sine, 0.5f), Noise(rng, 0.08f, 0.2f, 25f, 0.2f)); break;
@@ -173,7 +156,6 @@ namespace RickMorty
             return clip;
         }
 
-        /// <summary>Forma de onda del oscilador (seno, cuadrada, sierra).</summary>
         enum Wave { Sine, Square, Saw }
 
         static float Osc(Wave w, float phase)

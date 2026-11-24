@@ -4,16 +4,11 @@ using UnityEngine.Rendering;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Fabrica y cache de materiales URP por color (Lit, Unlit, transparente, particulas) para no crear uno nuevo cada vez.
-    /// Lo usan: FX, ItemFactory, efectos de objetos y NPC, la UI 3D y el builder de escena.
-    /// </summary>
     public static class MatLib
     {
         static readonly Dictionary<string, Material> s_Cache = new Dictionary<string, Material>();
         static Texture2D s_SoftDot;
 
-        /// <summary>Solo editor: permite al constructor de escena guardar los materiales como assets.</summary>
         public static System.Func<Material, string, Material> PersistHook;
 
         static Material Store(string key, Material m)
@@ -35,7 +30,6 @@ namespace RickMorty
             }
             if (m != null) return m;
 
-            // Fallback (solo si no se corrio el builder)
             var shaderName = kind == 0 ? "Universal Render Pipeline/Lit"
                 : kind == 3 ? "Universal Render Pipeline/Particles/Unlit"
                 : "Universal Render Pipeline/Unlit";
@@ -77,7 +71,6 @@ namespace RickMorty
             return Store(key, m);
         }
 
-        /// <summary>Material transparente sin cache (para poder animar su alpha).</summary>
         public static Material TransparentInstance(Color c)
         {
             var m = new Material(Base(2));
@@ -128,7 +121,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Configura un material URP (Lit/Unlit/Particles) como transparente alpha-blend.</summary>
         public static void MakeTransparent(Material m, bool particles = false)
         {
             m.SetFloat("_Surface", 1f);
@@ -148,8 +140,6 @@ namespace RickMorty
         static MaterialPropertyBlock s_Mpb;
         static readonly int s_BaseColorId = Shader.PropertyToID("_BaseColor");
 
-        /// <summary>Cambia el color sin crear materiales. Reusa un unico MaterialPropertyBlock
-        /// (se llama cada cuadro desde varios efectos: crear uno nuevo generaba basura y tirones en Quest).</summary>
         public static void SetColor(Renderer r, Color c)
         {
             if (r == null) return;

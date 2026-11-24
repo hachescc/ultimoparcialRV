@@ -7,10 +7,6 @@ using UnityEngine;
 
 namespace RickMorty.EditorTools
 {
-    /// <summary>
-    /// Recorrido automatico con capturas para documentar el juego (lo usa _Tools/pdf para armar el PDF).
-    /// Menu "Rick y Morty/4. Recorrido con capturas" o batch: -executeMethod ...RickMortyShowcase.BatchRun -showcaseOut &lt;dir&gt;
-    /// </summary>
     [InitializeOnLoad]
     public static class RickMortyShowcase
     {
@@ -33,7 +29,6 @@ namespace RickMorty.EditorTools
             Run(true, i >= 0 && i + 1 < args.Length ? args[i + 1] : Path.GetFullPath("Documentacion/capturas"));
         }
 
-        /// <summary>Video MP4 del gameplay (1280x720, 30 fps): -executeMethod ...RickMortyShowcase.BatchFilm -filmOut &lt;archivo.mp4&gt;</summary>
         public static void BatchFilm()
         {
             var args = Environment.GetCommandLineArgs();

@@ -2,12 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Caja de Meeseeks. Gatillo: aparece un Meeseeks.
-    /// Original: limpia el garaje llevando basura al agujero negro ("¡Oooh, can do!").
-    /// Contrabando: se roba un ingrediente al azar, tose y explota.
-    /// Lo usan: ItemFactory (behaviours "meeseeks_box" y "contraband_box").
-    /// </summary>
     public class MeeseeksBox : ItemBehaviour
     {
         public bool contraband;

@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// SCAR del Fortnite: rafaga rapida con dispersion horrible y numeros de dano amarillos.
-    /// Lo usan: ItemFactory (behaviour "scar").
-    /// </summary>
     public class ScarRifle : ItemBehaviour
     {
         public float fireRate = 10f;

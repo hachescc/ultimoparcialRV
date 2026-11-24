@@ -3,19 +3,11 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Entidad viva vulnerable (one-hit kill). Al morir: congelamiento de 0.2 s, se infla
-    /// (armas de fuego) o se parte (armas blancas), explota en particulas del color de su
-    /// "sangre", deja un charco y Rick reacciona por la radio.
-    /// Lo usan: ItemFactory (criaturas), las armas, FX.Explosion, ScoreManager (penalizacion moral) y GameEvents.
-    /// </summary>
     public class Creature : MonoBehaviour
     {
         public string displayName = "Criatura";
         public Color splatColor = Color.red;
-        [Tooltip("Penalización moral en puntos (no afecta el progreso)")]
         public int moralPenalty;
-        [Tooltip("Id de la linea de Rick al matarla (dialogues.json)")]
         public string killLineId;
         public bool invulnerableToLaser;
 
@@ -34,7 +26,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Pedazos de carne que salen volando (y desaparecen a los pocos segundos).</summary>
         void SpawnChunks(Vector3 pos, int n)
         {
             var mat = MatLib.Lit(Color.Lerp(splatColor, new Color(1f, 0.55f, 0.6f), 0.4f), 0.15f, 0.85f);
@@ -68,7 +59,6 @@ namespace RickMorty
             var rb = GetComponent<Rigidbody>();
             foreach (var mb in GetComponents<CreatureMover>()) mb.enabled = false;
 
-            // Congelamiento de impacto
             if (rb != null) { rb.isKinematic = true; }
             yield return new WaitForSeconds(0.2f);
 
@@ -98,8 +88,8 @@ namespace RickMorty
             var pos = transform.position;
             var dark = Color.Lerp(splatColor, Color.black, 0.45f);
             var light = Color.Lerp(splatColor, Color.white, 0.55f);
-            FX.Burst(pos, light, 18, 1.2f, 0.35f, 0.25f, 0f, true);          // "pop" brillante
-            FX.Burst(pos, Color.Lerp(splatColor, light, 0.3f), 40, 3.5f, 0.16f, 1.1f, 2.5f);   // gotas grandes que caen
+            FX.Burst(pos, light, 18, 1.2f, 0.35f, 0.25f, 0f, true);
+            FX.Burst(pos, Color.Lerp(splatColor, light, 0.3f), 40, 3.5f, 0.16f, 1.1f, 2.5f);
             FX.Burst(pos, splatColor, 25, 2f, 0.1f, 0.9f, 2.5f);
             FX.FlashLight(pos, splatColor, 3f, 3f, 0.3f);
             AudioFX.Play("splat", pos, 1f, Random.Range(0.8f, 1.1f));

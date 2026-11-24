@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Cuchillos (CS:GO, Kunai): si se lanzan con fuerza se clavan en la madera o el corcho
-    /// (FixedJoint temporal / kinematic). El de CS:GO gira en el dedo con el gatillo sostenido.
-    /// Lo usan: ItemFactory (behaviour "knife").
-    /// </summary>
     public class ThrowingKnife : ItemBehaviour
     {
         public float stickSpeed = 2.5f;
@@ -37,7 +32,6 @@ namespace RickMorty
             if (m_Visual) m_Visual.localRotation = Quaternion.identity;
             if (m_StuckKinematic)
             {
-                // XRGrabInteractable restaura el estado kinematic de cuando se agarro; lo corregimos
                 m_StuckKinematic = false;
                 Body.isKinematic = false;
             }

@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Colisionador de la cabeza del jugador. En VR "comer" o "ponerse" algo se detecta
-    /// cuando el objeto toca la cabeza (camara). Tambien detecta portales.
-    /// Lo usan: el builder de escena (va en la camara); llama a los IHeadInteractable y a EndingPortal.
-    /// </summary>
     [RequireComponent(typeof(SphereCollider))]
     public class PlayerHead : MonoBehaviour
     {
@@ -23,7 +18,6 @@ namespace RickMorty
 
         IHeadInteractable m_Candidate;
         float m_CandidateSince;
-        [Tooltip("Segundos que hay que mantener la comida/casco en la cara para usarlo")]
         public float mouthDwell = 0.4f;
 
         void OnTriggerEnter(Collider other)
@@ -31,7 +25,6 @@ namespace RickMorty
             var consumable = other.GetComponentInParent<IHeadInteractable>();
             if (consumable != null)
             {
-                // No se consume al instante: acercarse el Aguardiente para mirarlo se lo tomaba (y es ingrediente de la receta final).
                 if (!ReferenceEquals(consumable, m_Candidate)) { m_Candidate = consumable; m_CandidateSince = Time.time; }
                 return;
             }
@@ -55,10 +48,6 @@ namespace RickMorty
         }
     }
 
-    /// <summary>
-    /// Objetos que reaccionan al tocar la cabeza (comida, cascos...).
-    /// Lo usan: PlayerHead; lo implementan Consumable y SnowballHelmet.
-    /// </summary>
     public interface IHeadInteractable
     {
         void OnTouchHead(PlayerHead head);

@@ -4,14 +4,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    // ------------------------------------------------------------------
-    //  Modelos de datos (se cargan desde Resources/Data/*.json)
-    // ------------------------------------------------------------------
-
-    /// <summary>
-    /// Un objeto del juego (ingrediente, resultado de mezcla, arma, criatura...) tal como viene en items.json.
-    /// Lo usan: GameDatabase, ItemFactory (para crearlo), MixableItem, el holograma y el reloj.
-    /// </summary>
     [Serializable]
     public class ItemDef
     {
@@ -36,13 +28,8 @@ namespace RickMorty
         }
     }
 
-    /// <summary>Contenedor de items.json (JsonUtility necesita una clase raiz). Lo usan: GameDatabase.Load.</summary>
     [Serializable] public class ItemList { public List<ItemDef> items = new List<ItemDef>(); }
 
-    /// <summary>
-    /// Una receta: lista de ingredientes (ids) y el id del resultado.
-    /// Lo usan: GameDatabase, el tazon (MixingBowl), GameManager (misiones) y ScoreManager.
-    /// </summary>
     [Serializable]
     public class RecipeDef
     {
@@ -52,7 +39,6 @@ namespace RickMorty
         public string Key => GameDatabase.MakeKey(ingredients);
     }
 
-    /// <summary>Contenedor de recipes.json: recetas normales y la receta final. Lo usan: GameDatabase.Load.</summary>
     [Serializable]
     public class RecipeList
     {
@@ -60,10 +46,6 @@ namespace RickMorty
         public RecipeDef finalRecipe;
     }
 
-    /// <summary>
-    /// Una linea de dialogo de dialogues.json (hablante y texto, o varias variantes al azar).
-    /// Lo usan: GameDatabase y RickComms (Say), ademas de Talker, Tio Steve y Rick Caleno (textos flotantes).
-    /// </summary>
     [Serializable]
     public class DialogueLine
     {
@@ -80,14 +62,8 @@ namespace RickMorty
         }
     }
 
-    /// <summary>Contenedor de dialogues.json. Lo usan: GameDatabase.Load.</summary>
     [Serializable] public class DialogueList { public List<DialogueLine> lines = new List<DialogueLine>(); }
 
-    /// <summary>
-    /// Base de datos del juego. Lee items, recetas y dialogos desde JSON para que
-    /// el equipo pueda modificarlos sin tocar codigo.
-    /// Lo usan: casi todos los sistemas (tazon, fabrica de objetos, dialogos, holograma, puntaje).
-    /// </summary>
     public static class GameDatabase
     {
         static bool s_Loaded;
@@ -103,7 +79,6 @@ namespace RickMorty
         public static IReadOnlyList<RecipeDef> Recipes { get { Load(); return s_Recipes; } }
         public static RecipeDef FinalRecipe { get { Load(); return s_Final; } }
 
-        /// <summary>Objetos que se pueden descubrir (todo lo que no es ingrediente base), en el orden de items.json.</summary>
         public static List<ItemDef> Discoverables
         {
             get
@@ -162,7 +137,6 @@ namespace RickMorty
             }
             else Debug.LogError("[GameDatabase] Falta Resources/Data/dialogues.json");
 
-            // Validacion: toda receta debe apuntar a items existentes
             foreach (var r in s_Recipes)
             {
                 if (!s_Items.ContainsKey(r.result)) Debug.LogWarning($"[GameDatabase] Resultado desconocido: {r.result}");
@@ -171,8 +145,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Clave unica de una mezcla: los ids ordenados alfabeticamente y unidos con "+"
-        /// (asi el orden en que se meten los ingredientes no importa).</summary>
         public static string MakeKey(IEnumerable<string> ids)
         {
             var sorted = new List<string>(ids);
@@ -186,7 +158,6 @@ namespace RickMorty
             return id != null && s_Items.TryGetValue(id, out var d) ? d : null;
         }
 
-        /// <summary>Nombre visible de un objeto (si no existe o no tiene nombre, devuelve el id).</summary>
         public static string NameOf(string id)
         {
             var item = GetItem(id);
@@ -214,10 +185,6 @@ namespace RickMorty
             return r;
         }
 
-        /// <summary>
-        /// Devuelve true si el conjunto (multiconjunto) de ingredientes es parte de alguna receta valida.
-        /// Se usa para la retroalimentacion haptica "la mezcla va bien / va a explotar".
-        /// </summary>
         public static bool IsPartialOfAnyRecipe(List<string> ids)
         {
             Load();
@@ -228,7 +195,6 @@ namespace RickMorty
             return false;
         }
 
-        /// <summary>true si todos los ids caben en los ingredientes de la receta (respetando repetidos).</summary>
         static bool FitsIn(List<string> ids, RecipeDef r)
         {
             if (ids.Count > r.ingredients.Count) return false;

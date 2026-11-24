@@ -18,17 +18,10 @@ using Object = UnityEngine.Object;
 
 namespace RickMorty.EditorTools
 {
-    /// <summary>
-    /// Paso 2: construye la escena completa con placeholders (primitivas + colores del diseno):
-    /// garaje, mesa de mezclas, estanteria, lavanderia, easter eggs, exterior suburbano,
-    /// casa del vecino, perimetro del FBI, XR Origin con reloj y todos los sistemas conectados.
-    /// Se puede re-ejecutar: regenera la escena desde cero.
-    /// </summary>
     public static class RickMortySceneBuilder
     {
         public const string ScenePath = RickMortySetup.Root + "/Scenes/RickGarage.unity";
 
-        // Colores del diseno
         static readonly Color Wood = new Color(0.55f, 0.38f, 0.22f);
         static readonly Color WoodDark = new Color(0.36f, 0.24f, 0.13f);
         static readonly Color Concrete = new Color(0.52f, 0.52f, 0.5f);
@@ -79,10 +72,8 @@ namespace RickMorty.EditorTools
                 var exterior = BuildExterior();
                 var boundary = BuildPerimeter();
 
-                // ---------------- Jugador ----------------
                 var rig = BuildPlayer(out var watch, out var hologram, out var leftController, out var rightController, out var head);
 
-                // ---------------- Sistemas ----------------
                 var systems = new GameObject("Sistemas");
                 var comms = systems.AddComponent<RickComms>();
                 comms.voiceSource = watch.transform;
@@ -109,7 +100,6 @@ namespace RickMorty.EditorTools
 
                 var endRoom = BuildEndRoom();
 
-                // Rick y su holograma
                 var rick = BuildRick(out var rickHolo);
 
                 var gmGo = new GameObject("GameManager");
@@ -143,11 +133,9 @@ namespace RickMorty.EditorTools
                 gm.music = music;
                 boundary.respawnPoint = gm.playerStart;
 
-                // Modelos reales (descargados/generados) sobre los placeholders
                 RickMortySetup.CreateVisualRegistry();
                 RickMortyModelPass.Apply();
 
-                // Guardar
                 System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(ScenePath));
                 EditorSceneManager.SaveScene(scene, ScenePath);
                 var scenes = new List<EditorBuildSettingsScene> { new EditorBuildSettingsScene(ScenePath, true) };
@@ -159,10 +147,6 @@ namespace RickMorty.EditorTools
                 RickMortySetup.EndPersistMaterials();
             }
         }
-
-        // ==================================================================
-        //  Helpers de geometria
-        // ==================================================================
 
         static GameObject Prim(PrimitiveType type, string name, Transform parent, Vector3 pos, Vector3 scale, Material mat,
             Quaternion? rot = null, bool collider = true, SurfaceKind? surface = null)
@@ -177,8 +161,6 @@ namespace RickMorty.EditorTools
             if (!collider) Object.DestroyImmediate(go.GetComponent<Collider>());
             else if (type == PrimitiveType.Cylinder)
             {
-                // El collider del cilindro de Unity es una capsula: aplastada se vuelve una esfera
-                // enorme que sobresale (empujaba los frascos fuera del tazon). Usar una caja.
                 Object.DestroyImmediate(go.GetComponent<Collider>());
                 go.AddComponent<BoxCollider>();
             }
@@ -192,7 +174,6 @@ namespace RickMorty.EditorTools
 
         static Material[] s_Blueprints;
 
-        /// <summary>Guarda como PNG una textura generada por codigo (para que el material de la escena la conserve).</summary>
         static Texture2D TexAsset(string name, Func<Texture2D> build, bool alpha)
         {
             string dir = RickMortySetup.Root + "/Textures/Generadas";
@@ -211,7 +192,6 @@ namespace RickMorty.EditorTools
             return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
         }
 
-        /// <summary>Material con textura guardado como asset (se reutiliza entre construcciones de la escena).</summary>
         static Material TexturedMat(string name, Texture2D tex, Color tint, bool transparent, float smooth = 0.2f)
         {
             string path = RickMortySetup.GenMatDir + "/" + name + ".mat";
@@ -256,7 +236,6 @@ namespace RickMorty.EditorTools
             return s_Markers;
         }
 
-        /// <summary>Copia del material de la fuente que solo dibuja la cara delantera (asset en Fonts/).</summary>
         static Material FrontFaceFontMaterial(TMP_FontAsset font)
         {
             const string path = RickMortySetup.Root + "/Fonts/Fuente Solo Frente.mat";
@@ -264,7 +243,7 @@ namespace RickMorty.EditorTools
             if (m == null && font != null)
             {
                 m = new Material(font.material) { name = "Fuente Solo Frente" };
-                m.SetFloat("_CullMode", 2f);   // 2 = Back: oculta la cara trasera
+                m.SetFloat("_CullMode", 2f);
                 AssetDatabase.CreateAsset(m, path);
             }
             return m != null ? m : font.material;
@@ -277,7 +256,6 @@ namespace RickMorty.EditorTools
             go.transform.localPosition = pos;
             go.transform.localRotation = rot;
             var t = go.AddComponent<TextMeshPro>();
-            // fondo oscuro detras del texto: se lee sobre cualquier fondo (brillos verdes, paredes claras)
             const string mark = "<mark=#07111DD0 padding=\"18,18,8,8\">";
             t.text = mark + text.Replace("\n", "</mark>\n" + mark) + "</mark>";
             t.fontSize = size;
@@ -297,7 +275,7 @@ namespace RickMorty.EditorTools
                 var rb = go.GetComponent<Rigidbody>();
             if (rb == null) rb = go.AddComponent<Rigidbody>();
                 rb.mass = 0.5f;
-                rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;   // objetos chicos lanzados fuerte atravesaban paredes de 5 cm y caian para siempre
+                rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
                 var g = go.AddComponent<XRGrabInteractable>();
                 g.useDynamicAttach = true;
                 go.isStatic = false;
@@ -314,11 +292,6 @@ namespace RickMorty.EditorTools
             return egg;
         }
 
-        // ==================================================================
-        //  Iluminacion
-        // ==================================================================
-
-        /// <summary>Cielo real (Poly Haven "kloofendal 48d partly cloudy", CC0) en vez del cielo por defecto de Unity.</summary>
         static Material SkyMaterial()
         {
             string tex = RickMortySetup.Root + "/Textures/sky/sky_partly_cloudy.jpg";
@@ -329,7 +302,7 @@ namespace RickMorty.EditorTools
                 imp.maxTextureSize = 4096;
                 imp.wrapModeU = TextureWrapMode.Repeat;
                 imp.wrapModeV = TextureWrapMode.Clamp;
-                imp.mipmapEnabled = false;          // el cielo siempre se ve a la misma escala: los mipmaps solo lo emborronan
+                imp.mipmapEnabled = false;
                 imp.SaveAndReimport();
                 t = AssetDatabase.LoadAssetAtPath<Texture2D>(tex);
             }
@@ -345,7 +318,7 @@ namespace RickMorty.EditorTools
             else EditorUtility.SetDirty(m);
             return m;
         }
-        const float SkyRotation = 110f;   // gira el panorama para que su sol coincida con la luz direccional
+        const float SkyRotation = 110f;
 
         static Light BuildLighting()
         {
@@ -379,7 +352,7 @@ namespace RickMorty.EditorTools
         {
             var list = new List<FlickerLight>();
             var g = Group("Tubos Fluorescentes");
-            float[] zs = { -0.6f, 1.4f, 3.5f };   // la de atras en 3.5: en 3.0 el tubo atravesaba la pantalla del monitor
+            float[] zs = { -0.6f, 1.4f, 3.5f };
             foreach (var z in zs)
             {
                 var root = new GameObject("Fluorescente").transform;
@@ -394,7 +367,7 @@ namespace RickMorty.EditorTools
                 lightGo.transform.localPosition = new Vector3(0, -0.15f, 0);
                 var l = lightGo.AddComponent<Light>();
                 l.type = LightType.Point;
-                l.range = 5f;   // 3 luces de 6.5 m cubrian TODO el garaje por pixel (caro en Quest)
+                l.range = 5f;
                 l.intensity = 2.2f;
                 l.color = new Color(0.92f, 1f, 0.95f);
                 l.shadows = LightShadows.None;
@@ -407,10 +380,6 @@ namespace RickMorty.EditorTools
             return list;
         }
 
-        // ==================================================================
-        //  Garaje
-        // ==================================================================
-
         static void BuildGarageShell(out GarageDoor door, out Vector3 windowPos)
         {
             var g = Group("Garaje");
@@ -420,7 +389,6 @@ namespace RickMorty.EditorTools
             Box("ParedFrontal", g, new Vector3(0, 1.5f, -3.05f), new Vector3(8.2f, 3f, 0.1f), Wood, SurfaceKind.Wood);
             Box("ParedIzquierda", g, new Vector3(-4.05f, 1.5f, 0.5f), new Vector3(0.1f, 3f, 7f), Wood, SurfaceKind.Wood);
 
-            // Pared derecha con abertura de la puerta del garaje (z -1.25..2.25) y ventana (z 2.75..3.45, y 1.2..1.9)
             Box("ParedDer_A", g, new Vector3(4.05f, 1.5f, -2.125f), new Vector3(0.1f, 3f, 1.75f), Wood, SurfaceKind.Wood);
             Box("ParedDer_SobrePuerta", g, new Vector3(4.05f, 2.75f, 0.5f), new Vector3(0.1f, 0.5f, 3.5f), Wood, SurfaceKind.Wood);
             Box("ParedDer_B1", g, new Vector3(4.05f, 1.5f, 2.5f), new Vector3(0.1f, 3f, 0.5f), Wood, SurfaceKind.Wood);
@@ -432,14 +400,12 @@ namespace RickMorty.EditorTools
             windowPos = new Vector3(4.05f, 1.55f, 3.1f);
             Box("MarcoVentana", g, new Vector3(4.0f, 1.55f, 3.1f), new Vector3(0.04f, 0.04f, 0.72f), WoodDark, collider: false);
 
-            // Vigas y pilares expuestos
             for (int i = 0; i < 5; i++)
                 Box("Viga", g, new Vector3(0, 2.92f, -2.5f + i * 1.6f), new Vector3(8f, 0.16f, 0.14f), WoodDark, collider: false);
             foreach (var x in new[] { -3.9f, 3.9f })
                 foreach (var z in new[] { -2.9f, 0.5f, 3.9f })
                     Box("Pilar", g, new Vector3(x, 1.5f, z), new Vector3(0.16f, 3f, 0.16f), WoodDark, SurfaceKind.Wood);
 
-            // Puerta de la casa (izquierda, bloqueada) + lampara naranja manchada
             Box("PuertaCasa", g, new Vector3(-3.97f, 1.05f, -1.6f), new Vector3(0.06f, 2.1f, 0.95f), WoodDark, SurfaceKind.Wood);
             Sph("Perilla", g, new Vector3(-3.92f, 1.0f, -1.25f), Vector3.one * 0.06f, new Color(0.8f, 0.7f, 0.3f), false);
             Label("BLOQUEADA", g, new Vector3(-3.92f, 1.6f, -1.6f), Quaternion.Euler(0, -90, 0), 0.8f, new Color(1, 0.4f, 0.3f));
@@ -450,7 +416,6 @@ namespace RickMorty.EditorTools
             for (int i = 0; i < 4; i++)
                 Sph("Mancha", lamp.transform, UnityEngine.Random.onUnitSphere * 0.45f, Vector3.one * 0.15f, new Color(0.2f, 0.12f, 0.05f), false);
 
-            // Puerta metalica del garaje
             var doorRoot = new GameObject("PuertaGaraje").transform;
             doorRoot.SetParent(g, false);
             doorRoot.position = new Vector3(4.02f, 0, 0.5f);
@@ -461,10 +426,6 @@ namespace RickMorty.EditorTools
             door.panel = panel.transform;
             door.openHeight = 2.35f;
         }
-
-        // ==================================================================
-        //  Mesa de trabajo (centro de accion)
-        // ==================================================================
 
         struct DeskRefs
         {
@@ -484,14 +445,12 @@ namespace RickMorty.EditorTools
                     Box("Pata", g, new Vector3(x, (top - 0.05f) * 0.5f, z), new Vector3(0.08f, top - 0.05f, 0.08f), WoodDark, SurfaceKind.Wood);
             Box("Repisa", g, new Vector3(0, 0.25f, 2.0f), new Vector3(2.2f, 0.03f, 0.9f), WoodDark, SurfaceKind.Wood);
 
-            // Planos esparcidos
             for (int i = 0; i < 6; i++)
             {
                 var p = new Vector3(UnityEngine.Random.Range(-1f, 1f), top + 0.002f, UnityEngine.Random.Range(1.6f, 2.4f));
                 if (Mathf.Abs(p.x) < 0.5f) continue;
                 var plano = Box("Plano", g, p, new Vector3(0.3f, 0.002f, 0.22f), new Color(0.2f, 0.35f, 0.7f), collider: false,
                     rot: Quaternion.Euler(0, UnityEngine.Random.Range(0, 360f), 0));
-                // plano tecnico dibujado (antes era un rectangulo azul liso)
                 s_Blueprints ??= new[]
                 {
                     TexturedMat("Plano_pistola", TexAsset("plano_pistola", () => ProcTex.BuildBlueprint(0), false), Color.white, false, 0.05f),
@@ -499,9 +458,7 @@ namespace RickMorty.EditorTools
                 };
                 plano.GetComponent<Renderer>().sharedMaterial = s_Blueprints[i % 2];
             }
-            // Cristales morados brillando en base metalica (decoracion)
             var cbase = Cyl("BaseCristales", g, new Vector3(-0.45f, top + 0.02f, 2.38f), new Vector3(0.18f, 0.02f, 0.18f), MetalGray);
-            // racimo de cristales (mismo modelo que va dentro del frasco de Cristales Kalaxianos); si falta, las 3 barritas de antes
             var crystalPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(RickMortySetup.Root + "/Models/Env/relleno_kalaxianos.glb");
             if (crystalPrefab != null)
             {
@@ -515,7 +472,6 @@ namespace RickMorty.EditorTools
                 Box("CristalDeco", cbase.transform.parent, new Vector3(-0.45f + (i - 1) * 0.05f, top + 0.09f, 2.38f), new Vector3(0.035f, 0.12f, 0.035f),
                     new Color(0.6f, 0.2f, 1f), collider: false, emission: 2f, rot: Quaternion.Euler(UnityEngine.Random.Range(-15, 15), 0, UnityEngine.Random.Range(-15, 15)));
 
-            // ---------- Tazon de mezclas ----------
             var bowlRoot = new GameObject("Tazon de Mezclas").transform;
             bowlRoot.SetParent(g, false);
             bowlRoot.position = new Vector3(0, top, 2.05f);
@@ -532,7 +488,6 @@ namespace RickMorty.EditorTools
             }
             var liquid = Prim(PrimitiveType.Cylinder, "Liquido", bowlRoot, new Vector3(0, 0.03f, 0), new Vector3(0.42f, 0.01f, 0.42f),
                 MatLib.Transparent(new Color(0.3f, 0.8f, 0.4f, 0.6f)), collider: false);
-            // halo suave alrededor del tazon (antes un disco verde plano de 60 cm que parecia un plato)
             var glow = Prim(PrimitiveType.Quad, "Brillo", bowlRoot, new Vector3(0, 0.003f, 0), new Vector3(0.95f, 0.95f, 1f),
                 TexturedMat("Halo_tazon", TexAsset("halo_suave", () => ProcTex.BuildSoftGlow(), true), new Color(0.3f, 1f, 0.4f, 0.14f), true),
                 Quaternion.Euler(90, 0, 0), collider: false);
@@ -549,12 +504,9 @@ namespace RickMorty.EditorTools
             bowl.bowlLight = bl;
             Label("TAZÓN DE MEZCLAS", g, new Vector3(0, top + 0.2f, 2.33f), Quaternion.identity, 0.5f, new Color(0.7f, 1f, 0.7f));
 
-            // Cuchara de madera y pinzas (decoracion)
             Box("Cuchara", g, new Vector3(0.3f, top + 0.012f, 2.3f), new Vector3(0.03f, 0.015f, 0.3f), new Color(0.75f, 0.55f, 0.3f), collider: false, rot: Quaternion.Euler(0, 20, 0));
             Box("Pinzas", g, new Vector3(-0.3f, top + 0.01f, 2.3f), new Vector3(0.015f, 0.012f, 0.2f), MetalGray, collider: false, rot: Quaternion.Euler(0, -25, 0));
 
-            // ---------- Zona de salida ----------
-            // Bandeja de salida: plato de metal oscuro con un aro verde luminoso (antes un disco verde liso)
             Cyl("BandejaAro", g, new Vector3(0, top + 0.003f, 1.66f), new Vector3(0.265f, 0.003f, 0.265f), new Color(0.25f, 1f, 0.35f), false, 0.9f);
             var outPad = Prim(PrimitiveType.Cylinder, "BandejaSalida", g, new Vector3(0, top + 0.006f, 1.66f), new Vector3(0.24f, 0.006f, 0.24f),
                 MatLib.Lit(new Color(0.16f, 0.17f, 0.19f), 0f, 0.7f, 0.85f), collider: false);
@@ -564,7 +516,6 @@ namespace RickMorty.EditorTools
             output.position = new Vector3(0, top + 0.06f, 1.66f);
             bowl.outputPoint = output;
 
-            // ---------- Boton MEZCLAR ----------
             var btnRoot = new GameObject("Boton MEZCLAR").transform;
             btnRoot.SetParent(g, false);
             btnRoot.position = new Vector3(-0.42f, top, 1.72f);
@@ -581,11 +532,9 @@ namespace RickMorty.EditorTools
             Label("MEZCLAR", btnRoot, new Vector3(0, 0.16f, 0.02f), Quaternion.Euler(20, 0, 0), 0.6f, new Color(1f, 0.4f, 0.35f));
             refs.bowl = bowl;
 
-            // ---------- Soporte de ensamblaje final ----------
             var stRoot = new GameObject("Soporte de Ensamblaje").transform;
             stRoot.SetParent(g, false);
             stRoot.position = new Vector3(0.4f, top, 1.66f);
-            // plataforma metalica con aro luminoso por debajo y dos horquillas que sostienen la pistola
             Cyl("Anillo", stRoot, new Vector3(0, 0.004f, 0), new Vector3(0.255f, 0.004f, 0.255f), new Color(0.3f, 1f, 0.3f), false, 0.9f);
             Prim(PrimitiveType.Cylinder, "Plataforma", stRoot, new Vector3(0, 0.015f, 0), new Vector3(0.23f, 0.015f, 0.23f),
                 MatLib.Lit(new Color(0.2f, 0.21f, 0.23f), 0f, 0.7f, 0.85f));
@@ -604,10 +553,8 @@ namespace RickMorty.EditorTools
             Label("SOPORTE DE\nENSAMBLAJE", stRoot, new Vector3(0, 0.28f, 0.05f), Quaternion.Euler(15, 0, 0), 0.4f, new Color(0.6f, 1f, 0.6f));
             refs.station = station;
 
-            // ---------- Ingredientes base en sus soportes ----------
             BuildIngredientRacks(g, top);
 
-            // ---------- Agujero negro de basura ----------
             var bin = new GameObject("Agujero Negro (Basura)").transform;
             bin.SetParent(g, false);
             bin.position = new Vector3(-1.6f, 0, 1.5f);
@@ -630,7 +577,6 @@ namespace RickMorty.EditorTools
             Label("BASURA\n(agujero negro)", bin, new Vector3(0, 0.85f, 0), Quaternion.LookRotation(Vector3.Scale(bin.position - new Vector3(0, 0, 1.3f), new Vector3(1, 0, 1)).normalized), 0.5f, new Color(0.8f, 0.6f, 1f));
             refs.trash = trash;
 
-            // ---------- Brazo robotico ----------
             var arm = Group("Brazo Robotico", g);
             Cyl("Base", arm, new Vector3(0, 2.98f, 2.2f), new Vector3(0.3f, 0.04f, 0.3f), GreenGray, false);
             Cyl("Seg1", arm, new Vector3(0, 2.62f, 2.2f), new Vector3(0.09f, 0.35f, 0.09f), GreenGray, false);
@@ -639,7 +585,6 @@ namespace RickMorty.EditorTools
             Box("Pinza1", arm, new Vector3(0.04f, 1.78f, 1.9f), new Vector3(0.02f, 0.14f, 0.03f), MetalGray, collider: false, rot: Quaternion.Euler(0, 0, 15));
             Box("Pinza2", arm, new Vector3(-0.04f, 1.78f, 1.9f), new Vector3(0.02f, 0.14f, 0.03f), MetalGray, collider: false, rot: Quaternion.Euler(0, 0, -15));
 
-            // ---------- Bajo la mesa: caja de herramientas, chatarra y casco de Iron Man ----------
             Box("CajaHerramientas", g, new Vector3(0.75f, 0.39f, 2.15f), new Vector3(0.4f, 0.25f, 0.22f), new Color(0.7f, 0.1f, 0.1f), SurfaceKind.Metal);
             for (int i = 0; i < 5; i++)
                 Box("Chatarra", g, new Vector3(UnityEngine.Random.Range(-0.9f, 0.0f), 0.37f, UnityEngine.Random.Range(1.7f, 2.3f)), Vector3.one * UnityEngine.Random.Range(0.06f, 0.14f), MetalGray,
@@ -652,7 +597,6 @@ namespace RickMorty.EditorTools
             return refs;
         }
 
-        /// <summary>Parte un nombre largo en dos lineas por el espacio mas cercano a la mitad.</summary>
         static string SplitTwoLines(string s)
         {
             int best = -1, mid = s.Length / 2;
@@ -664,7 +608,6 @@ namespace RickMorty.EditorTools
         static void BuildIngredientRacks(Transform g, float top)
         {
             var racks = Group("Ingredientes Base", g);
-            // Liquidos a la izquierda, solidos a la derecha (los cristales atras para no activar el ensamblaje)
             var layout = new (string id, Vector3 pos)[]
             {
                 ("mega_semilla",   new Vector3(-0.95f, 0, 1.88f)),
@@ -707,18 +650,12 @@ namespace RickMorty.EditorTools
                 bi.homeRotation = Quaternion.identity;
                 socket.startingSelectedInteractable = flask.GetComponent<XRGrabInteractable>();
 
-                // Placa fija con el nombre (2 lineas). Antes el nombre solo flotaba al acercarse a < 1.1 m y las
-                // etiquetas vecinas se montaban; desde el puesto de trabajo no se sabia cual frasco era cual.
                 bool backRow = p.z > 2.1f;
                 string plate = def.name.Length > 13 && def.name.Contains(" ") ? SplitTwoLines(def.name) : def.name;
                 if (backRow) Label(plate, racks, new Vector3(p.x, top + 0.30f, p.z + 0.13f), Quaternion.Euler(8, 0, 0), 0.27f, Color.Lerp(def.Color, Color.white, 0.55f));
                 else Label(plate, racks, new Vector3(p.x, top + 0.035f, p.z - 0.15f), Quaternion.Euler(62, 0, 0), 0.27f, Color.Lerp(def.Color, Color.white, 0.55f));
             }
         }
-
-        // ==================================================================
-        //  Estanteria, tablero de corcho y monitor
-        // ==================================================================
 
         static void BuildShelfAndBoards(out RickMonitor monitor, out CorkBoard cork)
         {
@@ -731,7 +668,6 @@ namespace RickMorty.EditorTools
             foreach (var y in levels)
                 Box("Nivel", g, new Vector3(0, y, (zf + zb) * 0.5f), new Vector3(4.05f, 0.03f, 0.5f), MetalGray, SurfaceKind.Metal);
 
-            // Objetos canonicos
             Sph("Calavera", g, new Vector3(-1.6f, 1.12f, 3.7f), new Vector3(0.18f, 0.2f, 0.2f), new Color(0.95f, 0.93f, 0.85f));
             var mace = Cyl("Mazo", g, new Vector3(-1.1f, 1.08f, 3.7f), new Vector3(0.04f, 0.2f, 0.04f), WoodDark, true, 0, Quaternion.Euler(0, 0, 80));
             Sph("MazoCabeza", g, new Vector3(-0.85f, 1.1f, 3.7f), Vector3.one * 0.14f, MetalGray, false);
@@ -743,22 +679,17 @@ namespace RickMorty.EditorTools
             var ttBox = Box("Caja TIME TRAVEL STUFF", g, new Vector3(1.3f, 1.75f, 3.72f), new Vector3(0.45f, 0.28f, 0.35f), new Color(0.7f, 0.55f, 0.35f));
             Label("TIME TRAVEL\nSTUFF", g, new Vector3(1.3f, 1.75f, 3.54f), Quaternion.identity, 0.5f, new Color(0.15f, 0.1f, 0.05f), 0.45f);
 
-            // Easter Egg 4: Cubo de Gojo (Prison Realm) como pisapapeles
             var gojo = Box("Cubo Prison Realm (easter egg)", null, new Vector3(0.95f, 1.66f, 3.62f), Vector3.one * 0.09f, new Color(0.25f, 0.2f, 0.3f));
             for (int i = 0; i < 6; i++)
                 Box("OjoCerrado", gojo.transform, new Vector3(UnityEngine.Random.Range(-0.3f, 0.3f), UnityEngine.Random.Range(-0.3f, 0.3f), -0.51f), new Vector3(0.25f, 0.04f, 0.02f), new Color(0.1f, 0.05f, 0.1f), collider: false);
             var folded = Box("PlanosDoblados", g, new Vector3(0.95f, 1.625f, 3.62f), new Vector3(0.25f, 0.01f, 0.2f), new Color(0.2f, 0.35f, 0.7f), collider: false);
-            // planos dibujados (el cubo es el "pisapapeles" que los sostiene); antes era una tabla azul lisa
             folded.GetComponent<Renderer>().sharedMaterial = TexturedMat("Plano_portal", TexAsset("plano_portal", () => ProcTex.BuildBlueprint(1), false), Color.white, false, 0.05f);
             MakeEgg(gojo, "gojo", "Cubo Prison Realm", "Es un buen pisapapeles. No lo abras, adentro hay un tipo de pelo blanco muy molesto.", true);
 
-            // Easter Egg 5: Esfera del dragon de 4 estrellas en un frasco de formol
             var jarPos = new Vector3(-1.5f, 2.33f, 3.7f);
             for (int i = 0; i < 3; i++)
             {
                 var jp = jarPos + Vector3.right * i * 0.22f;
-                // vidrio casi transparente + formol verdoso adentro + tapa metalica con borde
-                // sin colider: si no, el frasco tapaba el rayo y la esfera del dragon no se podia agarrar
                 Prim(PrimitiveType.Cylinder, "FrascoConserva", g, jp, new Vector3(0.15f, 0.1f, 0.15f),
                     MatLib.Transparent(new Color(0.85f, 0.95f, 0.95f, 0.16f)), collider: false);
                 Prim(PrimitiveType.Cylinder, "Formol", g, jp + Vector3.down * 0.02f, new Vector3(0.138f, 0.075f, 0.138f),
@@ -766,7 +697,6 @@ namespace RickMorty.EditorTools
                 Cyl("TapaFrasco", g, jp + Vector3.up * 0.108f, new Vector3(0.158f, 0.012f, 0.158f), MetalGray, false);
                 Cyl("RoscaTapa", g, jp + Vector3.up * 0.094f, new Vector3(0.152f, 0.006f, 0.152f), new Color(0.35f, 0.33f, 0.3f), false);
             }
-            // los otros dos frascos tambien tienen "muestras" de Rick
             Sph("MuestraOjo", g, jarPos + new Vector3(0, -0.03f, 0), Vector3.one * 0.06f, new Color(0.95f, 0.92f, 0.85f), false);
             Sph("MuestraPupila", g, jarPos + new Vector3(0, -0.03f, -0.026f), new Vector3(0.025f, 0.025f, 0.012f), new Color(0.1f, 0.35f, 0.15f), false);
             Prim(PrimitiveType.Capsule, "MuestraPepino", g, jarPos + new Vector3(0.44f, -0.025f, 0), new Vector3(0.045f, 0.055f, 0.045f),
@@ -774,7 +704,6 @@ namespace RickMorty.EditorTools
             var ball = Sph("Esfera del Dragon (easter egg)", null, jarPos + new Vector3(0.22f, 0, 0), Vector3.one * 0.07f, new Color(1f, 0.55f, 0.1f), true, 1.5f);
             MakeEgg(ball, "dragonball", "Esfera del Dragón de 4 estrellas", "No la toques, Morty. Ya pedí mi deseo y el dragón me debe plata.", false);
 
-            // Easter Egg 6: figura de Hatsune Miku con parche cibernetico, cerca del reloj
             var clock = Cyl("RelojPared", g, new Vector3(-0.4f, 2.6f, 3.98f), new Vector3(0.3f, 0.02f, 0.3f), White, false, 0, Quaternion.Euler(90, 0, 0));
             var miku = new GameObject("Figura Miku (easter egg)");
             miku.transform.position = new Vector3(-0.65f, 2.33f, 3.65f);
@@ -786,7 +715,6 @@ namespace RickMorty.EditorTools
             var mc = miku.AddComponent<BoxCollider>(); mc.center = new Vector3(0, 0.03f, 0); mc.size = new Vector3(0.14f, 0.2f, 0.08f);
             MakeEgg(miku, "miku", "Figura de Hatsune Miku", "Le instalé un parche cibernético. Ahora canta en frecuencias que solo oyen los perros.", true);
 
-            // Easter Egg 7: Llama de Fortnite asomando de una caja de plastico gris
             Box("CajaPlastico1", g, new Vector3(0.4f, 2.36f, 3.7f), new Vector3(0.45f, 0.28f, 0.4f), new Color(0.6f, 0.6f, 0.62f));
             Box("CajaPlastico2", g, new Vector3(1.3f, 2.36f, 3.7f), new Vector3(0.45f, 0.28f, 0.4f), new Color(0.6f, 0.6f, 0.62f));
             var llama = new GameObject("Llama Fortnite (easter egg)");
@@ -797,10 +725,7 @@ namespace RickMorty.EditorTools
             llama.AddComponent<BoxCollider>().size = new Vector3(0.14f, 0.25f, 0.14f);
             MakeEgg(llama, "llama", "Llama de Fortnite", "La usé para guardar pólvora interdimensional. Guarda mejor que una caja fuerte.", true);
 
-            // Monitor colgante (objetivo + subtitulos)
             var monGo = new GameObject("Monitor de Rick");
-            // A 1.75 m de quien trabaja en la mesa (antes 2.0-2.3 m) e inclinado hacia abajo, hacia el jugador
-            // (antes 8 grados hacia ARRIBA). El borde inferior queda a 1.8 m: nadie mete la cabeza en la pantalla.
             monGo.transform.position = new Vector3(0, 2.22f, 2.95f);
             monGo.transform.rotation = Quaternion.Euler(-14f, 0, 0);
             Box("Carcasa", monGo.transform, new Vector3(0, 0, 0.03f), new Vector3(1.48f, 0.86f, 0.05f), new Color(0.15f, 0.17f, 0.15f));
@@ -808,7 +733,6 @@ namespace RickMorty.EditorTools
             monitor = monGo.AddComponent<RickMonitor>();
             monitor.sizeMeters = new Vector2(1.4f, 0.8f);
 
-            // Tablero de corcho
             var corkGo = new GameObject("Tablero de Corcho");
             corkGo.transform.position = new Vector3(-2.95f, 1.6f, 3.97f);
             var corkCol = Box("CorchoFisico", corkGo.transform, new Vector3(0, 0, 0.02f), new Vector3(1.25f, 0.95f, 0.04f), new Color(0.62f, 0.45f, 0.28f), SurfaceKind.Cork);
@@ -817,10 +741,6 @@ namespace RickMorty.EditorTools
             var cc = cork.transform.Find("CorchoFisico");
             if (cc != null) cc.localPosition = new Vector3(0, 0, 0.03f);
         }
-
-        // ==================================================================
-        //  Lavanderia y rincon derecho
-        // ==================================================================
 
         static void BuildLaundryAndCorner()
         {
@@ -832,7 +752,6 @@ namespace RickMorty.EditorTools
             Box("Fregadero", g, new Vector3(-3.6f, 0.45f, 2.8f), new Vector3(0.65f, 0.9f, 0.75f), new Color(0.45f, 0.45f, 0.42f), SurfaceKind.Metal);
             Box("Mugre", g, new Vector3(-3.6f, 0.905f, 2.8f), new Vector3(0.5f, 0.01f, 0.6f), new Color(0.3f, 0.28f, 0.2f), collider: false);
 
-            // Easter Egg 1: calcomania desgastada de Colombia en la lavadora
             var flag = new GameObject("Calcomania Colombia (easter egg)");
             flag.transform.position = new Vector3(-3.27f, 0.75f, 1.2f);
             flag.transform.rotation = Quaternion.Euler(0, 90, 0);
@@ -842,7 +761,6 @@ namespace RickMorty.EditorTools
             flag.AddComponent<BoxCollider>().size = new Vector3(0.16f, 0.11f, 0.03f);
             MakeEgg(flag, "colombia", "Calcomanía de Colombia", "Esa calcomanía la puso Morty hace años. O un Morty. Ya no sé cuál.", false);
 
-            // Easter Egg 2: Pokebola con cables entre calcetines sucios
             var ball = new GameObject("Pokebola (easter egg)");
             ball.transform.position = new Vector3(-3.0f, 0.06f, 0.75f);
             Prim(PrimitiveType.Sphere, "Arriba", ball.transform, new Vector3(0, 0.01f, 0), new Vector3(0.1f, 0.06f, 0.1f), MatLib.Lit(new Color(0.9f, 0.1f, 0.1f)), null, false);
@@ -854,7 +772,6 @@ namespace RickMorty.EditorTools
             for (int i = 0; i < 2; i++)
                 Box("Calcetin", g, new Vector3(-3.1f + i * 0.2f, 0.015f, 0.6f + i * 0.25f), new Vector3(0.08f, 0.03f, 0.22f), new Color(0.85f, 0.85f, 0.75f), collider: false, rot: Quaternion.Euler(0, 30 + i * 50, 0));
 
-            // Rincon derecho: escoba, recogedor, robot arana, capibara
             var c = Group("Rincon Derecho");
             Cyl("Escoba", c, new Vector3(3.8f, 0.7f, 3.75f), new Vector3(0.03f, 0.7f, 0.03f), WoodDark, true, 0, Quaternion.Euler(-10, 0, 8));
             Box("Cerdas", c, new Vector3(3.75f, 0.08f, 3.7f), new Vector3(0.3f, 0.12f, 0.06f), new Color(0.7f, 0.6f, 0.3f), collider: false);
@@ -867,7 +784,6 @@ namespace RickMorty.EditorTools
                 Cyl("Pata", c, new Vector3(2.7f, 0.08f, 3.5f) + dir * 0.22f, new Vector3(0.02f, 0.12f, 0.02f), MetalGray, false, 0, Quaternion.LookRotation(dir) * Quaternion.Euler(60, 0, 0));
             }
 
-            // Easter Egg 8: capibara con gafas VR sobre un saco de dormir
             Box("SacoDormir", c, new Vector3(3.3f, 0.04f, 3.1f), new Vector3(0.7f, 0.08f, 1.1f), new Color(0.3f, 0.45f, 0.3f), SurfaceKind.Ground);
             var capy = new GameObject("Capibara (easter egg)");
             capy.transform.position = new Vector3(3.3f, 0.25f, 3.1f);
@@ -892,21 +808,15 @@ namespace RickMorty.EditorTools
             MakeEgg(capy, "capybara", "Capibara cuántico", "Shhh. Está alcanzando el nirvana en realidad virtual.", false);
         }
 
-        // ==================================================================
-        //  Exterior: casa Smith, calle, casa del vecino
-        // ==================================================================
-
         static Transform BuildExterior()
         {
             var g = Group("Exterior");
             Box("Cesped", g, new Vector3(5f, -0.06f, 2f), new Vector3(70f, 0.1f, 90f), Grass, SurfaceKind.Ground);
-            // Entrada de concreto con grietas
             Box("EntradaConcreto", g, new Vector3(9f, -0.005f, 0.5f), new Vector3(10f, 0.02f, 4.2f), Concrete, SurfaceKind.Ground);
             for (int i = 0; i < 6; i++)
                 Box("Grieta", g, new Vector3(UnityEngine.Random.Range(5f, 13f), 0.007f, UnityEngine.Random.Range(-1f, 2f)), new Vector3(UnityEngine.Random.Range(0.4f, 1.2f), 0.002f, 0.02f),
                     new Color(0.25f, 0.25f, 0.25f), collider: false, rot: Quaternion.Euler(0, UnityEngine.Random.Range(0, 180f), 0));
 
-            // Fachada exterior del garaje (blanca) + zocalo de ladrillo + techo de tejas
             Box("FachadaDer_A", g, new Vector3(4.13f, 1.5f, -2.125f), new Vector3(0.05f, 3f, 1.75f), White, collider: false);
             Box("FachadaDer_B1", g, new Vector3(4.13f, 1.5f, 2.575f), new Vector3(0.05f, 3f, 0.35f), White, collider: false);
             Box("FachadaDer_B2", g, new Vector3(4.13f, 1.5f, 3.725f), new Vector3(0.05f, 3f, 0.55f), White, collider: false);
@@ -918,11 +828,9 @@ namespace RickMorty.EditorTools
             Box("Zocalo1", g, new Vector3(4.16f, 0.25f, -2.125f), new Vector3(0.04f, 0.5f, 1.75f), Brick, collider: false);
             Box("Zocalo2", g, new Vector3(4.16f, 0.25f, 3.2f), new Vector3(0.04f, 0.5f, 1.6f), Brick, collider: false);
             Box("TechoGaraje", g, new Vector3(0, 3.2f, 0.5f), new Vector3(8.6f, 0.2f, 7.6f), Roof);
-            // Aro de baloncesto sobre la puerta
             Box("Tablero", g, new Vector3(4.2f, 3.55f, 0.5f), new Vector3(0.04f, 0.6f, 0.9f), White, collider: false);
             Cyl("Aro", g, new Vector3(4.45f, 3.35f, 0.5f), new Vector3(0.45f, 0.01f, 0.45f), new Color(1f, 0.45f, 0.1f), false);
 
-            // Casa Smith (dos pisos) a la izquierda del garaje
             var house = Group("Casa Smith", g);
             Box("Cuerpo", house, new Vector3(-9.1f, 3f, 1f), new Vector3(10f, 6f, 9f), White);
             Box("Techo", house, new Vector3(-9.1f, 6.6f, 1f), new Vector3(10.6f, 1.2f, 9.6f), Roof);
@@ -933,14 +841,12 @@ namespace RickMorty.EditorTools
             for (int i = 0; i < 6; i++)
                 Box("Baldosa", g, new Vector3(-6.5f, -0.004f, -4.2f - i * 0.8f), new Vector3(0.8f, 0.02f, 0.5f), new Color(0.6f, 0.58f, 0.55f), SurfaceKind.Ground);
 
-            // Calle y aceras
             Box("Calle", g, new Vector3(18f, -0.01f, 0f), new Vector3(8f, 0.04f, 90f), Asphalt, SurfaceKind.Ground);
             for (int i = -10; i <= 10; i++)
                 Box("Linea", g, new Vector3(18f, 0.012f, i * 4f), new Vector3(0.15f, 0.005f, 1.8f), new Color(0.95f, 0.85f, 0.2f), collider: false);
             Box("AceraOeste", g, new Vector3(13.5f, 0.02f, 0f), new Vector3(1f, 0.1f, 90f), new Color(0.7f, 0.7f, 0.68f), SurfaceKind.Ground);
             Box("AceraEste", g, new Vector3(22.5f, 0.02f, 0f), new Vector3(1f, 0.1f, 90f), new Color(0.7f, 0.7f, 0.68f), SurfaceKind.Ground);
 
-            // Casa del vecino (rosada, un piso) con ventanas "diana"
             var nb = Group("Casa del Vecino", g);
             Box("Cuerpo", nb, new Vector3(7.5f, 1.75f, 13.5f), new Vector3(9f, 3.5f, 7f), Pink);
             Box("Techo", nb, new Vector3(7.5f, 3.8f, 13.5f), new Vector3(9.5f, 0.6f, 7.5f), new Color(0.75f, 0.2f, 0.2f));
@@ -951,16 +857,14 @@ namespace RickMorty.EditorTools
                 w.AddComponent<NeighborWindow>();
             }
             Label("¡NO ME TIREN BICHOS\nA LAS VENTANAS!", nb, new Vector3(7.5f, 3.1f, 9.9f), Quaternion.identity, 1.2f, Color.white, 4f);
-            // Valla blanca con puerta
             for (float x = 4.3f; x <= 13f; x += 0.5f)
             {
-                if (x > 8f && x < 9.2f) continue; // puerta transitable
+                if (x > 8f && x < 9.2f) continue;
                 Box("Valla", g, new Vector3(x, 0.45f, 7.5f), new Vector3(0.08f, 0.9f, 0.05f), White);
             }
             Box("VallaRiel", g, new Vector3(6.15f, 0.7f, 7.5f), new Vector3(3.8f, 0.06f, 0.04f), White, collider: false);
             Box("VallaRiel2", g, new Vector3(11.1f, 0.7f, 7.5f), new Vector3(3.8f, 0.06f, 0.04f), White, collider: false);
 
-            // Horizonte: otras casas suburbanas de colores
             var colors = new[] { new Color(0.6f, 0.8f, 0.95f), new Color(0.95f, 0.9f, 0.6f), new Color(0.7f, 0.95f, 0.7f), new Color(0.95f, 0.75f, 0.55f), new Color(0.85f, 0.7f, 0.95f) };
             for (int i = 0; i < 8; i++)
             {
@@ -968,7 +872,6 @@ namespace RickMorty.EditorTools
                 Box("CasaHorizonte", g, new Vector3(29f, 2f, z), new Vector3(7f, 4f, 7f), colors[i % colors.Length], collider: false);
                 Box("TechoHorizonte", g, new Vector3(29f, 4.4f, z), new Vector3(7.4f, 0.8f, 7.4f), Roof, collider: false);
             }
-            // Cajas de carton y sandias alienigenas en el patio (para las armas de corte)
             for (int i = 0; i < 4; i++)
             {
                 var box = Box("CajaCarton", null, new Vector3(9f + i * 0.9f, 0.2f, 3.8f), Vector3.one * 0.4f, new Color(0.7f, 0.55f, 0.35f));
@@ -984,8 +887,8 @@ namespace RickMorty.EditorTools
             var b = g.gameObject.AddComponent<PlayAreaBoundary>();
             b.allowedZones = new List<Bounds>
             {
-                new Bounds(new Vector3(4.7f, 0, 3.45f), new Vector3(17.6f, 10f, 13.1f)),   // garaje + entrada + jardin vecino: x[-4.1,13.5] z[-3.1,10]
-                new Bounds(new Vector3(18.25f, 0, 0f), new Vector3(9.5f, 10f, 76f)),       // calle: x[13.5,23] z[-38,38]
+                new Bounds(new Vector3(4.7f, 0, 3.45f), new Vector3(17.6f, 10f, 13.1f)),
+                new Bounds(new Vector3(18.25f, 0, 0f), new Vector3(9.5f, 10f, 76f)),
             };
             var yellow = new Color(1f, 0.85f, 0.1f);
             void Tape(Vector3 a, Vector3 c)
@@ -999,8 +902,6 @@ namespace RickMorty.EditorTools
                 {
                     var p = a + d.normalized * t;
                     Box("Poste", g, new Vector3(p.x, 0.5f, p.z), new Vector3(0.06f, 1f, 0.06f), new Color(1f, 0.45f, 0.1f), collider: false);
-                    // legible desde ambos lados: dos letreros espalda con espalda, cada uno solo con su cara
-                    // delantera (si no, TMP dibuja tambien la de atras y se ve un texto espejado encima)
                     foreach (var yaw in new[] { 90f, -90f })
                     {
                         var r = rot * Quaternion.Euler(0, yaw, 0);
@@ -1018,7 +919,6 @@ namespace RickMorty.EditorTools
             Tape(new Vector3(13.5f, 0, -38f), new Vector3(23f, 0, -38f));
             Tape(new Vector3(23f, 0, -38f), new Vector3(23f, 0, 38f));
 
-            // Barricadas, conos y camionetas del FBI en los extremos de la calle
             foreach (var z in new[] { -39f, 39f })
             {
                 for (int i = 0; i < 4; i++)
@@ -1034,17 +934,12 @@ namespace RickMorty.EditorTools
             return b;
         }
 
-        // ==================================================================
-        //  Jugador XR
-        // ==================================================================
-
         static PlayerRig BuildPlayer(out WristWatch watch, out DiscoveryHologram hologram, out Transform left, out Transform right, out Transform head)
         {
             var originPrefab = FindPrefab("XR Origin (XR Rig)");
             if (originPrefab == null)
                 throw new Exception("No se encontro el prefab 'XR Origin (XR Rig)'. Ejecuta primero 'Rick y Morty/1. Configurar proyecto'.");
 
-            // Interaction Manager + EventSystem para UI XR
             new GameObject("XR Interaction Manager").AddComponent<XRInteractionManager>();
             var es = new GameObject("EventSystem");
             es.AddComponent<EventSystem>();
@@ -1055,9 +950,8 @@ namespace RickMorty.EditorTools
             var origin = originGo.GetComponent<XROrigin>();
             var cam = origin.Camera;
             head = cam.transform;
-            cam.nearClipPlane = 0.05f;   // 2 cm hacia parpadear (z-fighting) calcomanias y lineas lejanas; 5 cm sigue por delante de los fundidos (12 cm)
+            cam.nearClipPlane = 0.05f;
             var camData = cam.GetUniversalAdditionalCameraData();
-            // apagado por defecto (en Quest cuesta una pasada extra por cuadro); ScreenFX lo enciende solo durante sus efectos
             if (camData != null) camData.renderPostProcessing = false;
 
             left = FindDeep(originGo.transform, "Left Controller");
@@ -1073,10 +967,8 @@ namespace RickMorty.EditorTools
             }
 
             CleanUpRig(originGo);
-            originGo.layer = 2;   // "Ignore Raycast": los disparos (portal, laser) no chocan con la capsula del jugador
+            originGo.layer = 2;
 
-            // Manos que nos dio el profesor (carpeta Assets/Oculus Hands): cada prefab va como hijo de su control,
-            // igual que en clase. Traen su Animator y el script AnimateHandOnInput (gatillo = pinza, grip = puno).
             AddProfessorHand(left, "Left Hand Model");
             AddProfessorHand(right, "Right Hand Model");
 
@@ -1094,10 +986,9 @@ namespace RickMorty.EditorTools
             var vignette = cam.gameObject.AddComponent<ComfortVignette>();
             vignette.origin = originGo.transform;
 
-            // Reloj Multiversal en la muneca izquierda
             var watchGo = new GameObject("Reloj Multiversal");
             watchGo.transform.SetParent(left != null ? left : originGo.transform, false);
-            watchGo.transform.localPosition = new Vector3(0, 0.03f, -0.15f);   // en la muneca, detras de la mano del profesor
+            watchGo.transform.localPosition = new Vector3(0, 0.03f, -0.15f);
             watchGo.transform.localRotation = Quaternion.identity;
             watch = watchGo.AddComponent<WristWatch>();
             watch.head = head;
@@ -1107,7 +998,6 @@ namespace RickMorty.EditorTools
             hologram.head = head;
             watch.hologram = hologram;
 
-            // Simulador XR solo para el Editor (mouse/teclado)
             var simPrefab = FindPrefab("XR Interaction Simulator");
             if (simPrefab != null)
             {
@@ -1115,7 +1005,6 @@ namespace RickMorty.EditorTools
                 simRoot.tag = "EditorOnly";
                 var sim = (GameObject)PrefabUtility.InstantiatePrefab(simPrefab);
                 sim.transform.SetParent(simRoot.transform, false);
-                // En el PC, WASD mueve la "cabeza" simulada: a 0.2 se sentia muy lento (comentario del equipo)
                 foreach (var mb in sim.GetComponentsInChildren<MonoBehaviour>(true))
                 {
                     if (mb == null) continue;
@@ -1124,7 +1013,7 @@ namespace RickMorty.EditorTools
                     if (px == null) continue;
                     px.floatValue = 0.42f;
                     var pz = so.FindProperty("m_TranslateZSpeed"); if (pz != null) pz.floatValue = 0.42f;
-                    var py = so.FindProperty("m_TranslateYSpeed"); if (py != null) py.floatValue = 0f;   // sin volar (Q/E atravesaban el techo)
+                    var py = so.FindProperty("m_TranslateYSpeed"); if (py != null) py.floatValue = 0f;
                     so.ApplyModifiedPropertiesWithoutUndo();
                 }
                 sim.SetActive(false);
@@ -1135,10 +1024,6 @@ namespace RickMorty.EditorTools
             return rig;
         }
 
-        /// <summary>
-        /// El rig de los Starter Assets trae activos salto (boton A: sube la vista 1.25 m), escalada, "grab move" y
-        /// teletransporte (palanca derecha hacia adelante: arco sin destino valido). El juego es solo caminar y girar.
-        /// </summary>
         static void CleanUpRig(GameObject originGo)
         {
             foreach (var t in originGo.GetComponentsInChildren<Transform>(true))
@@ -1153,25 +1038,23 @@ namespace RickMorty.EditorTools
                 string tn = mb.GetType().Name;
                 if (tn == "ControllerInputActionManager")
                 {
-                    // sin referencia al interactor de teletransporte, el sample no lo vuelve a encender
                     var so = new SerializedObject(mb);
                     var p = so.FindProperty("m_TeleportInteractor");
                     if (p != null) { p.objectReferenceValue = null; so.ApplyModifiedPropertiesWithoutUndo(); }
                 }
                 else if (mb is UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning.SnapTurnProvider snap)
                 {
-                    snap.enableTurnAround = false;   // palanca hacia atras = giro brusco de 180 grados
+                    snap.enableTurnAround = false;
                     EditorUtility.SetDirty(snap);
                 }
                 else if (mb is UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider move)
                 {
-                    move.moveSpeed = 1.8f;           // 2.5 m/s es trotar; ~1.4-1.8 es lo comodo en VR
+                    move.moveSpeed = 1.8f;
                     EditorUtility.SetDirty(move);
                 }
             }
         }
 
-        /// <summary>Pone la mano del profesor dentro del control y oculta el modelo del control de Quest.</summary>
         static void AddProfessorHand(Transform controller, string prefabName)
         {
             if (controller == null) return;
@@ -1182,12 +1065,10 @@ namespace RickMorty.EditorTools
             foreach (var r in hand.GetComponentsInChildren<Renderer>(true))
                 r.shadowCastingMode = ShadowCastingMode.Off;
 
-            // Ocultamos solo los renderers del modelo del control (del objeto cuelgan otras piezas del rig)
             foreach (var t in controller.GetComponentsInChildren<Transform>(true))
                 if (t.name.EndsWith("Controller Visual"))
                     foreach (var r in t.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
 
-            // Si el prefab del profesor perdio las acciones (otra version de XRI), se las ponemos a mano
             var anim = hand.GetComponent<AnimateHandOnInput>();
             if (anim != null)
             {
@@ -1198,11 +1079,10 @@ namespace RickMorty.EditorTools
                 Debug.Log("[RickMorty] Mano " + prefabName + ": pinza=" + Describe(anim.pinchAnimationAction) + " grip=" + Describe(anim.gripAnimationAction));
             }
 
-            // Agarrar a distancia trae el objeto A LA MANO (antes quedaba flotando en la punta del rayo)
             foreach (var nf in controller.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactors.NearFarInteractor>(true))
             {
                 nf.farAttachMode = UnityEngine.XR.Interaction.Toolkit.Attachment.InteractorFarAttachMode.Near;
-                nf.blockUIOnInteractableSelection = false;   // con algo en la mano igual se pueden tocar los botones
+                nf.blockUIOnInteractableSelection = false;
                 EditorUtility.SetDirty(nf);
             }
         }
@@ -1260,10 +1140,6 @@ namespace RickMorty.EditorTools
             return go.transform;
         }
 
-        // ==================================================================
-        //  Rick (placeholder) y holograma
-        // ==================================================================
-
         static RickNPC BuildRick(out RickHologram holo)
         {
             var rickGo = new GameObject("Rick");
@@ -1318,20 +1194,15 @@ namespace RickMorty.EditorTools
             }
         }
 
-        // ==================================================================
-        //  Sala final (vacio espacial)
-        // ==================================================================
-
         static EndScreen BuildEndRoom()
         {
             var root = new GameObject("Sala Final (espacio)");
-            root.transform.position = new Vector3(0, -500f, 0); // bajo tierra: invisible desde el mundo
+            root.transform.position = new Vector3(0, -500f, 0);
             var floor = Prim(PrimitiveType.Cylinder, "Plataforma", root.transform, new Vector3(0, -0.05f, 0), new Vector3(4f, 0.05f, 4f),
                 MatLib.Transparent(new Color(0.3f, 1f, 0.4f, 0.15f)));
             floor.AddComponent<SurfaceType>().kind = SurfaceKind.Ground;
             var voidMat = MatLib.Unlit(new Color(0.01f, 0.01f, 0.03f));
             var sky = Prim(PrimitiveType.Sphere, "Vacio", root.transform, Vector3.zero, Vector3.one * 80f, voidMat, null, false);
-            // Invertir normales para ver la esfera desde adentro
             var mf = sky.GetComponent<MeshFilter>();
             var mesh = Object.Instantiate(mf.sharedMesh);
             mesh.name = "EsferaInvertida";

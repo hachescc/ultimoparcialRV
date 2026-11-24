@@ -8,11 +8,6 @@ using UnityEngine.XR.Interaction.Toolkit.UI;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Ayudas para construir UI XR en espacio mundo por codigo (canvas, paneles, textos, botones).
-    /// Todas las interfaces del juego son diegeticas (reloj, monitor, tablero, hologramas).
-    /// Lo usan: todas las pantallas (reloj, monitor, pausa, controles, corcho, holograma, franja, resultados).
-    /// </summary>
     public static class UIKit
     {
         public static readonly Color Neon = new Color(0.45f, 1f, 0.45f);
@@ -44,7 +39,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Crea un canvas en espacio mundo. sizePx en "pixeles" de UI; metersPerPx define el tamano real.</summary>
         public static Canvas WorldCanvas(string name, Transform parent, Vector2 sizePx, float metersPerPx, bool interactive)
         {
             var go = new GameObject(name, typeof(RectTransform));
@@ -96,7 +90,6 @@ namespace RickMorty
 
         static TMP_FontAsset s_TitleFont;
 
-        /// <summary>Fuente de titulos (Rubik Wet Paint, en Resources/Fonts &amp; Materials). Null si no existe.</summary>
         public static TMP_FontAsset TitleFont
         {
             get
@@ -106,7 +99,6 @@ namespace RickMorty
             }
         }
 
-        /// <summary>Convierte un texto en titulo (fuente de titulos, sin negrita sintetica).</summary>
         public static T AsTitle<T>(T t) where T : TMP_Text
         {
             var f = TitleFont;
@@ -114,7 +106,6 @@ namespace RickMorty
             return t;
         }
 
-        /// <summary>Envuelve un texto con la etiqueta de la fuente de titulos (para textos con varias partes).</summary>
         public static string TitleTag(string s) => "<font=\"Titulos SDF\">" + s + "</font>";
 
         public static TextMeshProUGUI Text(string name, Transform parent, string text, float size, Color color,
@@ -132,7 +123,6 @@ namespace RickMorty
             return t;
         }
 
-        /// <summary>Texto de una sola linea: no hace salto, se encoge un poco si no cabe y si aun asi no cabe pone '...'.</summary>
         public static TextMeshProUGUI Line(string name, Transform parent, string text, float size, Color color, TextAlignmentOptions align,
             Vector2 anchorMin, Vector2 anchorMax, float padX, float padY)
         {
@@ -145,7 +135,6 @@ namespace RickMorty
             return t;
         }
 
-        /// <summary>Bloque de texto con salto de linea y auto-tamano entre min y max; si no cabe, termina en '...'.</summary>
         public static TextMeshProUGUI Block(string name, Transform parent, string text, float min, float max, Color color,
             Vector2 anchorMin, Vector2 anchorMax, float pad)
         {

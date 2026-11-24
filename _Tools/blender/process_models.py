@@ -1,7 +1,3 @@
-# Procesa los modelos descargados: rota, une, decima, escala a metros, ajusta pivote,
-# reduce texturas, recolorea y exporta GLB optimizado a Assets/_RickMorty/Models.
-# Convencion: en Blender +Z arriba y el FRENTE (canon/punta) hacia -Y  => en Unity +Z adelante.
-# Uso: blender -b -P process_models.py -- <src_dir> <dst_dir> [solo_id]
 import bpy, sys, os, math
 from mathutils import Vector, Matrix, Quaternion
 
@@ -9,11 +5,7 @@ argv = sys.argv[sys.argv.index("--") + 1:]
 SRC, DST = argv[0], argv[1]
 ONLY = argv[2].split(",") if len(argv) > 2 else None
 
-# fit: ('h', alto) | ('len', largo en Y) | ('max', mayor dimension) | ('w', ancho en X) | ('dims', (x,y,z))
-# pivot: center | bottom | top ; rot: grados XYZ aplicados primero ; flip: gira 180 en Z
-# color: reemplaza el color base (quita texturas); tris: maximo de triangulos ; tex: tamano max de textura
 CFG = [
-    # ---------- Escenario ----------
     dict(id="rick", src="rick_sanchez_-_ready_for_ue4_rigged.glb", dir="Env", fit=('h', 1.75), pivot='bottom', tex=1024, rig=True),
     dict(id="mesa", src="workbench (1).glb", dir="Env", fit=('dims', (2.4, 1.0, 0.9)), pivot='bottom', tex=512),
     dict(id="estanteria", src="rusty_metal_shelving.glb", dir="Env", fit=('dims', (2.0, 0.5, 2.45)), pivot='bottom', tex=1024, tris=20000),
@@ -27,7 +19,6 @@ CFG = [
     dict(id="recogedor", src="dustpan.glb", dir="Env", fit=('max', 0.3), pivot='bottom'),
     dict(id="meeseeks_npc", src="mr_meeseks.glb", dir="Env", fit=('h', 1.05), pivot='bottom', tris=9000, tex=512),
 
-    # ---------- Objetos (ids de items.json) ----------
     dict(id="mega_semilla", src="erlenmeyer_flask.glb", fit=('h', 0.19), pivot='center'),
     dict(id="meeseeks", src="transparent_glass_jar_with_green_lid_-_3d_model.glb", fit=('h', 0.14), pivot='center'),
     dict(id="bola_meeseeks", src="meeseks_box.glb", fit=('h', 0.2), pivot='center', tex=512),
@@ -54,8 +45,6 @@ CFG = [
     dict(id="peluche_teto", src="kasane_teto_plush.glb", fit=('h', 0.28), pivot='center', tris=8000, tex=512, png=True),
     dict(id="dakimakura", src="kurumi_body_pillow.glb", fit=('h', 0.85), pivot='center', tex=512),
 ]
-# ---------- Reemplazos descargados de Sketchfab (2026-11-16) para modelos que antes se generaban ----------
-# Fuente: _ModelosOriginales/sketchfab2/<id>.glb (autores y licencias en _ModelosOriginales/sketchfab2/CREDITOS.md)
 SF2 = "sketchfab2/"
 SF3 = "sketchfab3/"
 CFG += [
@@ -79,7 +68,6 @@ CFG += [
     dict(id="barricada", src=SF2 + "barricada.glb", dir="Env", rot=(0, 0, 90), fit=('w', 1.8), pivot='bottom', tex=1024),
     dict(id="cono", src=SF2 + "cono.glb", dir="Env", fit=('h', 0.52), pivot='bottom', tex=512),
 ]
-# ---------- Ronda 2 (entorno): casas del barrio, valla, aro, caneca, boton, vegetacion, mobiliario urbano ----------
 CFG += [
     dict(id="casa_barrio1", src=SF2 + "casa_barrio1.glb", dir="Env", fit=('w', 7.5), pivot='bottom', tris=6000, tex=1024),
     dict(id="casa_barrio2", src=SF2 + "casa_barrio2.glb", dir="Env", fit=('w', 8.0), pivot='bottom', tris=8000, tex=512),
@@ -93,7 +81,6 @@ CFG += [
     dict(id="farola", src=SF2 + "farola.glb", dir="Env", fit=('h', 5.0), pivot='bottom', tris=2500, tex=512),
     dict(id="hidrante", src=SF2 + "hidrante.glb", dir="Env", fit=('h', 0.75), pivot='bottom', tex=512),
     dict(id="reloj_pared", src=SF2 + "reloj_pared.glb", dir="Env", fit=('max', 0.32), pivot='center', tex=512),
-    # --- Ronda 3 (2026-11-19): personajes que seguian generados + utileria del garaje
     dict(id="hombre_eyeholes", src=SF3 + "hombre_eyeholes.glb", dir="Env", drop=["Ring", "Icosphere"], rot=(0, 0, 45), fit=('h', 2.05), pivot='bottom', tris=12000, tex=1024),
     dict(id="tio_steve", src=SF3 + "tio_steve.glb", fit=('max', 0.34), pivot='center', tris=8000, tex=512),
     dict(id="casco_snowball", src=SF3 + "casco_snowball.glb", rot=(0, 0, 180), fit=('max', 0.31), pivot='center', color=(0.72, 0.76, 0.8), rough=0.3, tex=512),
@@ -102,7 +89,6 @@ CFG += [
     dict(id="gabinete", src=SF3 + "gabinete.glb", dir="Env", fit=('h', 1.35), pivot='bottom', tris=9000, tex=1024),
     dict(id="bicicleta", src=SF3 + "bicicleta.glb", dir="Env", fit=('len', 1.75), pivot='bottom', tex=512, png=True),
 ]
-# Ingredientes que comparten modelo
 ALIASES = {"mega_semilla": ["fleeb", "acido", "materia_oscura"], "meeseeks": ["plumbus_polvo", "esporas", "kalaxianos", "marihuana", "semen"], "bola_meeseeks": ["caja_contrabando"]}
 
 
@@ -212,7 +198,6 @@ def fit_and_pivot(root_objs, transform_target, c):
 def process(c):
     reset()
     bpy.ops.import_scene.gltf(filepath=os.path.join(SRC, c['src']))
-    # keep: solo las mallas cuyo nombre contenga alguno de estos textos; drop: quitar las que lo contengan
     if c.get('keep') or c.get('drop'):
         for o in list(bpy.data.objects):
             if o.type != 'MESH':
@@ -241,7 +226,6 @@ def process(c):
         obj.name = c['id']
         objs = [obj]
     else:
-        # Con rig: transformar el objeto raiz y aplicar escala/rotacion a todo
         roots = [o for o in objs if o.parent is None]
         root = bpy.data.objects.new("root", None)
         bpy.context.scene.collection.objects.link(root)
@@ -256,7 +240,6 @@ def process(c):
         bpy.context.view_layer.update()
         bpy.ops.object.select_all(action='SELECT')
         bpy.context.view_layer.objects.active = root
-        # aplicar transformaciones a la jerarquia completa
         for o in [o for o in bpy.data.objects if o.parent == root]:
             mw = o.matrix_world.copy(); o.parent = None; o.matrix_world = mw
         bpy.data.objects.remove(root, do_unlink=True)
@@ -268,7 +251,6 @@ def process(c):
 
     if c.get('color'):
         set_color(c['color'], c.get('rough'))
-        # los colores por vertice multiplican el color base: quitarlos
         for o in bpy.data.objects:
             if o.type == 'MESH':
                 for a in list(o.data.color_attributes):
@@ -294,10 +276,6 @@ def process(c):
     print(f"OUT {c['id']}: tris {tri_count(objs)} dims {d.x:.2f}x{d.y:.2f}x{d.z:.2f} -> {os.path.getsize(path)/1048576:.2f}MB")
     return path
 
-
-# ---------------------------------------------------------------------------
-# Animaciones de Rick: brazos abajo como pose de reposo + Idle / Walk / Talk
-# ---------------------------------------------------------------------------
 
 def _find(arm, *keys):
     for b in arm.pose.bones:
@@ -344,14 +322,9 @@ def rick_animations():
     spine = _find(arm, 'spine_03') or _find(arm, 'spine')
     print("BONES", [b.name if b else None for b in (ua_l, ua_r, th_l, th_r, head, spine)])
 
-    # 1) Brazos abajo (de pose T a pose relajada) y fijarlo como reposo
-    # Se calcula la rotacion exacta que lleva el hueso (su eje Y) a "abajo y un poco afuera",
-    # en vez de adivinar un eje local (eso giraba los brazos hacia atras y quedaban escondidos).
     from mathutils import Euler
 
     def world_dir(pb):
-        # direccion REAL de la extremidad: de esta articulacion a la siguiente (la punta del hueso
-        # importado de glTF es una heuristica y no sigue la malla)
         nxt = next((c for c in pb.children if 'twist' not in c.name.lower()), None)
         end = nxt.head if nxt is not None else pb.tail
         return ((arm.matrix_world @ end) - (arm.matrix_world @ pb.head)).normalized()
@@ -360,7 +333,7 @@ def rick_animations():
         """Rotacion exacta: la diferencia entre la direccion real del brazo y la deseada, llevada
         del espacio del mundo al espacio local del hueso en reposo (padres en reposo)."""
         pb.rotation_mode = 'QUATERNION'
-        for _ in range(3):   # 3 pasadas para corregir el error residual
+        for _ in range(3):
             cur = world_dir(pb)
             rw = cur.rotation_difference(target)
             arm_q = arm.matrix_world.to_quaternion()
@@ -393,8 +366,6 @@ def rick_animations():
         pb.rotation_mode = 'QUATERNION'
         pb.rotation_quaternion = Quaternion()
 
-    # 2) Animaciones: cada hueso rota alrededor de un eje del MUNDO (X = lateral, para
-    #    balancear adelante/atras), convertido al espacio local del hueso en reposo.
     arm_rot = arm.matrix_world.to_quaternion()
 
     def local_q(pb, world_axis, deg):
@@ -419,7 +390,6 @@ def rick_animations():
             pb.rotation_quaternion = Quaternion()
         return act
 
-    # Walk: ciclo de 1 s, piernas +-24, rodillas, brazos opuestos +-14
     new_action("Walk")
     for f in range(0, 25, 3):
         s = math.sin(f / 24 * 2 * math.pi)
@@ -427,14 +397,12 @@ def rick_animations():
         key(cf_l, -max(0.0, -s) * 30, f); key(cf_r, -max(0.0, s) * 30, f)
         key(ua_l, -14 * s, f); key(ua_r, 14 * s, f)
         key(spine, 3, f)
-    # Idle: respiracion y leve balanceo
     new_action("Idle")
     for f in range(0, 49, 6):
         s = math.sin(f / 48 * 2 * math.pi)
         key(spine, 2 * s, f)
         key(head, 3 * math.sin(f / 48 * 2 * math.pi + 1), f)
         key(ua_l, 2 * s, f); key(ua_r, -2 * s, f)
-    # Talk: cabeceo + gesto con el antebrazo derecho hacia adelante
     new_action("Talk")
     for f in range(0, 49, 4):
         ph = f / 48 * 2 * math.pi

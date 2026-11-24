@@ -4,17 +4,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Etiqueta flotante con el nombre del objeto; solo aparece de cerca para no saturar.
-    /// Las etiquetas se coordinan entre si: si dos quedan casi en la misma direccion de la
-    /// mirada (se encimarian), solo se muestra la del objeto que se agarra o el mas centrado.
-    /// Lo usan: ItemFactory (se la pone a cada objeto).
-    /// </summary>
     public class ItemLabel : MonoBehaviour
     {
         public float showDistance = 1.1f;
         public float height = 0.12f;
-        [Tooltip("Separacion angular minima (grados) entre dos etiquetas visibles")]
         public float minSeparation = 9f;
         const int MaxVisible = 6;
 
@@ -49,7 +42,6 @@ namespace RickMorty
             m_Text.gameObject.SetActive(false);
         }
 
-        /// <summary>Decide una vez por frame que etiquetas se ven (sin encimarse).</summary>
         static void Resolve(PlayerRig rig)
         {
             var head = rig.HeadPosition;
@@ -60,14 +52,12 @@ namespace RickMorty
                 if (l == null || l.m_Text == null) continue;
                 l.m_Visible = false;
                 if (l.m_Item != null && l.m_Item.Unavailable) continue;
-                // los ingredientes base en su soporte ya tienen placa fija con el nombre: sin etiqueta flotante duplicada
                 if (l.m_Item != null && l.m_Item.IsBase && l.m_Item.InSocket) continue;
                 var p = l.transform.position + Vector3.up * l.height;
                 var d = p - head;
                 float dist = d.magnitude;
                 if (dist > l.showDistance || dist < 0.01f) continue;
                 l.m_Dir = d / dist;
-                // menor = mas prioridad: lo que se tiene en la mano primero, luego lo mas centrado en la vista
                 l.m_Score = Vector3.Angle(fwd, l.m_Dir) + dist * 10f;
                 if (l.m_Item != null && l.m_Item.IsHeld) l.m_Score -= 1000f;
                 s_Candidates.Add(l);

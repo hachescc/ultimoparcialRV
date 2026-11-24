@@ -6,12 +6,6 @@ using UnityEngine.XR;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Pantalla de ayuda con los controles (visor y PC). Se abre/cierra con el boton Y del control
-    /// izquierdo (en el simulador XR: tecla 2 con la mano izquierda) o la tecla B del teclado, o
-    /// desde el menu de pausa. No pausa el juego: aparece frente a la vista y se puede cerrar igual.
-    /// Lo usan: PauseMenu (la agrega a su objeto y tiene el boton "Ver controles").
-    /// </summary>
     public class ControlsPanel : MonoBehaviour
     {
         public static ControlsPanel Instance { get; private set; }
@@ -53,7 +47,6 @@ namespace RickMorty
 
         IEnumerator Start()
         {
-            // recordatorio unico, cuando Rick ya termino de explicar lo basico (antes salia a los 9 s, en plena charla)
             yield return new WaitForSeconds(4f);
             while (GameManager.Instance != null && (GameManager.Instance.State == GameState.Intro || GameManager.Instance.State == GameState.Onboarding))
                 yield return null;
@@ -70,13 +63,11 @@ namespace RickMorty
 
         void Build()
         {
-            // En el visor solo se muestra la columna del visor (la del teclado no sirve ahi y ensanchaba el panel a 73 grados).
-            // En el PC (simulador) se muestran las dos.
             bool vr = XRSettings.isDeviceActive;
             m_BuiltForVr = vr;
             if (m_Canvas != null) Destroy(m_Canvas.gameObject);
             m_Canvas = UIKit.WorldCanvas("ControlsCanvas", transform, new Vector2(vr ? 720 : 1280, 760), 0.001f, false);
-            m_Canvas.sortingOrder = 60;   // por encima del menu de pausa
+            m_Canvas.sortingOrder = 60;
             var root = m_Canvas.transform;
             UIKit.Fill("Marco", root, new Color(0.35f, 1f, 0.45f, 0.95f));
             root = UIKit.Panel("Bg", root, new Color(0.03f, 0.07f, 0.06f, 0.98f), Vector2.zero, Vector2.one, new Vector2(5, 5), new Vector2(-5, -5)).transform;
@@ -110,7 +101,6 @@ namespace RickMorty
 
         public void Open()
         {
-            // el visor puede activarse despues de Awake: si cambio el modo, se rehace el panel
             if (XRSettings.isDeviceActive != m_BuiltForVr) Build();
             var cam = Camera.main;
             if (cam != null)
@@ -119,7 +109,6 @@ namespace RickMorty
                 var f = head.forward; f.y = 0;
                 if (f.sqrMagnitude < 0.01f) f = Vector3.forward;
                 f.Normalize();
-                // un poco mas cerca que la pausa (0.9 m) para quedar delante si ambas estan abiertas
                 m_Canvas.transform.position = head.position + f * 0.86f + Vector3.down * 0.05f;
                 m_Canvas.transform.rotation = Quaternion.LookRotation(f, Vector3.up);
             }

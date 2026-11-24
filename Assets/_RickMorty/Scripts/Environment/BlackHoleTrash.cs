@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Bote de basura con un agujero negro en miniatura. Todo objeto creado que caiga adentro
-    /// se estira como espagueti y se destruye ("Fuuump"). Mantiene limpio el garaje y el
-    /// rendimiento (menos Rigidbodies activos). Los frascos base regresan a su lugar.
-    /// Lo usan: GameManager (referencia) y los Meeseeks, que llevan la basura aqui; lo crea el builder de escena.
-    /// </summary>
     public class BlackHoleTrash : MonoBehaviour
     {
         public Transform core;
@@ -20,7 +14,6 @@ namespace RickMorty
 
         void OnTriggerEnter(Collider other) => TrySwallow(other);
 
-        // Stay: si la mano entra sosteniendo el objeto y lo suelta ADENTRO, Enter ya paso y el objeto se quedaba ahi.
         void OnTriggerStay(Collider other) => TrySwallow(other);
 
         void TrySwallow(Collider other)
@@ -40,7 +33,6 @@ namespace RickMorty
             }
             if (item.itemId == "pistola_portales")
             {
-                // la pistola final no se puede perder: vuelve al soporte de ensamblaje por un portal
                 FinalAssemblyStation.ReturnGun(item);
                 return;
             }

@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Vineta dinamica de confort (anti-mareo): oscurece los bordes al caminar o girar con el joystick.
-    /// Se activa/desactiva desde el menu de pausa y se guarda en el archivo de guardado.
-    /// Lo usan: PauseMenu (activar o desactivar); la crea el builder de escena en la camara.
-    /// </summary>
     public class ComfortVignette : MonoBehaviour
     {
         public static ComfortVignette Instance { get; private set; }
@@ -43,7 +38,6 @@ namespace RickMorty
             Destroy(quad.GetComponent<Collider>());
             quad.name = "ComfortVignette";
             quad.transform.SetParent(transform, false);
-            // a 50 cm (antes 14 cm): tan cerca, cada ojo veia el hueco de la vineta corrido ~13 grados en sentido contrario
             quad.transform.localPosition = new Vector3(0, 0, 0.5f);
             quad.transform.localScale = new Vector3(1.5f, 1.5f, 1f);
             m_Renderer = quad.GetComponent<Renderer>();
@@ -94,7 +88,6 @@ namespace RickMorty
             float target = 0f;
             if (m_Enabled)
             {
-                // Saltos muy grandes (teletransporte/snap turn) no deben activar la vineta
                 if (speed < 20f) target = Mathf.Max(target, Mathf.Clamp01(speed / moveSpeedForMax));
                 if (turn < 2000f) target = Mathf.Max(target, Mathf.Clamp01(turn / turnSpeedForMax));
             }

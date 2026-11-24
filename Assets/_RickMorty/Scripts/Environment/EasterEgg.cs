@@ -3,11 +3,6 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Easter egg escondido en el garaje. Se "encuentra" al agarrarlo/seleccionarlo con la mano
-    /// o el rayo (o al tirarle algo, en el caso del capibara). Suma puntos una vez.
-    /// Lo usan: el builder de escena (los pone en el garaje), Capybara y FX (no empuja secretos con la explosion).
-    /// </summary>
     public class EasterEgg : MonoBehaviour
     {
         public string eggId = "egg";

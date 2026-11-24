@@ -1,6 +1,3 @@
-// Arma Documentacion/RickMorty_Recorrido.html a partir de las capturas del recorrido
-// (Documentacion/capturas/manifest.json) y los datos del juego (items/recetas JSON).
-// Luego se imprime a PDF con Edge headless (ver build_pdf.ps1).
 const fs = require('fs');
 const path = require('path');
 
@@ -14,7 +11,6 @@ const items = JSON.parse(fs.readFileSync(path.join(data, 'items.json'), 'utf8'))
 const recipes = JSON.parse(fs.readFileSync(path.join(data, 'recipes.json'), 'utf8'));
 const byId = Object.fromEntries(items.map(i => [i.id, i]));
 
-// Capturas que quedaron tapadas por otros objetos: no van al PDF
 const SKIP = new Set(['Meeseeks de contrabando', 'Rick Caleno + camiseta del America', 'Rick Caleño + camiseta del América', 'Cubo Prison Realm']);
 
 const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

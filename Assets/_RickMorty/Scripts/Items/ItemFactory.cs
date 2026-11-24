@@ -3,12 +3,6 @@ using UnityEngine.XR.Interaction.Toolkit.Interactables;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Fabrica de objetos: crea cualquier item del JSON con fisica, agarre XR, etiqueta,
-    /// sonido de impacto y su comportamiento especial. Usa el modelo del ItemVisualRegistry
-    /// si existe; si no, arma un placeholder con primitivas y colores del diseno.
-    /// Lo usan: el tazon y el soporte final (resultados), GameManager, EventDirector, Meeseeks, DebugCheats y el builder de escena.
-    /// </summary>
     public static class ItemFactory
     {
         public static MixableItem Spawn(string id, Vector3 position, Quaternion rotation)
@@ -144,14 +138,10 @@ namespace RickMorty
                 case "tio_steve": cr.splatColor = new Color(0.4f, 1f, 0.3f); cr.killLineId = "kill_steve"; break;
                 case "sr_pantalones": cr.killLineId = "kill_pantalones"; cr.moralPenalty = 150; cr.splatColor = new Color(0.8f, 0.1f, 0.1f); break;
                 case "meeseeks_kirkland": cr.killLineId = "kill_meeseeks"; cr.splatColor = new Color(0.3f, 0.6f, 1f); break;
-                case "mini_cronenberg": cr.splatColor = new Color(0.62f, 0.12f, 0.45f); break;   // liquido negro-morado (en el asfalto el negro puro no se notaba)
+                case "mini_cronenberg": cr.splatColor = new Color(0.62f, 0.12f, 0.45f); break;
                 case "rick_caleno": cr.killLineId = "kill_caleno"; break;
             }
         }
-
-        // ------------------------------------------------------------------
-        //  Placeholders con primitivas
-        // ------------------------------------------------------------------
 
         static GameObject Prim(PrimitiveType type, Transform parent, Vector3 pos, Vector3 scale, Material mat, Vector3 euler = default)
         {
@@ -166,7 +156,6 @@ namespace RickMorty
             return p;
         }
 
-        /// <summary>Construye el placeholder. Devuelve el punto de agarre (para armas) o null.</summary>
         public static Transform BuildPlaceholder(Transform root, ItemDef def)
         {
             var c = def.Color;
@@ -267,7 +256,7 @@ namespace RickMorty
                         Prim(PrimitiveType.Cube, root, new Vector3(0, -0.03f, s * 0.15f), new Vector3(0.03f, 0.08f, 0.05f), dark);
                     break;
                 }
-                default: // cube
+                default:
                     Prim(PrimitiveType.Cube, root, Vector3.zero, Vector3.one * s, body);
                     if (def.id == "bloque_minecraft")
                         Prim(PrimitiveType.Cube, root, new Vector3(0, s * 0.45f, 0), new Vector3(s * 1.01f, s * 0.12f, s * 1.01f), MatLib.Lit(new Color(0.35f, 0.75f, 0.2f)));
@@ -291,17 +280,12 @@ namespace RickMorty
             }
         }
 
-        /// <summary>
-        /// Detalles sobre los modelos reales: liquido de color dentro de los frascos base,
-        /// feto de Rick en la bola de clon y accesorios del Rick caleno.
-        /// </summary>
         static void DecorateModel(Transform model, ItemDef def)
         {
             if (def.IsBase || def.id == "marihuana" || def.id == "semen")
             {
                 if (def.shape == "jar")
                 {
-                    // el vidrio del frasco importa casi invisible: vidrio propio, tenue pero visible
                     var glass = MatLib.Transparent(new Color(0.85f, 0.95f, 1f, 0.22f));
                     foreach (var r in model.GetComponentsInChildren<Renderer>())
                     {
@@ -311,8 +295,6 @@ namespace RickMorty
                         r.sharedMaterials = mats;
                     }
                 }
-                // Solidos con contenido propio (cristales, esporas, polvo, cogollos) en vez de un relleno de color liso:
-                // tres frascos se veian casi del mismo rosado y solo se distinguian leyendo la etiqueta.
                 var reg = ItemVisualRegistry.Get();
                 var fill = reg != null && def.shape == "jar" ? reg.Find("relleno_" + def.id) : null;
                 if (fill != null)
@@ -373,7 +355,6 @@ namespace RickMorty
             }
             else if (def.id == "rick_caleno")
             {
-                // Gafas de ciclista oscuras y gorra agachada (coordenadas en metros del modelo de 1.75 m)
                 var glasses = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 StripCollider(glasses);
                 glasses.transform.SetParent(model, false);
@@ -403,7 +384,6 @@ namespace RickMorty
             if (Application.isPlaying) Object.Destroy(c); else Object.DestroyImmediate(c);
         }
 
-        /// <summary>Punto de agarre para armas con modelo real: mango atras (-Z) y abajo.</summary>
         static Transform MakeGrip(Transform root, ItemDef def, BoxCollider box)
         {
             var s = box.size; var c = box.center;
@@ -431,7 +411,6 @@ namespace RickMorty
             return grip;
         }
 
-        /// <summary>Calcula una BoxCollider que envuelve todos los renderers del visual.</summary>
         public static BoxCollider FitBoxCollider(GameObject go, Transform visual)
         {
             var renderers = visual.GetComponentsInChildren<Renderer>();

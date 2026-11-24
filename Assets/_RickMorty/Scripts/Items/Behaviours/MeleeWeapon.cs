@@ -2,11 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Armas de corte (Katana, Espada de Zord): un golpe con velocidad suficiente mata
-    /// criaturas (one-hit kill). La Espada de Zord deja marcas de quemadura.
-    /// Lo usan: ItemFactory (behaviours "melee" y "melee_heavy").
-    /// </summary>
     public class MeleeWeapon : ItemBehaviour
     {
         public float minSpeed = 1.2f;
@@ -20,8 +15,6 @@ namespace RickMorty
 
         void FixedUpdate()
         {
-            // Agarrada, el arma es un cuerpo cinematico que la mano "teletransporta": la fisica le reporta
-            // velocidad 0 y los golpes no contaban. Medimos su velocidad real por el cambio de posicion.
             float v = (transform.position - m_LastPos).magnitude / Mathf.Max(Time.fixedDeltaTime, 0.0001f);
             m_OwnSpeed = Mathf.Lerp(m_OwnSpeed, v, 0.5f);
             m_LastPos = transform.position;

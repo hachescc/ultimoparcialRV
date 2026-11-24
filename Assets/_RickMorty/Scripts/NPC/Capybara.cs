@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Easter egg: capibara durmiendo con gafas VR. Si le tiras algo solo mueve una oreja.
-    /// El laser le rebota en la cabeza. Si lo matas, Rick se indigna.
-    /// Lo usan: el builder de escena (lo pone en el garaje).
-    /// </summary>
     public class Capybara : MonoBehaviour
     {
         public Transform ear;

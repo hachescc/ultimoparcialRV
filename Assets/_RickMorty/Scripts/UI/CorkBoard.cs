@@ -5,11 +5,6 @@ using UnityEngine.UI;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Tablero de corcho de Rick: notas con pistas que se van revelando durante la partida.
-    /// Cada nota tiene su chincheta y un hilo rojo la une con la anterior (estilo "tablero de conspiracion").
-    /// Lo usan: GameManager (AddNote con pistas); lo crea el builder de escena.
-    /// </summary>
     public class CorkBoard : MonoBehaviour
     {
         public static CorkBoard Instance { get; private set; }
@@ -54,7 +49,7 @@ namespace RickMorty
         {
             if (m_Notes.Contains(text)) return;
             int i = m_Notes.Count;
-            if (i >= 12) return;   // 12 espacios (con 9 se perdian las ultimas pistas/notas de progreso)
+            if (i >= 12) return;
             m_Notes.Add(text);
             const int cols = 4;
             int cx = i % cols, cy = i / cols;
@@ -66,7 +61,6 @@ namespace RickMorty
             var t = UIKit.Block("Texto", note.transform, text, 22, 31, new Color(0.12f, 0.1f, 0.08f), Vector2.zero, Vector2.one, 12);
             t.alignment = TextAlignmentOptions.Center;
 
-            // chincheta arriba al centro de la nota (en coordenadas del canvas)
             var size = sizeMeters / Mpp;
             var pin = new Vector2(((minA.x + maxA.x) * 0.5f - 0.5f) * size.x, (maxA.y - 0.5f) * size.y - 24f);
             if (m_Pins.Count > 0) AddString(m_Pins[m_Pins.Count - 1], pin);

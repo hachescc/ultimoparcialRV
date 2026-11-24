@@ -3,14 +3,8 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Perimetro de la cinta policial del FBI. Si el jugador sale, los francotiradores
-    /// "le vuelan la cabeza": destello rojo, penalizacion y reaparicion en el garaje.
-    /// Lo usan: el builder de escena (la pone alrededor de la casa); se activa sola al salir de la cinta.
-    /// </summary>
     public class PlayAreaBoundary : MonoBehaviour
     {
-        [Tooltip("Zonas permitidas (union de cajas en coordenadas de mundo)")]
         public List<Bounds> allowedZones = new List<Bounds>();
         public Transform respawnPoint;
         public float warningDistance = 1.5f;
@@ -24,7 +18,6 @@ namespace RickMorty
         void Awake() => Instance = this;
         void OnDestroy() { if (Instance == this) Instance = null; }
 
-        [Tooltip("Zona interior con paredes fisicas (el garaje): ahi no se muestran avisos")]
         public Bounds safeInterior;
 
         public bool IsInside(Vector3 p)
@@ -38,7 +31,6 @@ namespace RickMorty
             return false;
         }
 
-        /// <summary>True si a 'warningDistance' en alguna direccion horizontal ya se sale del perimetro.</summary>
         bool NearEdge(Vector3 p)
         {
             if (safeInterior.size != Vector3.zero && safeInterior.Contains(p)) return false;
@@ -53,7 +45,7 @@ namespace RickMorty
             if (rig == null || allowedZones.Count == 0) return;
             var gm = GameManager.Instance;
             if (gm != null && gm.IsFinished) return;
-            if (Time.timeScale == 0f) return;   // en pausa no dispara
+            if (Time.timeScale == 0f) return;
 
             m_Cooldown -= Time.deltaTime;
             var p = rig.HeadPosition;

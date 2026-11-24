@@ -4,22 +4,14 @@ using UnityEngine.UI;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Reloj Multiversal (UI diegetica en la muneca izquierda): muestra el tiempo que falta para que
-    /// entre el FBI, el puntaje y la coleccion. Si el jugador lo mira, se proyecta el Holograma de
-    /// Descubrimientos. Los avisos (Notify) se muestran en la franja HudStrip, delante del jugador.
-    /// Lo usan: GameManager (onboarding y avisos), eventos, objetos y PlayAreaBoundary (Notify).
-    /// </summary>
     public class WristWatch : MonoBehaviour
     {
         public static WristWatch Instance { get; private set; }
 
         public Transform head;
         public DiscoveryHologram hologram;
-        [Tooltip("Coseno del angulo maximo entre la cara del reloj y la cabeza para considerarlo 'mirado'")]
         public float lookDot = 0.6f;
         public float lookMaxDistance = 0.6f;
-        [Tooltip("Ademas el jugador debe estar MIRANDO hacia el reloj (coseno del angulo entre la vista y el reloj)")]
         public float gazeDot = 0.74f;
 
         TextMeshProUGUI m_Timer, m_Score, m_Footer;
@@ -37,7 +29,6 @@ namespace RickMorty
 
         void Build()
         {
-            // Cuerpo fisico del reloj (placeholder)
             var body = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Destroy(body.GetComponent<Collider>());
             body.name = "WatchBody";
@@ -51,11 +42,7 @@ namespace RickMorty
             tape.transform.localScale = new Vector3(0.085f, 0.008f, 0.03f);
             tape.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(new Color(0.6f, 0.6f, 0.62f), 0f, 0.2f);
 
-            // Pantalla del reloj: SOLO lo que se lee de un vistazo (tiempo, puntaje, coleccion) y en grande.
-            // Antes tambien traia subtitulos y objetivo con letra de 0.2-0.5 grados: ilegibles en el visor.
-            // Ese texto ahora sale en el monitor del garaje y en la franja de avisos (HudStrip).
             body.transform.localScale = new Vector3(0.088f, 0.012f, 0.074f);
-            // marco y botones laterales para que no parezca una caja gris
             var bezel = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Destroy(bezel.GetComponent<Collider>());
             bezel.name = "WatchBezel";
@@ -110,8 +97,6 @@ namespace RickMorty
             PlayerRig.Instance?.Haptic(Hand.Left, 0.9f, 0.4f);
         }
 
-        /// <summary>Muestra un aviso delante del jugador (franja HudStrip pegada al cuerpo).
-        /// Antes flotaba sobre la muneca: con la mano abajo no se veia nunca.</summary>
         public void Notify(string text, Color color, float seconds = 4f)
         {
             if (HudStrip.Instance != null) HudStrip.Instance.Notify(text, color, seconds);
@@ -121,7 +106,6 @@ namespace RickMorty
 
         void Update()
         {
-            // Los textos solo se reescriben cuando cambia el valor (antes se armaban strings en cada cuadro: basura y tirones en Quest)
             var timer = GameTimer.Instance;
             if (timer != null)
             {
@@ -147,16 +131,12 @@ namespace RickMorty
                 }
             }
 
-            // Deteccion de "mirar el reloj" (angulo del visor respecto al reloj)
             if (head != null)
             {
                 var toHead = head.position - transform.position;
                 float dist = toHead.magnitude;
                 float dot = dist > 0.0001f ? Vector3.Dot(transform.up, toHead / dist) : 0f;
-                // la cara del reloj apunta a la cabeza Y el jugador esta mirando hacia el reloj
-                // (antes bastaba con tener la mano a la altura de la mesa: el holograma saltaba solo mientras se trabajaba)
                 float gaze = dist > 0.0001f ? Vector3.Dot(head.forward, -toHead / dist) : 0f;
-                // En el PC la mano no se puede girar facil: basta con mirar hacia el reloj
                 bool faceOk = dot > lookDot || EditorSimulatorToggle.SimulatorOn;
                 bool looking = dist < lookMaxDistance && faceOk && gaze > gazeDot;
                 if (looking) m_LookTime += Time.deltaTime; else m_LookTime = 0f;

@@ -4,11 +4,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Guantelete del Infinito: gatillo = chasquido. Exactamente la mitad de los objetos
-    /// sueltos desaparece en polvo (los ingredientes base regresan por el anti-estupidez).
-    /// Lo usan: ItemFactory (behaviour "gauntlet").
-    /// </summary>
     public class InfinityGauntlet : ItemBehaviour
     {
         float m_Next;
@@ -16,7 +11,6 @@ namespace RickMorty
         protected override void Start()
         {
             base.Start();
-            // Gemas de colores
             var colors = new[] { Color.red, Color.blue, Color.green, Color.yellow, new Color(1f, 0.5f, 0f), new Color(0.6f, 0.2f, 1f) };
             for (int i = 0; i < colors.Length; i++)
             {
@@ -50,11 +44,10 @@ namespace RickMorty
                 if (m.itemId == "pistola_portales") continue;
                 candidates.Add(m);
             }
-            // Mezcla aleatoria y elimina la mitad exacta
             for (int i = 0; i < candidates.Count; i++)
             {
                 int j = Random.Range(i, candidates.Count);
-                var temp = candidates[i];   // intercambia las posiciones i y j
+                var temp = candidates[i];
                 candidates[i] = candidates[j];
                 candidates[j] = temp;
             }
@@ -62,7 +55,7 @@ namespace RickMorty
             for (int i = 0; i < half; i++)
             {
                 var m = candidates[i];
-                if (m == null) continue;   // pudo consumirse en una mezcla mientras corria el chasquido
+                if (m == null) continue;
                 FX.Burst(m.transform.position, new Color(0.45f, 0.35f, 0.25f), 25, 0.6f, 0.03f, 1.5f, -0.1f);
                 AudioFX.Play("dust", m.transform.position, 0.5f);
                 m.Consume(1.5f, false);

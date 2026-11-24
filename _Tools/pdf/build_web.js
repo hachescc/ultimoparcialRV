@@ -1,7 +1,3 @@
-// Genera la version web interactiva del recorrido:
-//  - Documentacion/RickMorty_Recorrido_web.html  (copia local completa, abrir con doble clic junto a la carpeta capturas/)
-//  - <out>/index.html                            (cuerpo para publicar como Artifact, sin <html>/<head>)
-// Uso: node _Tools/pdf/build_web.js [carpeta_salida_artifact]
 const fs = require('fs');
 const path = require('path');
 

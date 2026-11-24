@@ -2,12 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Falso Tio Steve (parasito de memoria): camina lentamente hacia ti pidiendo un abrazo.
-    /// Si te toca: la pantalla se llena de corazones rosas 5 s (falsos recuerdos) y penalizacion.
-    /// Hay que destruirlo con un arma antes, o bloquearlo con un escudo.
-    /// Lo usan: ItemFactory (behaviour "creature_steve"); aparece por EventDirector (invasion).
-    /// </summary>
     public class FakeUncleSteve : CreatureMover
     {
         public float hugDistance = 0.55f;
@@ -41,8 +35,8 @@ namespace RickMorty
         {
             base.Update();
             var rig = PlayerRig.Instance;
-            if (IsHeld) m_StunUntil = Time.time + 1.5f;   // al soltarlo tarda un poco en volver a abrazar
-            if (rig == null || IsHeld || Time.timeScale == 0f) return;   // en pausa no abraza
+            if (IsHeld) m_StunUntil = Time.time + 1.5f;
+            if (rig == null || IsHeld || Time.timeScale == 0f) return;
             var gm = GameManager.Instance;
             if (gm != null && gm.IsFinished) return;
             var creature = GetComponent<Creature>();

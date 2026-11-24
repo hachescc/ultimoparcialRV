@@ -1,5 +1,3 @@
-# Guarda las texturas de un GLB como PNG pequenos (para ver que contiene cada una).
-# Uso: blender -b -P dump_textures.py -- <archivo.glb> <carpeta_salida>
 import bpy, sys, os
 argv = sys.argv[sys.argv.index("--") + 1:]
 bpy.ops.wm.read_factory_settings(use_empty=True)

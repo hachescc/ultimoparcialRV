@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Tubo fluorescente que zumba y parpadea de vez en cuando. Soporta apagones.
-    /// Lo usan: EventDirector (apagon); el builder de escena lo pone en cada fluorescente.
-    /// </summary>
     public class FlickerLight : MonoBehaviour
     {
         public Light targetLight;
@@ -41,8 +37,6 @@ namespace RickMorty
             else if (Time.time > m_NextFlicker)
             {
                 if (m_FlickerEnd < Time.time) m_FlickerEnd = Time.time + Random.Range(0.15f, 0.6f);
-                // cada estado dura al menos 0.1 s y baja al 60 % (antes cambiaba al azar CADA cuadro entre 100 % y 15 %:
-                // un estrobo de toda la sala, molesto en el visor)
                 if (Time.time >= m_NextFlip) { m_NextFlip = Time.time + Random.Range(0.1f, 0.22f); m_Low = !m_Low; }
                 k = m_Low ? 0.6f : 1f;
                 if (Time.time > m_FlickerEnd) m_NextFlicker = Time.time + Random.Range(6f, 20f);

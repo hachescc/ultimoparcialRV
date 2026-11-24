@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Marihuana Cosmica: si la quemas con la pistola laser el garaje se llena de humo morado y la
-    /// gravedad de la escena se reduce a la mitad por 30 segundos.
-    /// Lo usan: ItemFactory (behaviour "burnable"), los proyectiles laser (ItemBehaviour) y GameManager (ResetGravity).
-    /// </summary>
     public class Burnable : ItemBehaviour
     {
         public float duration = 30f;

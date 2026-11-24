@@ -9,11 +9,6 @@ using UnityEngine.Rendering;
 
 namespace RickMorty.EditorTools
 {
-    /// <summary>
-    /// Prueba de humo automatica: entra a Play, recorre el flujo principal (mezclas validas e
-    /// invalidas, todos los objetos, eventos inesperados, final) y guarda capturas + errores.
-    /// Uso: menu "Rick y Morty/3. Prueba automatica" o en batch con -executeMethod ...BatchRun
-    /// </summary>
     [InitializeOnLoad]
     public static class RickMortySmokeTest
     {
@@ -118,7 +113,6 @@ namespace RickMorty.EditorTools
                         s_Step++;
                         break;
                     case 3:
-                        // Mezcla valida: Acido + Polvo de Plumbus = Pistola laser
                         Release("acido", "plumbus_polvo");
                         s_Wait = T + 0.5;
                         s_Step = 30;
@@ -134,7 +128,6 @@ namespace RickMorty.EditorTools
                         if (T < s_Wait) return;
                         Note("Pistola laser descubierta: " + ScoreManager.Instance.IsDiscovered("pistola_laser") + " | existe: " + (MixableItem.FindById("pistola_laser") != null) + " | puntaje " + ScoreManager.Instance.Score);
                         Shot("05_mesa_resultado", new Pose(new Vector3(0, 1.45f, 1.0f), Quaternion.Euler(40, 0, 0)));
-                        // Mezcla invalida: explosion
                         Release("mega_semilla", "kalaxianos");
                         s_Wait = T + 0.5;
                         s_Step = 31;
@@ -156,7 +149,6 @@ namespace RickMorty.EditorTools
                         if (T < s_Wait) return;
                         Note("Contenido del tazon antes de mezclar se registra arriba. Explosiones: " + ScoreManager.Instance.Explosions + " | frascos base disponibles: " + MixableItem.All.Count(m => m.IsBase && !m.Unavailable) + "/8");
                         foreach (var sk in s_Disabled) if (sk != null) sk.socketActive = true;
-                        // Aparecer todos los objetos descubribles para ejecutar sus comportamientos
                         int i = 0;
                         foreach (var def in GameDatabase.Discoverables)
                         {
@@ -183,12 +175,10 @@ namespace RickMorty.EditorTools
                     case 10:
                         if (T < s_Wait) return;
                         Shot("08_apagon", new Pose(new Vector3(0, 1.6f, 0.6f), Quaternion.Euler(15, 0, 0)));
-                        // Matar criaturas con un "disparo"
                         int killed = 0;
                         foreach (var c in UnityEngine.Object.FindObjectsByType<Creature>(FindObjectsSortMode.None))
                             if (c.displayName != "Capibara") { c.Kill(DamageType.Firearm); killed++; }
                         Note("Criaturas eliminadas en prueba: " + killed);
-                        // Final: crear la pistola, agarrarla, abrir portal
                         var gun = ItemFactory.Spawn("pistola_portales", new Vector3(0.4f, 1.1f, 1.66f), Quaternion.identity);
                         ScoreManager.Instance.RegisterDiscovery("pistola_portales");
                         gm.OnPortalGunCreated(gun);

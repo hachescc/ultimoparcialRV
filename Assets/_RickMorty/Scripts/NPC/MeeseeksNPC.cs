@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Meeseeks invocado por una caja.
-    /// Normal: busca basura tirada y la lleva al agujero negro ("¡Ooooh, sí se puede!").
-    /// Contrabando (Kirkland rojo): camina a la mesa, roba un ingrediente base, tose y explota.
-    /// Lo usan: MeeseeksBox (lo invoca), EventDirector (Meeseeks pirata) y GameManager (lo borra al terminar).
-    /// </summary>
     public class MeeseeksNPC : CreatureMover
     {
         public bool contraband;
@@ -31,7 +25,6 @@ namespace RickMorty
             if (modelEntry != null)
             {
                 var model = Instantiate(modelEntry.prefab, visual);
-                // el de contrabando usa el modelo rojo (0.32 m) escalado a tamano completo
                 float scale = contraband ? 1.05f / 0.32f : 1f;
                 model.transform.localScale = Vector3.one * scale;
                 model.transform.localPosition = contraband ? Vector3.zero : new Vector3(0, -0.55f, 0);
@@ -121,7 +114,7 @@ namespace RickMorty
                 if (m == null || m.IsBase || m.Unavailable || m.IsHeld || m.InSocket) continue;
                 if (m.GetComponent<Creature>() != null) continue;
                 if (m.itemId == "pistola_portales" || m.itemId == "portal_carton" || m.itemId == "aguardiente") continue;
-                if (m.transform.position.y > 0.4f) continue; // solo lo que esta tirado en el suelo
+                if (m.transform.position.y > 0.4f) continue;
                 float d = (m.transform.position - transform.position).sqrMagnitude;
                 if (d < bestD) { bestD = d; best = m; }
             }
@@ -137,7 +130,7 @@ namespace RickMorty
             if (contraband)
             {
                 bool close = m_Target != null && FlatDelta(m_Target.transform.position).sqrMagnitude < 0.8f;
-                bool tired = m_Target != null && Time.time - m_Born > 12f;   // si la mesa no lo deja llegar, roba igual
+                bool tired = m_Target != null && Time.time - m_Born > 12f;
                 if (close || tired)
                 {
                     if (m_Target.Base != null) m_Target.Base.Steal(15f);

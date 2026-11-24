@@ -5,12 +5,6 @@ using UnityEngine.UI;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Holograma de Descubrimientos: cuadricula con todos los objetos del multiverso.
-    /// Los no descubiertos salen como "???". Al apuntar con la mano derecha a uno descubierto
-    /// se despliega su receta (asi no hay que memorizar las combinaciones).
-    /// Lo usan: WristWatch (lo muestra al mirar el reloj); lo crea el builder de escena.
-    /// </summary>
     public class DiscoveryHologram : MonoBehaviour
     {
         public Transform head;
@@ -35,8 +29,6 @@ namespace RickMorty
         void Build()
         {
             var items = new List<ItemDef>(GameDatabase.Discoverables);
-            // 6 columnas con celdas mas grandes y panel mas lejos (0.62 m): antes 7x6 con letra de 0.4-0.6 grados
-            // a 44 cm de los ojos (demasiado cerca y demasiado denso).
             columns = 6;
             int rows = Mathf.CeilToInt(items.Count / (float)columns);
             float cellW = 152, cellH = 80, pad = 6;
@@ -49,7 +41,7 @@ namespace RickMorty
             var root = m_Canvas.transform;
             UIKit.Fill("Marco", root, new Color(0.35f, 0.85f, 1f, 0.9f));
             var bg = UIKit.Panel("Bg", root, new Color(0.03f, 0.07f, 0.13f, 0.94f), Vector2.zero, Vector2.one, new Vector2(4, 4), new Vector2(-4, -4));
-            bg.raycastTarget = true; // para mantenerlo visible mientras se apunta
+            bg.raycastTarget = true;
             UIKit.OnHover(bg.gameObject, () => { m_PointerCount++; m_LastPointerTime = Time.time; }, () => { m_PointerCount = Mathf.Max(0, m_PointerCount - 1); m_LastPointerTime = Time.time; });
 
             m_Header = UIKit.Text("Header", root, "HOLOGRAMA DE DESCUBRIMIENTOS", 30, UIKit.Cyan, TextAlignmentOptions.Center,
@@ -65,7 +57,6 @@ namespace RickMorty
                     new Vector2(pad + cx * (cellW + pad), -(pad + cy * (cellH + pad)) - cellH),
                     new Vector2(pad + cx * (cellW + pad) + cellW, -(pad + cy * (cellH + pad))));
                 cellBg.raycastTarget = true;
-                // franja con el color del objeto (aparece al descubrirlo): se reconoce de un vistazo sin leer
                 var chip = UIKit.Panel("Chip", cellBg.transform, def.Color, new Vector2(0, 0), new Vector2(0, 1), new Vector2(5, 8), new Vector2(13, -8));
                 chip.enabled = false;
                 m_Chips[def.id] = chip;
@@ -89,7 +80,6 @@ namespace RickMorty
         readonly Dictionary<string, Image> m_Chips = new Dictionary<string, Image>();
         static readonly Color CellKnown = new Color(0.1f, 0.42f, 0.24f, 0.97f), CellUnknown = new Color(0.08f, 0.12f, 0.2f, 0.95f);
 
-        /// <summary>Celda bajo el puntero: se aclara para que se note cual se esta senalando.</summary>
         void Highlight(string id, bool on)
         {
             if (!m_Cells.TryGetValue(id, out var cell)) return;
@@ -143,7 +133,6 @@ namespace RickMorty
             m_Group.alpha = m_Alpha;
             m_Canvas.transform.localScale = Vector3.one * Scale * Mathf.Lerp(0.6f, 1f, m_Alpha);
 
-            // Se proyecta mas alla de la muneca, a ~62 cm de la cabeza (lectura comoda) y un poco por encima de la mano
             if (head != null)
             {
                 var anchor = transform.parent != null ? transform.parent.position : transform.position;

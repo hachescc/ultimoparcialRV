@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Ventana del vecino: si le pega un objeto vivo se escuchan gritos de terror desde adentro.
-    /// Lo usan: StickyThrowable (se pega en ella); el builder de escena la pone en la casa del vecino.
-    /// </summary>
     public class NeighborWindow : MonoBehaviour
     {
         float m_Next;

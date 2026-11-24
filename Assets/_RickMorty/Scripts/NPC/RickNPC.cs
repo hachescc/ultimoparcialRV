@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Rick en el garaje durante la introduccion y el tutorial: modelo 3D con animaciones Idle, Talk y Walk.
-    /// Golpea la mesa, mira al jugador mientras habla y al final camina hacia la puerta y se va por un portal.
-    /// Lo usan: GameManager (SlamTable en la intro, CoLeave cuando Rick se va, mouth para la voz).
-    /// </summary>
     public class RickNPC : MonoBehaviour
     {
         public Transform exitPoint;
@@ -22,13 +17,11 @@ namespace RickMorty
         {
             m_Visual = transform.Find("Visual");
             if (mouth == null) mouth = transform;
-            // Modelo real con animaciones Idle/Talk/Walk (hechas en Blender, importadas como clips Legacy)
             m_Anim = GetComponentInChildren<Animation>();
             if (m_Anim != null)
                 foreach (AnimationState st in m_Anim) st.wrapMode = WrapMode.Loop;
         }
 
-        /// <summary>Reproduce el clip cuyo nombre contiene 'key' (Idle, Talk, Walk).</summary>
         void PlayClip(string key)
         {
             if (m_Anim == null || m_Current == key) return;
@@ -43,7 +36,6 @@ namespace RickMorty
 
         void Update()
         {
-            // Mira al jugador mientras habla
             var rig = PlayerRig.Instance;
             if (rig == null || m_Walking) return;
             var d = rig.HeadPosition - transform.position; d.y = 0;

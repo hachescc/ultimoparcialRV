@@ -3,21 +3,13 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Comida: se "come" acercandola a la boca (colision con la cabeza).
-    /// Szechuan = filtro VHS, Empanada Cuantica = teletransporte 3 s, Aguardiente/Papa = borrachera,
-    /// Cereal Eyeholes = aparece el Hombre Agujero de Ojo y te arrebata la caja.
-    /// Lo usan: ItemFactory (behaviours "food_..."), PlayerHead (lo come al tocar la boca) y GameManager (ResetStatics).
-    /// </summary>
     public class Consumable : ItemBehaviour, IHeadInteractable
     {
-        /// <summary>Que pasa al comerlo: borrachera, filtro VHS, teletransporte o Hombre Agujero de Ojo.</summary>
         public enum Effect { Drunk, VHS, Teleport, Eyeholes }
         public Effect effect;
 
         bool m_Used;
 
-        /// <summary>En el PC (teclado y mouse) no se puede acercar la comida a la boca: con T se come.</summary>
         protected override void OnActivate()
         {
             if (!EditorSimulatorToggle.SimulatorOn) return;
@@ -28,7 +20,6 @@ namespace RickMorty
         public void OnTouchHead(PlayerHead head)
         {
             if (m_Used || !Item.IsHeld) return;
-            // El aguardiente es ingrediente de la receta final: avisamos pero se puede beber
             m_Used = true;
             var rig = PlayerRig.Instance;
             var gm = GameManager.Instance;
@@ -61,7 +52,7 @@ namespace RickMorty
 
         static IEnumerator CoTeleport(PlayerRig rig, GameManager gm)
         {
-            if (s_Teleporting) yield break;   // una segunda empanada no debe guardar el "otro lado" como punto de regreso
+            if (s_Teleporting) yield break;
             var back = rig.FeetPosition;
             var fwd = rig.head != null ? rig.head.forward : Vector3.forward;
             var spots = gm.quantumSpots;
@@ -74,7 +65,6 @@ namespace RickMorty
             WristWatch.Instance?.Notify("EXISTES EN OTRA REALIDAD (3 s)", new Color(0.6f, 1f, 0.6f), 3f);
             yield return new WaitForSeconds(3f);
             s_Teleporting = false;
-            // si la partida termino mientras tanto, el jugador ya esta en la sala final: no lo devolvemos al garaje
             if (gm == null || rig == null || gm.IsFinished) yield break;
             ScreenFX.Instance?.Flash(new Color(0.6f, 1f, 0.6f), 0.05f, 0.5f);
             rig.TeleportTo(back, fwd);
@@ -96,7 +86,6 @@ namespace RickMorty
                 var entry = reg != null ? reg.Find("hombre_eyeholes") : null;
                 if (entry != null)
                 {
-                    // modelo de cuerpo entero parado en el piso: se escala para que la cabeza quede a la altura de la ventana
                     var model = Instantiate(entry.prefab, man.transform);
                     float k = Mathf.Max(0.6f, (spot.position.y + 0.08f) / 1.92f);
                     model.transform.localScale = Vector3.one * k;
@@ -144,10 +133,6 @@ namespace RickMorty
         }
     }
 
-    /// <summary>
-    /// El Hombre Agujero de Ojo golpea la ventana: sacudida corta y agresiva mientras esta en escena.
-    /// Lo usan: Consumable (cereal Eyeholes) al hacer aparecer al Hombre Agujero de Ojo.
-    /// </summary>
     public class EyeholeManShake : MonoBehaviour
     {
         Vector3 m_Base;
@@ -157,7 +142,6 @@ namespace RickMorty
         void Update()
         {
             m_T += Time.deltaTime;
-            // embestidas hacia la ventana + temblor
             float lunge = Mathf.Abs(Mathf.Sin(m_T * 9f)) * 0.12f;
             transform.position = m_Base + (m_BaseRot * Vector3.forward) * lunge + Vector3.up * (Mathf.Sin(m_T * 23f) * 0.015f);
             transform.rotation = m_BaseRot * Quaternion.Euler(0, 0, Mathf.Sin(m_T * 17f) * 3f);

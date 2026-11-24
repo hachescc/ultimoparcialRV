@@ -11,13 +11,6 @@ using UnityEngine.Rendering.Universal;
 
 namespace RickMorty.Dev
 {
-    /// <summary>
-    /// SOLO EDITOR. "Playblast" del juego: graba a MP4 (H.264 + audio) lo que ve una camara de cine.
-    /// Usa tiempo fijo (Time.captureFramerate) para que el video salga fluido aunque el render sea lento,
-    /// UnityEditor.Media.MediaEncoder para codificar y AudioRenderer para el audio sincronizado.
-    /// El ShowcaseRunner en modo pelicula le encola "planos" (pose + titulo); la camara vuela suave
-    /// entre planos y se queda unos segundos en cada uno mientras el juego sigue corriendo.
-    /// </summary>
     public class FilmRecorder : MonoBehaviour
     {
         public struct FilmShot
@@ -28,7 +21,7 @@ namespace RickMorty.Dev
 
         public int width = 1280, height = 720, fps = 30;
         public int fxLayer = 4;
-        public float maxSeconds = 900f;   // seguro: si algo se traba, el MP4 igual queda cerrado y valido
+        public float maxSeconds = 900f;
 
         MediaEncoder m_Enc;
         RenderTexture m_Rt;
@@ -42,7 +35,6 @@ namespace RickMorty.Dev
         bool m_HasTarget, m_Snap = true;
         float m_CaptionAlpha, m_CaptionTimer;
         public int Frames { get; private set; }
-        /// <summary>Mientras es true no se graban cuadros (recargas de escena, tiempos muertos). El audio se descarta para seguir sincronizado.</summary>
         public bool Paused;
 
         public bool HasQueued => m_Queue.Count > 0;
@@ -55,7 +47,7 @@ namespace RickMorty.Dev
             DontDestroyOnLoad(camGo);
             m_Cam = camGo.AddComponent<Camera>();
             m_Cam.nearClipPlane = 0.01f; m_Cam.farClipPlane = 400f; m_Cam.fieldOfView = 70f;
-            m_Cam.enabled = false;   // solo renderiza cuando se le pide
+            m_Cam.enabled = false;
             var data = m_Cam.GetUniversalAdditionalCameraData();
             data.renderPostProcessing = true;
             data.antialiasing = AntialiasingMode.FastApproximateAntialiasing;
@@ -101,19 +93,15 @@ namespace RickMorty.Dev
 
         public void Queue(FilmShot s) => m_Queue.Enqueue(s);
 
-        /// <summary>Corta a la vista del jugador (sin titulo) hasta el proximo plano.</summary>
         public void FollowPlayer() { m_Target.useMain = true; m_HasTarget = true; m_Snap = true; m_CaptionTimer = 0f; }
 
-        /// <summary>Reproduce el siguiente plano: vuela hasta la pose y se queda 'hold' segundos.</summary>
         public IEnumerator PlayNext()
         {
             var s = m_Queue.Dequeue();
-            // corte si el salto es muy grande (otra zona) o cambia entre vista del jugador y camara libre
-            bool cut = !m_HasTarget || s.useMain != m_Target.useMain || (s.pos - m_Cam.transform.position).sqrMagnitude > 2.5f * 2.5f;   // lejos: corte directo (volar atravesaba objetos)
+            bool cut = !m_HasTarget || s.useMain != m_Target.useMain || (s.pos - m_Cam.transform.position).sqrMagnitude > 2.5f * 2.5f;
             m_Target = s; m_HasTarget = true; m_Snap = cut;
             m_Caption.text = $"<size=62%><color=#7DFF6A>{s.section}</color></size>\n<mark=#000000B0 padding=\"14,14,6,6\">{s.title}</mark>";
             m_CaptionTimer = s.hold + (cut ? 0f : 0.9f);
-            // se cuentan CUADROS (no tiempo de juego): con la pausa timeScale=0 y WaitForSeconds no terminaria nunca
             int frames = Mathf.RoundToInt((s.hold + (cut ? 0f : 0.9f)) * fps);
             for (int i = 0; i < frames; i++) yield return null;
         }
@@ -126,15 +114,14 @@ namespace RickMorty.Dev
                 if (m_Audio) { int k = AudioRenderer.GetSampleCountForCaptureFrame(); if (k > 0) { var junk = new NativeArray<float>(k * m_Channels, Allocator.Temp); AudioRenderer.Render(junk); junk.Dispose(); } }
                 return;
             }
-            float dt = 1f / fps;   // tiempo de video (funciona tambien con el juego en pausa)
+            float dt = 1f / fps;
 
-            // --- pose de la camara de cine
             Vector3 tp; Quaternion tr; float tf;
             if (m_Target.useMain && Camera.main != null)
             {
                 var mc = Camera.main.transform;
                 tp = mc.position; tr = mc.rotation; tf = 80f;
-                m_Snap = true;   // la vista del jugador va pegada (los overlays cuelgan de su camara)
+                m_Snap = true;
             }
             else { tp = m_Target.pos; tr = m_Target.rot; tf = m_Target.fov; }
             var t = m_Cam.transform;
@@ -147,18 +134,16 @@ namespace RickMorty.Dev
             }
             m_Cam.cullingMask = m_Target.useMain ? ~0 : ~(1 << fxLayer);
 
-            // --- titulo abajo a la izquierda (aparece y se desvanece)
             m_CaptionTimer -= dt;
             float target = m_CaptionTimer > 0.4f ? 1f : 0f;
             m_CaptionAlpha = Mathf.MoveTowards(m_CaptionAlpha, target, dt * 3f);
             m_Caption.color = new Color(1, 1, 1, m_CaptionAlpha);
             float halfH = 0.6f * Mathf.Tan(m_Cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
             float halfW = halfH * width / height;
-            m_Caption.fontSize = halfH * 1.45f;   // tamano constante en pantalla (legible a 720p)
+            m_Caption.fontSize = halfH * 1.45f;
             m_Caption.rectTransform.sizeDelta = new Vector2(halfW * 1.7f, halfH * 0.8f);
             m_Caption.transform.SetPositionAndRotation(t.position + t.rotation * new Vector3(-halfW * 0.08f, -halfH * 0.52f, 0.6f), t.rotation);
 
-            // --- render + cuadro al codificador
             var req = new RenderPipeline.StandardRequest { destination = m_Rt };
             if (RenderPipeline.SupportsRenderRequest(m_Cam, req)) RenderPipeline.SubmitRenderRequest(m_Cam, req);
             else { m_Cam.targetTexture = m_Rt; m_Cam.Render(); m_Cam.targetTexture = null; }

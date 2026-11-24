@@ -5,11 +5,6 @@ using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Base para comportamientos de objetos agarrables: expone eventos de agarre,
-    /// soltar y gatillo (activate) del XRGrabInteractable.
-    /// Lo usan: todos los comportamientos de Items/Behaviours (armas, consumibles, caja Meeseeks...) y PetHinter.
-    /// </summary>
     [RequireComponent(typeof(MixableItem))]
     public abstract class ItemBehaviour : MonoBehaviour
     {
@@ -34,7 +29,6 @@ namespace RickMorty
         void HandleActivated(ActivateEventArgs args) => OnActivate();
         void HandleDeactivated(DeactivateEventArgs args) => OnDeactivate();
 
-        // Un soporte (socket) tambien "agarra" el objeto: eso no cuenta como agarre del jugador
         void HandleSelectEntered(SelectEnterEventArgs args)
         {
             if (!(args.interactorObject is XRSocketInteractor)) OnGrabbed();
@@ -52,7 +46,6 @@ namespace RickMorty
 
         protected Vector3 Muzzle(float forward = 0.15f) => transform.position + transform.forward * forward;
 
-        /// <summary>Aplica el impacto de un proyectil (laser, bala) sobre lo que golpeo.</summary>
         protected static void ApplyProjectileHit(RaycastHit hit, Vector3 dir, float force, bool laser)
         {
             var creature = hit.collider.GetComponentInParent<Creature>();

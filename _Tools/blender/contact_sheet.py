@@ -1,5 +1,3 @@
-# Renderiza todos los GLB de una carpeta en una cuadricula con etiquetas (para elegir modelos).
-# Uso: blender -b -P contact_sheet.py -- <carpeta_glb> <salida.png> [columnas]
 import bpy, sys, os, math
 from mathutils import Vector
 
@@ -44,7 +42,6 @@ for i, f in enumerate(files):
     cx, cy = (i % cols) * cell, -(i // cols) * cell
     root.scale = (s, s, s)
     root.location = (Vector((0, -cx, cy)) if side else Vector((cx, 0, cy))) - center * s
-    # etiqueta
     bpy.ops.object.text_add(location=((-0.8, -cx + 0.75, cy - 0.78) if side else (cx - 0.75, -0.8, cy - 0.78)))
     t = bpy.context.object
     t.data.body = f"{i}:{os.path.basename(f)[:22]}"

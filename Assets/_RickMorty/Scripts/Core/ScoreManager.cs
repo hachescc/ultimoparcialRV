@@ -4,15 +4,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Puntaje y estadisticas verificables de la partida. Escucha el bus de eventos (GameEvents).
-    /// Lo usan: GameManager (resultado y pistas), tazon, soporte final, reloj, holograma, monitor y pantalla final.
-    /// </summary>
     public class ScoreManager : MonoBehaviour
     {
         public static ScoreManager Instance { get; private set; }
 
-        [Header("Puntos")]
         public int pointsPerDiscovery = 100;
         public int pointsPerRepeatMix = 10;
         public int pointsPerEasterEgg = 50;
@@ -53,7 +48,6 @@ namespace RickMorty
 
         public bool IsDiscovered(string id) => Discovered.Contains(id);
 
-        /// <summary>Registra un objeto como descubierto. Devuelve true si es nuevo.</summary>
         public bool RegisterDiscovery(string id)
         {
             if (!Discovered.Add(id)) return false;
@@ -63,7 +57,6 @@ namespace RickMorty
             return true;
         }
 
-        /// <summary>Suma (o resta) puntos. reason describe el motivo para quien lea el codigo.</summary>
         void Add(int pts, string reason)
         {
             Score = Mathf.Max(0, Score + pts);
@@ -71,7 +64,6 @@ namespace RickMorty
             Popup(pts);
         }
 
-        /// <summary>Numero flotante (+100 / -50) para que el jugador VEA por que cambio su puntaje.</summary>
         static void Popup(int pts)
         {
             if (pts == 0) return;
@@ -92,7 +84,6 @@ namespace RickMorty
             FX.FloatingText(pos, (pts > 0 ? "+" : "") + pts + " pts", pts > 0 ? new Color(0.45f, 1f, 0.45f) : new Color(1f, 0.35f, 0.3f), 0.9f, 1.8f, 0.25f);
         }
 
-        // Repetir la misma mezcla puntua como maximo 3 veces (antes daba +10 sin limite: se podia "farmear").
         readonly Dictionary<string, int> m_RepeatCount = new Dictionary<string, int>();
 
         void OnMixSucceeded(RecipeDef r, bool first)
@@ -124,8 +115,6 @@ namespace RickMorty
             Add(-Mathf.Abs(pts), reason);
         }
 
-        // Cada bono puntua como maximo 3 veces por partida (antes se podia "farmear" puntaje sin limite
-        // clavando el cuchillo en el corcho, tirando cosas a la ventana del vecino, repitiendo mezclas...)
         const int MaxSameBonus = 3;
         readonly Dictionary<string, int> m_BonusCount = new Dictionary<string, int>();
 

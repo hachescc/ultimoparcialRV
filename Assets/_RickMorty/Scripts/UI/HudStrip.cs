@@ -4,22 +4,14 @@ using UnityEngine.UI;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Franja de avisos que sigue a la camara: flota delante del jugador, un poco por debajo de la vista,
-    /// y se mueve suave detras de la cabeza (si estuviera clavada a la cabeza mareria). Muestra:
-    /// 1) notificaciones (descubrimientos, eventos, penalizaciones), siempre;
-    /// 2) subtitulos de Rick y el objetivo cuando cambia, solo si el monitor del garaje NO esta a la vista.
-    /// Es angosta (unos 30 grados) para leerla sin mover la cabeza.
-    /// Lo usan: GameManager (la crea con Ensure; objetivo, pistas y recordatorios), WristWatch.Notify y PauseMenu.
-    /// </summary>
     public class HudStrip : MonoBehaviour
     {
         public static HudStrip Instance { get; private set; }
 
         public Transform head;
-        [Tooltip("Distancia a la cabeza (m)")] public float distance = 1.0f;
-        [Tooltip("Grados por debajo del centro de la vista")] public float angleDown = 15f;
-        [Tooltip("Que tan rapido alcanza a la cabeza (mas alto = mas pegada)")] public float followSpeed = 6f;
+        public float distance = 1.0f;
+        public float angleDown = 15f;
+        public float followSpeed = 6f;
         public float objectiveSeconds = 7f;
 
         Canvas m_Canvas;
@@ -53,7 +45,6 @@ namespace RickMorty
             m_Group.blocksRaycasts = false;
             m_Group.interactable = false;
             var root = m_Canvas.transform;
-            // vidrio verde oscuro translucido con borde de color (antes era una placa negra casi opaca)
             m_Border = UIKit.Fill("Borde", root, new Color(0.35f, 1f, 0.45f, 0.75f));
             var bg = UIKit.Panel("Fondo", root, new Color(0.02f, 0.07f, 0.06f, 0.84f), Vector2.zero, Vector2.one, new Vector2(3, 3), new Vector2(-3, -3));
             m_Label = UIKit.Line("Etiqueta", bg.transform, "", 26, UIKit.Cyan, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.74f), new Vector2(1, 1f), 20, 4);
@@ -74,7 +65,6 @@ namespace RickMorty
             m_SubText = text;
         }
 
-        /// <summary>Aviso corto y destacado (se ve siempre, aunque el monitor este a la vista).</summary>
         public void Notify(string text, Color color, float seconds = 4f)
         {
             m_Note = text;
@@ -83,7 +73,6 @@ namespace RickMorty
             m_Pop = 0f;
         }
 
-        /// <summary>Objetivo nuevo: se muestra unos segundos cuando cambia.</summary>
         public void ShowObjective(string text)
         {
             if (string.IsNullOrEmpty(text) || text == "..." || text == m_Objective) return;
@@ -91,7 +80,6 @@ namespace RickMorty
             m_ObjUntil = Time.unscaledTime + objectiveSeconds;
         }
 
-        /// <summary>Vuelve a mostrar el objetivo actual unos segundos (recordatorio cuando el jugador no avanza).</summary>
         public void Remind()
         {
             if (!string.IsNullOrEmpty(m_Objective)) m_ObjUntil = Time.unscaledTime + objectiveSeconds;
@@ -120,7 +108,6 @@ namespace RickMorty
                 m_Subscribed = true;
             }
 
-            // --- que mostrar (prioridad: aviso > subtitulo > objetivo)
             var gm = GameManager.Instance;
             bool ended = gm != null && gm.IsFinished;
             bool paused = Time.timeScale == 0f;
@@ -175,7 +162,6 @@ namespace RickMorty
             if (!m_Canvas.gameObject.activeSelf) m_Canvas.gameObject.SetActive(true);
             m_Group.alpha = m_Alpha;
 
-            // --- seguimiento: la direccion de la franja persigue suave a la de la mirada (unos grados mas abajo)
             Vector3 wanted = Quaternion.AngleAxis(angleDown, head.right) * head.forward;
             if (wasHidden || m_Dir == Vector3.zero) m_Dir = wanted;
             else m_Dir = Vector3.Slerp(m_Dir, wanted, 1f - Mathf.Exp(-followSpeed * dt));
@@ -183,7 +169,6 @@ namespace RickMorty
             t.position = head.position + m_Dir.normalized * distance;
             t.rotation = Quaternion.LookRotation(t.position - head.position, Vector3.up);
 
-            // entrada con un pequeno "pop" (sin parpadeo)
             m_Pop = Mathf.MoveTowards(m_Pop, 1f, dt * 5f);
             float e = 1f - (1f - m_Pop) * (1f - m_Pop);
             t.localScale = Vector3.one * (0.001f * Mathf.Lerp(0.86f, 1f, e));

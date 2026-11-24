@@ -2,12 +2,6 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>
-    /// Bloque de Minecraft (y Token de Fortnite): ignora la gravedad. Donde lo sueltas, ahi se
-    /// queda (kinematic). Sirve como plataforma flotante o para hacer escaleras ridiculas.
-    /// El token ademas gira sobre su eje y flota arriba y abajo.
-    /// Lo usan: ItemFactory (behaviours "minecraft" y "spinner").
-    /// </summary>
     public class FloatingBlock : ItemBehaviour
     {
         public bool spin;
