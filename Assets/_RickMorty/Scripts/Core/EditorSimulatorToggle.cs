@@ -14,10 +14,7 @@ namespace RickMorty
         void Awake()
         {
 #if UNITY_EDITOR
-            bool hmd = false;
-            var displays = new List<XRDisplaySubsystem>();
-            SubsystemManager.GetSubsystems(displays);
-            foreach (var d in displays) if (d.running) hmd = true;
+            bool hmd = HeadsetRunning();
             if (simulator != null) simulator.SetActive(!hmd);
             SimulatorOn = simulator != null && !hmd;
             if (hmd) Debug.Log("[RickMorty] Visor detectado: simulador desactivado.");
@@ -34,6 +31,23 @@ namespace RickMorty
             yield return null;
             HideByName("InputSelectionWindow");
             HideByName("InputSelectionClosedWindow");
+        }
+
+        void Update()
+        {
+            if (!SimulatorOn || !HeadsetRunning()) return;
+            SimulatorOn = false;
+            if (simulator != null) simulator.SetActive(false);
+            if (PlayerRig.Instance != null) PlayerRig.Instance.UseHeadsetMode();
+            Debug.Log("[RickMorty] Visor conectado durante el juego: simulador desactivado.");
+        }
+
+        static bool HeadsetRunning()
+        {
+            var displays = new List<XRDisplaySubsystem>();
+            SubsystemManager.GetSubsystems(displays);
+            foreach (var d in displays) if (d.running) return true;
+            return XRSettings.isDeviceActive;
         }
 
         static void HideByName(string objectName)

@@ -49,15 +49,31 @@ namespace RickMorty
         }
 
         XRBaseInputInteractor[] m_PcInteractors;
+        XRBaseInputInteractor.InputTriggerType[] m_OriginalTriggers;
 
         void Start()
         {
             if (!EditorSimulatorToggle.SimulatorOn) return;
             m_PcInteractors = GetComponentsInChildren<XRBaseInputInteractor>(true);
-            foreach (var interactor in m_PcInteractors)
-                interactor.selectActionTrigger = XRBaseInputInteractor.InputTriggerType.Toggle;
+            m_OriginalTriggers = new XRBaseInputInteractor.InputTriggerType[m_PcInteractors.Length];
+            for (int i = 0; i < m_PcInteractors.Length; i++)
+            {
+                m_OriginalTriggers[i] = m_PcInteractors[i].selectActionTrigger;
+                m_PcInteractors[i].selectActionTrigger = XRBaseInputInteractor.InputTriggerType.Toggle;
+            }
             foreach (var nearFar in GetComponentsInChildren<NearFarInteractor>(true))
                 nearFar.farAttachMode = UnityEngine.XR.Interaction.Toolkit.Attachment.InteractorFarAttachMode.Far;
+        }
+
+        public void UseHeadsetMode()
+        {
+            if (m_PcInteractors != null && m_OriginalTriggers != null)
+                for (int i = 0; i < m_PcInteractors.Length; i++)
+                    if (m_PcInteractors[i] != null) m_PcInteractors[i].selectActionTrigger = m_OriginalTriggers[i];
+            foreach (var nearFar in GetComponentsInChildren<NearFarInteractor>(true))
+                nearFar.farAttachMode = UnityEngine.XR.Interaction.Toolkit.Attachment.InteractorFarAttachMode.Near;
+            m_PcInteractors = null;
+            m_HasLastHead = false;
         }
 
         void ReleaseFixedThings()
