@@ -1,4 +1,3 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,9 +5,10 @@ using UnityEngine.UI;
 namespace RickMorty
 {
     /// <summary>
-    /// Reloj Multiversal (UI diegetica en la muneca izquierda): temporizador del FBI, puntaje,
-    /// descubrimientos, subtitulos de Rick y notificaciones de neon. Al mirar la muneca
-    /// se proyecta el Holograma de Descubrimientos.
+    /// Reloj Multiversal (UI diegetica en la muneca izquierda): muestra el tiempo que falta para que
+    /// entre el FBI, el puntaje y la coleccion. Si el jugador lo mira, se proyecta el Holograma de
+    /// Descubrimientos. Los avisos (Notify) se muestran en la franja HudStrip, delante del jugador.
+    /// Lo usan: GameManager (onboarding y avisos), eventos, objetos y PlayAreaBoundary (Notify).
     /// </summary>
     public class WristWatch : MonoBehaviour
     {
@@ -22,12 +22,8 @@ namespace RickMorty
         [Tooltip("Ademas el jugador debe estar MIRANDO hacia el reloj (coseno del angulo entre la vista y el reloj)")]
         public float gazeDot = 0.74f;
 
-        TextMeshProUGUI m_Timer, m_Score, m_Footer, m_TimerLabel;
-        Image m_Bg, m_Screen;
-        Canvas m_Banner;
-        TextMeshProUGUI m_BannerText;
-        Image m_BannerBg;
-        Coroutine m_BannerCo;
+        TextMeshProUGUI m_Timer, m_Score, m_Footer;
+        Image m_Screen;
         float m_LookTime;
 
         public bool IsLooking { get; private set; }
@@ -46,7 +42,6 @@ namespace RickMorty
             Destroy(body.GetComponent<Collider>());
             body.name = "WatchBody";
             body.transform.SetParent(transform, false);
-            body.transform.localScale = new Vector3(0.07f, 0.012f, 0.06f);
             body.GetComponent<Renderer>().sharedMaterial = MatLib.Lit(new Color(0.25f, 0.27f, 0.25f), 0f, 0.6f, 0.6f);
             var tape = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Destroy(tape.GetComponent<Collider>());
@@ -85,27 +80,17 @@ namespace RickMorty
             canvas.transform.localRotation = Quaternion.Euler(90, 0, 0);
             var root = canvas.transform;
 
-            m_Bg = UIKit.Fill("Bg", root, new Color(0.10f, 0.12f, 0.11f, 1f));
+            UIKit.Fill("Bg", root, new Color(0.10f, 0.12f, 0.11f, 1f));
             m_Screen = UIKit.Panel("Screen", root, new Color(0.02f, 0.07f, 0.04f, 1f), Vector2.zero, Vector2.one, new Vector2(10, 10), new Vector2(-10, -10));
             var s = m_Screen.transform;
 
-            m_TimerLabel = UIKit.Line("TimerLabel", s, "EL FBI ENTRA EN", 24, new Color(1f, 0.82f, 0.35f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.86f), new Vector2(1, 1f), 16, 2);
+            UIKit.Line("TimerLabel", s, "EL FBI ENTRA EN", 24, new Color(1f, 0.82f, 0.35f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.86f), new Vector2(1, 1f), 16, 2);
             m_Timer = UIKit.Line("Timer", s, "--:--", 104, UIKit.Neon, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.44f), new Vector2(1f, 0.88f), 14, 0);
             m_Timer.fontStyle = FontStyles.Bold;
             UIKit.Panel("Sep", s, new Color(0.3f, 0.9f, 0.4f, 0.35f), new Vector2(0, 0.425f), new Vector2(1, 0.432f), new Vector2(12, 0), new Vector2(-12, 0), false);
             m_Score = UIKit.Line("Score", s, "0 pts", 54, Color.white, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.18f), new Vector2(1f, 0.42f), 16, 2);
             m_Score.fontStyle = FontStyles.Bold;
             m_Footer = UIKit.Line("Footer", s, "", 27, new Color(0.62f, 0.85f, 0.65f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.02f), new Vector2(1, 0.18f), 16, 0);
-
-            // Cartel de notificaciones (flota sobre la muneca): fondo opaco para que se lea sobre cualquier cosa
-            m_Banner = UIKit.WorldCanvas("NeonBanner", transform, new Vector2(760, 180), 0.00035f, false);
-            m_Banner.transform.localPosition = new Vector3(0, 0.1f, 0.02f);
-            UIKit.Fill("Border", m_Banner.transform, new Color(0.35f, 1f, 0.45f, 0.9f));
-            m_BannerBg = UIKit.Panel("Bg", m_Banner.transform, new Color(0.02f, 0.06f, 0.04f, 0.97f), Vector2.zero, Vector2.one, new Vector2(4, 4), new Vector2(-4, -4));
-            m_BannerText = UIKit.Block("Text", m_BannerBg.transform, "", 26, 42, UIKit.Neon, Vector2.zero, Vector2.one, 20);
-            m_BannerText.alignment = TextAlignmentOptions.Center;
-            m_BannerText.fontStyle = FontStyles.Bold;
-            m_Banner.gameObject.SetActive(false);
         }
 
         void OnEnable()
@@ -116,9 +101,6 @@ namespace RickMorty
         void OnDisable()
         {
             GameEvents.ItemDiscovered -= OnDiscovered;
-            // si el control se apaga (se pierde el tracking) con un cartel a medias, no debe quedar pegado
-            if (m_Banner != null) m_Banner.gameObject.SetActive(false);
-            m_BannerCo = null;
         }
 
         void OnDiscovered(ItemDef def)
@@ -128,48 +110,18 @@ namespace RickMorty
             PlayerRig.Instance?.Haptic(Hand.Left, 0.9f, 0.4f);
         }
 
-        /// <summary>El objetivo ya no se escribe en el reloj (no se podia leer): va al monitor y a la franja de avisos.</summary>
-        public void SetObjective(string text) { }
-
+        /// <summary>Muestra un aviso delante del jugador (franja HudStrip pegada al cuerpo).
+        /// Antes flotaba sobre la muneca: con la mano abajo no se veia nunca.</summary>
         public void Notify(string text, Color color, float seconds = 4f)
         {
-            // Los avisos salen delante del jugador (franja pegada al cuerpo). Antes flotaban sobre la muneca:
-            // con la mano abajo no se veian nunca.
-            var strip = HudStrip.Instance;
-            if (strip != null) { strip.Notify(text, color, seconds); return; }
-            if (!isActiveAndEnabled) return;   // control apagado: no se puede arrancar la corrutina
-            if (m_BannerCo != null) StopCoroutine(m_BannerCo);
-            m_BannerCo = StartCoroutine(CoBanner(text, color, seconds));
-        }
-
-        IEnumerator CoBanner(string text, Color color, float seconds)
-        {
-            m_Banner.gameObject.SetActive(true);
-            m_BannerText.text = text;
-            float t = 0;
-            while (t < seconds)
-            {
-                t += Time.deltaTime;
-                float flicker = 1f;   // sin estrobo: un cartel que parpadea a 30 cm de los ojos molesta
-                var c = color; c.a = flicker * Mathf.Clamp01((seconds - t) / 0.4f);
-                m_BannerText.color = c;
-                var bg = m_BannerBg.color; bg.a = 0.97f * Mathf.Clamp01((seconds - t) / 0.4f); m_BannerBg.color = bg;
-                if (head != null)
-                {
-                    var dir = m_Banner.transform.position - head.position;
-                    if (dir.sqrMagnitude > 0.0001f) m_Banner.transform.rotation = Quaternion.LookRotation(dir, Vector3.up);
-                }
-                yield return null;
-            }
-            m_Banner.gameObject.SetActive(false);
-            m_BannerCo = null;
+            if (HudStrip.Instance != null) HudStrip.Instance.Notify(text, color, seconds);
         }
 
         int m_LastSecs = -1, m_LastScore = int.MinValue, m_LastFound = -1, m_Discoverable = -1;
 
         void Update()
         {
-            // Los textos solo se reescriben cuando cambia el valor (antes se armaban strings en cada cuadro → basura/tirones en Quest)
+            // Los textos solo se reescriben cuando cambia el valor (antes se armaban strings en cada cuadro: basura y tirones en Quest)
             var timer = GameTimer.Instance;
             if (timer != null)
             {
@@ -204,7 +156,9 @@ namespace RickMorty
                 // la cara del reloj apunta a la cabeza Y el jugador esta mirando hacia el reloj
                 // (antes bastaba con tener la mano a la altura de la mesa: el holograma saltaba solo mientras se trabajaba)
                 float gaze = dist > 0.0001f ? Vector3.Dot(head.forward, -toHead / dist) : 0f;
-                bool looking = dist < lookMaxDistance && dot > lookDot && gaze > gazeDot;
+                // En el PC la mano no se puede girar facil: basta con mirar hacia el reloj
+                bool faceOk = dot > lookDot || EditorSimulatorToggle.SimulatorOn;
+                bool looking = dist < lookMaxDistance && faceOk && gaze > gazeDot;
                 if (looking) m_LookTime += Time.deltaTime; else m_LookTime = 0f;
                 IsLooking = m_LookTime > 0.25f;
                 if (hologram != null) hologram.SetVisible(IsLooking || hologram.IsPointerOver);

@@ -5,6 +5,7 @@ namespace RickMorty
     /// <summary>
     /// Materiales base (se crean como assets en Resources para que los shaders de URP
     /// entren en el build). Los colores se derivan en runtime y se cachean.
+    /// Lo usan: MatLib (materiales base) y RickMortySetup (crea el asset).
     /// </summary>
     public class MaterialLibrary : ScriptableObject
     {

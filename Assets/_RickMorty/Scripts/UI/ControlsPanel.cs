@@ -1,6 +1,8 @@
+using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR;
 
 namespace RickMorty
 {
@@ -8,6 +10,7 @@ namespace RickMorty
     /// Pantalla de ayuda con los controles (visor y PC). Se abre/cierra con el boton Y del control
     /// izquierdo (en el simulador XR: tecla 2 con la mano izquierda) o la tecla B del teclado, o
     /// desde el menu de pausa. No pausa el juego: aparece frente a la vista y se puede cerrar igual.
+    /// Lo usan: PauseMenu (la agrega a su objeto y tiene el boton "Ver controles").
     /// </summary>
     public class ControlsPanel : MonoBehaviour
     {
@@ -24,19 +27,19 @@ namespace RickMorty
             "<color=#7DFF6A>Grip</color> (el del dedo medio)   agarrar y soltar\n" +
             "<color=#7DFF6A>Gatillo</color> (índice)   usar lo que tienes en la mano\n" +
             "<color=#7DFF6A>Tocar el botón rojo</color>   mezclar lo que hay en el tazón\n" +
-            "<color=#7DFF6A>Mirar la muñeca izq.</color>   tiempo, puntos y colección\n" +
-            "<color=#7DFF6A>Apuntar al holograma</color>   ver recetas descubiertas\n" +
-            "<color=#7DFF6A>Botón Menú</color> (izq.)   pausa\n" +
-            "<color=#7DFF6A>Botón Y</color> (izq.)   esta pantalla de controles";
+            "<color=#7DFF6A>Mirar la muñeca izquierda</color>   tiempo, puntos y recetas\n" +
+            "<color=#7DFF6A>Botón Menú</color> (mano izquierda)   pausa\n" +
+            "<color=#7DFF6A>Botón Y</color> (mano izquierda)   esta pantalla de controles";
 
         const string Pc =
-            "<color=#5FD0E8>W A S D</color>   caminar, <color=#5FD0E8>Q / E</color> bajar / subir\n" +
+            "<color=#5FD0E8>W A S D</color>   caminar  (<color=#5FD0E8>F</color> sostenida: correr)\n" +
             "<color=#5FD0E8>Clic derecho + mouse</color>   mirar alrededor\n" +
-            "<color=#5FD0E8>Tab</color>   cambiar entre cabeza y manos\n" +
-            "<color=#5FD0E8>,  /  .</color>  (coma y punto)   mover la mano izquierda / derecha\n" +
-            "<color=#5FD0E8>G</color>   agarrar, <color=#5FD0E8>T</color>   gatillo (usar)\n" +
-            "<color=#5FD0E8>M</color>  o  <color=#5FD0E8>P</color>   pausa\n" +
-            "<color=#5FD0E8>B</color>   esta pantalla de controles";
+            "<color=#5FD0E8>G</color>   agarrar, y otra vez para soltar\n" +
+            "<color=#5FD0E8>T</color>   usar lo que tienes en la mano\n" +
+            "<color=#5FD0E8>Shift + G / T</color>   lo mismo con la mano izquierda\n" +
+            "<color=#5FD0E8>Apuntar al botón rojo y G</color>   mezclar\n" +
+            "<color=#5FD0E8>Mirar abajo a la izquierda</color>   reloj y recetas\n" +
+            "<color=#5FD0E8>P</color>   pausa,   <color=#5FD0E8>B</color>   esta pantalla";
 
         void Awake()
         {
@@ -48,15 +51,15 @@ namespace RickMorty
             Build();
         }
 
-        System.Collections.IEnumerator Start()
+        IEnumerator Start()
         {
             // recordatorio unico, cuando Rick ya termino de explicar lo basico (antes salia a los 9 s, en plena charla)
             yield return new WaitForSeconds(4f);
             while (GameManager.Instance != null && (GameManager.Instance.State == GameState.Intro || GameManager.Instance.State == GameState.Onboarding))
                 yield return null;
             yield return new WaitForSeconds(3f);
-            bool vr = UnityEngine.XR.XRSettings.isDeviceActive;
-            WristWatch.Instance?.Notify(vr ? "Botón Y (mano izquierda)\nver los controles" : "Botón Y o tecla B\nver los controles", UIKit.Cyan, 5f);
+            bool vr = XRSettings.isDeviceActive;
+            WristWatch.Instance?.Notify(vr ? "Botón Y (mano izquierda)\nver los controles" : "Tecla B\nver los controles", UIKit.Cyan, 5f);
         }
 
         void OnEnable() => m_Toggle.Enable();
@@ -69,7 +72,7 @@ namespace RickMorty
         {
             // En el visor solo se muestra la columna del visor (la del teclado no sirve ahi y ensanchaba el panel a 73 grados).
             // En el PC (simulador) se muestran las dos.
-            bool vr = UnityEngine.XR.XRSettings.isDeviceActive;
+            bool vr = XRSettings.isDeviceActive;
             m_BuiltForVr = vr;
             if (m_Canvas != null) Destroy(m_Canvas.gameObject);
             m_Canvas = UIKit.WorldCanvas("ControlsCanvas", transform, new Vector2(vr ? 720 : 1280, 760), 0.001f, false);
@@ -84,10 +87,10 @@ namespace RickMorty
             else
             {
                 Column(root, "EN EL VISOR (META QUEST)", Quest, 0.02f, 0.5f, new Color(0.06f, 0.16f, 0.09f));
-                Column(root, "EN EL PC (SIMULADOR XR)", Pc, 0.51f, 0.98f, new Color(0.05f, 0.12f, 0.17f));
+                Column(root, "EN EL COMPUTADOR (TECLADO Y MOUSE)", Pc, 0.51f, 0.98f, new Color(0.05f, 0.12f, 0.17f));
             }
 
-            UIKit.Line("Hint", root, vr ? "Botón Y para cerrar" : "Botón Y o tecla B para cerrar", 26, new Color(0.75f, 0.85f, 0.8f), TextAlignmentOptions.Center,
+            UIKit.Line("Hint", root, vr ? "Botón Y para cerrar" : "Tecla B para cerrar", 26, new Color(0.75f, 0.85f, 0.8f), TextAlignmentOptions.Center,
                 new Vector2(0, 0.01f), new Vector2(1, 0.08f), 10, 0);
             m_Canvas.gameObject.SetActive(false);
         }
@@ -108,7 +111,7 @@ namespace RickMorty
         public void Open()
         {
             // el visor puede activarse despues de Awake: si cambio el modo, se rehace el panel
-            if (UnityEngine.XR.XRSettings.isDeviceActive != m_BuiltForVr) Build();
+            if (XRSettings.isDeviceActive != m_BuiltForVr) Build();
             var cam = Camera.main;
             if (cam != null)
             {

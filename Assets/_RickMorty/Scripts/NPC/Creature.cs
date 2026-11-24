@@ -7,6 +7,7 @@ namespace RickMorty
     /// Entidad viva vulnerable (one-hit kill). Al morir: congelamiento de 0.2 s, se infla
     /// (armas de fuego) o se parte (armas blancas), explota en particulas del color de su
     /// "sangre", deja un charco y Rick reacciona por la radio.
+    /// Lo usan: ItemFactory (criaturas), las armas, FX.Explosion, ScoreManager (penalizacion moral) y GameEvents.
     /// </summary>
     public class Creature : MonoBehaviour
     {
@@ -19,8 +20,6 @@ namespace RickMorty
         public bool invulnerableToLaser;
 
         public bool IsDead { get; private set; }
-
-        public event System.Action Died;
 
         float m_LastLaserLine = -100f;
 
@@ -119,7 +118,6 @@ namespace RickMorty
 
             if (!string.IsNullOrEmpty(killLineId)) RickComms.Instance?.Say(killLineId);
             GameEvents.RaiseCreatureKilled(this, accidental);
-            Died?.Invoke();
             Destroy(gameObject);
         }
     }

@@ -17,7 +17,7 @@
     {"id":"katana","name":"Katana","category":"arma","shape":"blade","color":"#C8C8D0","size":0.85,"mass":1.2,"behaviour":"melee","description":"Espada japonesa. Corta criaturas de un golpe."},
     {"id":"pistola_laser","name":"Pistola Láser","category":"arma","shape":"gun","color":"#7A8A8F","size":0.25,"mass":1,"behaviour":"laser","description":"Gatillo: rayo que rebota hasta 3 veces."},
     {"id":"sable_luz","name":"Sable de Luz","category":"arma","shape":"hilt","color":"#D0D0D0","size":0.25,"mass":0.8,"behaviour":"lightsaber","description":"Gatillo: enciende la hoja de luz azul."},
-    {"id":"semen","name":"Semen Intergaláctico","category":"absurdo","shape":"jar","color":"#F4F1E8","size":0.12,"mass":0.5,"behaviour":"","description":"Frasco con etiqueta de Bio-Hazard. Brilla en la oscuridad."},
+    {"id":"semen","name":"Semen Intergaláctico","category":"absurdo","shape":"jar","color":"#F4F1E8","size":0.12,"mass":0.5,"behaviour":"","description":"Frasco con etiqueta de riesgo biológico. Brilla en la oscuridad."},
     {"id":"clon_rick","name":"Bola de Clon de Rick","category":"criatura","shape":"sphere","color":"#7CFFB2","size":0.1,"mass":0.3,"behaviour":"","description":"Esfera con un feto de Rick amargado adentro."},
     {"id":"peluche_teto","name":"Peluche de Kasane Teto","category":"absurdo","shape":"capsule","color":"#E0344B","size":0.25,"mass":0.4,"behaviour":"shield","description":"Escudo de felpa irrompible."},
     {"id":"papa_rellena","name":"Papa Rellena","category":"comida","shape":"sphere","color":"#D9962B","size":0.12,"mass":0.6,"behaviour":"food_drunk","description":"Llévatela a la boca. Grasienta y perfecta."},
@@ -32,9 +32,9 @@
     {"id":"caja_contrabando","name":"Caja de Meeseeks de Contrabando","category":"criatura","shape":"cube","color":"#3A5BD9","size":0.16,"mass":0.6,"behaviour":"contraband_box","description":"Gatillo: invoca un Meeseeks de mala calidad."},
     {"id":"empanada","name":"Empanada Cuántica","category":"comida","shape":"half","color":"#F2B33D","size":0.14,"mass":0.3,"behaviour":"food_teleport","description":"Muérdela y existirás en otro lugar por 3 segundos."},
     {"id":"bloque_minecraft","name":"Bloque de Tierra de Minecraft","category":"absurdo","shape":"cube","color":"#6BAA3A","size":0.3,"mass":1,"behaviour":"minecraft","description":"Ignora la gravedad: se queda donde lo sueltes."},
-    {"id":"dakimakura","name":"Dakimakura de Hatsune Miku","category":"absurdo","shape":"pillow","color":"#86CECB","size":0.8,"mass":1,"behaviour":"shield","description":"Escudo perfecto e irrompible."},
+    {"id":"dakimakura","name":"Dakimakura de Waifu","category":"absurdo","shape":"pillow","color":"#86CECB","size":0.8,"mass":1,"behaviour":"shield","description":"Escudo perfecto e irrompible."},
     {"id":"rick_caleno","name":"Rick Orientoso (Caleño)","category":"criatura","shape":"capsule","color":"#BFE6FF","size":0.15,"mass":0.3,"behaviour":"creature_caleno","description":"Muéstrale la camiseta del América, ve."},
-    {"id":"portal_carton","name":"Portal Gun de Cartón","category":"arma","shape":"gun","color":"#B98B57","size":0.25,"mass":0.4,"behaviour":"cardboard_gun","description":"Una réplica tristísima. Base de la receta definitiva."},
+    {"id":"portal_carton","name":"Portal Gun de cartón","category":"arma","shape":"gun","color":"#B98B57","size":0.25,"mass":0.4,"behaviour":"cardboard_gun","description":"Una réplica tristísima. Base de la receta definitiva."},
     {"id":"kunai","name":"Kunai de Plástico","category":"arma","shape":"knife","color":"#1A1A1A","size":0.22,"mass":0.2,"behaviour":"knife","description":"Cuchillo ninja de juguete. También se clava."},
     {"id":"casco_snowball","name":"Casco Traductor de Snowball","category":"absurdo","shape":"sphere","color":"#9AA0A6","size":0.25,"mass":0.8,"behaviour":"helmet_snowball","description":"Ponlo en tu cabeza... y escucha a Rick en perruno."},
     {"id":"meeseeks_kirkland","name":"Meeseeks marca Kirkland","category":"criatura","shape":"capsule","color":"#A33B3B","size":0.3,"mass":0.6,"behaviour":"creature_wander","description":"Rojo, con ojeras y barba de tres días."},
@@ -43,7 +43,7 @@
     {"id":"mini_cronenberg","name":"Mini-Cronenberg","category":"criatura","shape":"sphere","color":"#D9777F","size":0.22,"mass":0.8,"behaviour":"creature_throwable","description":"Bulto de carne con un ojo gigante. Asqueroso."},
     {"id":"cereal_eyeholes","name":"Cereal Eyeholes","category":"comida","shape":"cube","color":"#F5A623","size":0.22,"mass":0.4,"behaviour":"food_eyeholes","description":"No te lo acerques a la boca. En serio."},
     {"id":"vhs_balistica","name":"VHS Balística Interdimensional 2","category":"absurdo","shape":"cube","color":"#222222","size":0.16,"mass":0.3,"behaviour":"","description":"Televisión interdimensional en cinta."},
-    {"id":"semilla_sillas","name":"Semilla de Árbol de Sillas","category":"absurdo","shape":"sphere","color":"#6B4226","size":0.08,"mass":0.2,"behaviour":"","description":"Plántala y crecerán sillas."},
+    {"id":"semilla_sillas","name":"Semilla de Árbol de Sillas","category":"absurdo","shape":"sphere","color":"#6B4226","size":0.08,"mass":0.2,"behaviour":"","description":"Dicen que si la plantas crecen sillas. Rick nunca lo probó."},
     {"id":"pistola_portales","name":"Pistola de Portales","category":"final","shape":"gun","color":"#F2F2F2","size":0.3,"mass":1.2,"behaviour":"portal_gun","description":"La de verdad. Gatillo: abre un portal."}
   ]
 }

@@ -5,6 +5,7 @@ namespace RickMorty
     /// <summary>
     /// Vineta dinamica de confort (anti-mareo): oscurece los bordes al caminar o girar con el joystick.
     /// Se activa/desactiva desde el menu de pausa y se guarda en el archivo de guardado.
+    /// Lo usan: PauseMenu (activar o desactivar); la crea el builder de escena en la camara.
     /// </summary>
     public class ComfortVignette : MonoBehaviour
     {

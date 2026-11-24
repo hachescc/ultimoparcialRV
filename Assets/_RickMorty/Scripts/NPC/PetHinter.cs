@@ -2,7 +2,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>Sr. Pantalones de Popo de bolsillo: si lo sostienes te da pistas o se burla de tus mezclas.</summary>
+    /// <summary>
+    /// Sr. Pantalones de Popo de bolsillo: si lo sostienes te da pistas o se burla de tus mezclas.
+    /// Lo usan: ItemFactory (behaviour "creature_pet").
+    /// </summary>
     public class PetHinter : ItemBehaviour
     {
         float m_Next;
@@ -17,7 +20,8 @@ namespace RickMorty
 
         void OnMixFailed(string _)
         {
-            if ((PlayerRig.Instance.HeadPosition - transform.position).sqrMagnitude < 9f)
+            var rig = PlayerRig.Instance;
+            if (rig != null && (rig.HeadPosition - transform.position).sqrMagnitude < 9f)
                 Say("pantalones_fail");
         }
 
@@ -33,10 +37,10 @@ namespace RickMorty
                 Say("pantalones_idle");
         }
 
-        void Say(string id)
+        /// <summary>Dice una linea de dialogues.json (el hablante sale del archivo: Sr. Pantalones).</summary>
+        static void Say(string id)
         {
-            var line = GameDatabase.GetLine(id);
-            if (line != null) RickComms.Instance?.SayText(line.PickText(), line.speaker);
+            if (RickComms.Instance != null) RickComms.Instance.Say(id);
         }
     }
 }

@@ -7,13 +7,23 @@ namespace RickMorty
     /// Comida: se "come" acercandola a la boca (colision con la cabeza).
     /// Szechuan = filtro VHS, Empanada Cuantica = teletransporte 3 s, Aguardiente/Papa = borrachera,
     /// Cereal Eyeholes = aparece el Hombre Agujero de Ojo y te arrebata la caja.
+    /// Lo usan: ItemFactory (behaviours "food_..."), PlayerHead (lo come al tocar la boca) y GameManager (ResetStatics).
     /// </summary>
     public class Consumable : ItemBehaviour, IHeadInteractable
     {
+        /// <summary>Que pasa al comerlo: borrachera, filtro VHS, teletransporte o Hombre Agujero de Ojo.</summary>
         public enum Effect { Drunk, VHS, Teleport, Eyeholes }
         public Effect effect;
 
         bool m_Used;
+
+        /// <summary>En el PC (teclado y mouse) no se puede acercar la comida a la boca: con T se come.</summary>
+        protected override void OnActivate()
+        {
+            if (!EditorSimulatorToggle.SimulatorOn) return;
+            var head = FindFirstObjectByType<PlayerHead>();
+            if (head != null) OnTouchHead(head);
+        }
 
         public void OnTouchHead(PlayerHead head)
         {
@@ -65,7 +75,7 @@ namespace RickMorty
             yield return new WaitForSeconds(3f);
             s_Teleporting = false;
             // si la partida termino mientras tanto, el jugador ya esta en la sala final: no lo devolvemos al garaje
-            if (gm == null || rig == null || gm.State == GameState.Ending || gm.State == GameState.GameOver) yield break;
+            if (gm == null || rig == null || gm.IsFinished) yield break;
             ScreenFX.Instance?.Flash(new Color(0.6f, 1f, 0.6f), 0.05f, 0.5f);
             rig.TeleportTo(back, fwd);
         }
@@ -134,7 +144,10 @@ namespace RickMorty
         }
     }
 
-    /// <summary>El Hombre Agujero de Ojo golpea la ventana: sacudida corta y agresiva mientras esta en escena.</summary>
+    /// <summary>
+    /// El Hombre Agujero de Ojo golpea la ventana: sacudida corta y agresiva mientras esta en escena.
+    /// Lo usan: Consumable (cereal Eyeholes) al hacer aparecer al Hombre Agujero de Ojo.
+    /// </summary>
     public class EyeholeManShake : MonoBehaviour
     {
         Vector3 m_Base;

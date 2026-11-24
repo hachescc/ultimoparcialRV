@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace RickMorty
@@ -9,6 +8,7 @@ namespace RickMorty
     /// Tazon de mezclas. Detecta los objetos dentro, da retroalimentacion haptica
     /// (ronroneo suave si la mezcla va bien, vibracion agresiva + tazon rojo si va a explotar)
     /// y al presionar MEZCLAR crea el resultado o provoca la explosion catastrofica.
+    /// Lo usan: MixButton (llama a Mix), GameManager (misiones y final) y el builder de escena.
     /// </summary>
     public class MixingBowl : MonoBehaviour
     {
@@ -65,7 +65,7 @@ namespace RickMorty
             m_NextScan = Time.time + 0.1f;
 
             var contents = Contents();
-            var ids = contents.Select(c => c.itemId).ToList();
+            var ids = IdsOf(contents);
             if (contents.Count > m_LastCount && Time.timeSinceLevelLoad > 2f)
                 AudioFX.Play("plop", transform.position, 0.55f, 1f + 0.12f * contents.Count);   // confirma que el ingrediente SI quedo dentro
             m_LastCount = contents.Count;
@@ -127,9 +127,17 @@ namespace RickMorty
             }
         }
 
-        static bool s_FirstBoom = true;
+        bool m_FirstBoom = true;   // la primera explosion de la partida aturde mas (hay un solo tazon por escena)
         int m_LastCount;
         float m_NextDangerText;
+
+        /// <summary>Lista con los ids de los objetos (en el mismo orden).</summary>
+        static List<string> IdsOf(List<MixableItem> items)
+        {
+            var ids = new List<string>(items.Count);
+            foreach (var item in items) ids.Add(item.itemId);
+            return ids;
+        }
 
         /// <summary>Llamado por el boton MEZCLAR.</summary>
         public void Mix()
@@ -152,7 +160,7 @@ namespace RickMorty
                 return;
             }
             var contents = new List<MixableItem>(Contents());
-            var ids = contents.Select(c => c.itemId).ToList();
+            var ids = IdsOf(contents);
 
             if (contents.Count < 2)
             {
@@ -233,9 +241,9 @@ namespace RickMorty
             {
                 // destello corto y tibio (antes: blanco total 2 s en CADA mezcla fallida; molesto y agresivo en el visor)
                 ScreenFX.Instance?.Flash(new Color(1f, 0.95f, 0.8f, 0.6f), 0.08f, 0.7f);
-                ScreenFX.Instance?.Muffle(s_FirstBoom ? 3f : 1.5f);
-                AudioFX.Play2D("tinnitus", s_FirstBoom ? 0.45f : 0.15f);
-                s_FirstBoom = false;
+                ScreenFX.Instance?.Muffle(m_FirstBoom ? 3f : 1.5f);
+                AudioFX.Play2D("tinnitus", m_FirstBoom ? 0.45f : 0.15f);
+                m_FirstBoom = false;
                 rig.Haptic(Hand.Both, 1f, 0.5f);
             }
             GameEvents.RaiseMixFailed(reason);

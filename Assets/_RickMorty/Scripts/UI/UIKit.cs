@@ -11,6 +11,7 @@ namespace RickMorty
     /// <summary>
     /// Ayudas para construir UI XR en espacio mundo por codigo (canvas, paneles, textos, botones).
     /// Todas las interfaces del juego son diegeticas (reloj, monitor, tablero, hologramas).
+    /// Lo usan: todas las pantallas (reloj, monitor, pausa, controles, corcho, holograma, franja, resultados).
     /// </summary>
     public static class UIKit
     {

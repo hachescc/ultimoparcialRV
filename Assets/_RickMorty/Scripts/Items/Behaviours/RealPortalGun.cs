@@ -7,6 +7,7 @@ namespace RickMorty
     /// La Pistola de Portales real. Al agarrarla por primera vez se dispara la escena final.
     /// Gatillo: abre un portal donde apuntes. Si apuntas a un objeto suelto lo absorbe y lo
     /// escupe por un portal en el techo (ciclo infinito de objetos cayendo).
+    /// Lo usan: ItemFactory (behaviour "portal_gun"; la pide FinalAssemblyStation) y GameManager (al agarrarla empieza el final).
     /// </summary>
     public class RealPortalGun : ItemBehaviour
     {
@@ -49,7 +50,7 @@ namespace RickMorty
             Item.Haptic(1f, 0.35f);
             AudioFX.Play("zap", transform.position, 0.8f);
             var origin = Muzzle(0.22f);
-            if (!Physics.Raycast(origin, transform.forward, out var hit, range, ~0, QueryTriggerInteraction.Ignore)) return;
+            if (!Physics.Raycast(origin, transform.forward, out var hit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)) return;
 
             var other = hit.collider.GetComponentInParent<MixableItem>();
             if (other != null && other.gameObject != gameObject && !other.IsHeld && !other.IsBase)

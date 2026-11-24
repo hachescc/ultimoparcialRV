@@ -7,6 +7,7 @@ namespace RickMorty
     /// <summary>
     /// Socket XR que solo acepta objetos con ciertos ids (el soporte de cada frasco base,
     /// o el soporte de ensamblaje final que solo acepta la Portal Gun de carton).
+    /// Lo usan: BaseIngredient (vuelve a su soporte) y FinalAssemblyStation; los crea el builder de escena.
     /// </summary>
     public class IngredientSocket : XRSocketInteractor
     {

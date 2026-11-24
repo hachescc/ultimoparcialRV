@@ -7,6 +7,7 @@ namespace RickMorty
     /// Sistema "Anti-Estupidez": los 8 frascos base nunca se pierden. Si tocan el suelo,
     /// caen fuera del mapa, se usan en una mezcla o se los roban, un micro-portal se los
     /// traga y otro los devuelve a su soporte (socket) en la mesa.
+    /// Lo usan: MixableItem (lo consulta al consumir o robar) y los Meeseeks; el builder lo pone en cada frasco base.
     /// </summary>
     [RequireComponent(typeof(MixableItem))]
     public class BaseIngredient : MonoBehaviour
@@ -119,7 +120,7 @@ namespace RickMorty
             if (delay > 0) yield return new WaitForSeconds(delay);
 
             // Portal que se lo traga
-            var down = FX.Portal(transform.position + Vector3.up * 0.01f, Quaternion.identity, 0.12f, 0.9f);
+            FX.Portal(transform.position + Vector3.up * 0.01f, Quaternion.identity, 0.12f, 0.9f);
             float t = 0;
             var startScale = transform.localScale;
             while (t < 0.35f)
@@ -147,7 +148,6 @@ namespace RickMorty
             SetVisible(true);
             m_Item.Unavailable = false;
             m_Returning = false;
-            GameEvents.RaiseBaseRespawned();
 
             if (fromFloor && s_FirstFloorRespawn)
             {

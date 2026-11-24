@@ -1,10 +1,12 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace RickMorty
 {
     /// <summary>
-    /// Puntaje y estadisticas verificables de la partida. Escucha el bus de eventos.
+    /// Puntaje y estadisticas verificables de la partida. Escucha el bus de eventos (GameEvents).
+    /// Lo usan: GameManager (resultado y pistas), tazon, soporte final, reloj, holograma, monitor y pantalla final.
     /// </summary>
     public class ScoreManager : MonoBehaviour
     {
@@ -19,13 +21,10 @@ namespace RickMorty
         public int Score { get; private set; }
         public int Explosions { get; private set; }
         public int Kills { get; private set; }
-        public int SuccessfulMixes { get; private set; }
-        public int Penalties { get; private set; }
         public readonly HashSet<string> Discovered = new HashSet<string>();
         public readonly HashSet<string> EasterEggs = new HashSet<string>();
-        public readonly List<string> Log = new List<string>();
 
-        public event System.Action Changed;
+        public event Action Changed;
 
         void Awake()
         {
@@ -64,10 +63,10 @@ namespace RickMorty
             return true;
         }
 
+        /// <summary>Suma (o resta) puntos. reason describe el motivo para quien lea el codigo.</summary>
         void Add(int pts, string reason)
         {
             Score = Mathf.Max(0, Score + pts);
-            Log.Add($"{(pts >= 0 ? "+" : "")}{pts}  {reason}");
             Changed?.Invoke();
             Popup(pts);
         }
@@ -77,7 +76,7 @@ namespace RickMorty
         {
             if (pts == 0) return;
             var gm = GameManager.Instance;
-            if (gm != null && (gm.State == GameState.Ending || gm.State == GameState.GameOver)) return;
+            if (gm != null && gm.IsFinished) return;
             var cam = Camera.main;
             if (cam == null) return;
             Vector3 pos;
@@ -94,11 +93,10 @@ namespace RickMorty
         }
 
         // Repetir la misma mezcla puntua como maximo 3 veces (antes daba +10 sin limite: se podia "farmear").
-        readonly System.Collections.Generic.Dictionary<string, int> m_RepeatCount = new System.Collections.Generic.Dictionary<string, int>();
+        readonly Dictionary<string, int> m_RepeatCount = new Dictionary<string, int>();
 
         void OnMixSucceeded(RecipeDef r, bool first)
         {
-            SuccessfulMixes++;
             if (!first)
             {
                 m_RepeatCount.TryGetValue(r.result ?? "", out int n);
@@ -123,14 +121,13 @@ namespace RickMorty
 
         void OnPenalty(string reason, int pts)
         {
-            Penalties++;
             Add(-Mathf.Abs(pts), reason);
         }
 
         // Cada bono puntua como maximo 3 veces por partida (antes se podia "farmear" puntaje sin limite
         // clavando el cuchillo en el corcho, tirando cosas a la ventana del vecino, repitiendo mezclas...)
         const int MaxSameBonus = 3;
-        readonly System.Collections.Generic.Dictionary<string, int> m_BonusCount = new System.Collections.Generic.Dictionary<string, int>();
+        readonly Dictionary<string, int> m_BonusCount = new Dictionary<string, int>();
 
         void OnBonus(string reason, int pts)
         {

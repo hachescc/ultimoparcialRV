@@ -7,6 +7,7 @@ namespace RickMorty
     /// <summary>
     /// Efectos visuales placeholder creados por codigo: particulas, humo, destellos,
     /// textos flotantes, manchas (decals) y portales.
+    /// Lo usan: casi todos los scripts de objetos, NPC y mezclas para mostrar efectos.
     /// </summary>
     public static class FX
     {
@@ -210,6 +211,10 @@ namespace RickMorty
         }
     }
 
+    /// <summary>
+    /// Apaga poco a poco una luz de destello y luego la destruye.
+    /// Lo usan: FX.FlashLight (se agrega sola a la luz del destello).
+    /// </summary>
     public class LightFader : MonoBehaviour
     {
         public float duration = 0.4f;
@@ -226,6 +231,10 @@ namespace RickMorty
         }
     }
 
+    /// <summary>
+    /// Hace subir un texto flotante, lo gira hacia la camara y lo desvanece.
+    /// Lo usan: FX.FloatingText (numeros de puntaje, avisos del tazon, danos).
+    /// </summary>
     public class FloatingTextMotion : MonoBehaviour
     {
         public float life = 1.5f, rise = 0.4f;
@@ -250,6 +259,10 @@ namespace RickMorty
         }
     }
 
+    /// <summary>
+    /// Tiempo de vida de una mancha (decal): la borra al terminar y avisa a FX para llevar la cuenta.
+    /// Lo usan: FX.Decal (manchas de sangre, quemaduras, pintura verde).
+    /// </summary>
     public class DecalLife : MonoBehaviour
     {
         public float life = 30f;
@@ -257,7 +270,10 @@ namespace RickMorty
         void OnDestroy() => FX.DecalRemoved();
     }
 
-    /// <summary>Visual de portal: disco verde + anillo + espiral giratoria.</summary>
+    /// <summary>
+    /// Visual de portal: disco verde + anillo + espiral giratoria.
+    /// Lo usan: FX.Portal, y por ahi GameManager, el tazon, los frascos base, Rick y las pistolas de portales.
+    /// </summary>
     public class PortalVisual : MonoBehaviour
     {
         public float radius = 0.4f;

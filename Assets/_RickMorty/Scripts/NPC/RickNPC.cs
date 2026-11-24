@@ -4,8 +4,9 @@ using UnityEngine;
 namespace RickMorty
 {
     /// <summary>
-    /// Rick fisico (placeholder) durante la introduccion: golpea la mesa, mira al jugador y al
-    /// final camina hacia la puerta del garaje y se va por un portal.
+    /// Rick en el garaje durante la introduccion y el tutorial: modelo 3D con animaciones Idle, Talk y Walk.
+    /// Golpea la mesa, mira al jugador mientras habla y al final camina hacia la puerta y se va por un portal.
+    /// Lo usan: GameManager (SlamTable en la intro, CoLeave cuando Rick se va, mouth para la voz).
     /// </summary>
     public class RickNPC : MonoBehaviour
     {
@@ -77,7 +78,7 @@ namespace RickMorty
                 yield return null;
             }
             var portalPos = transform.position + transform.forward * 0.8f + Vector3.up * 1f;
-            var portal = FX.Portal(portalPos, Quaternion.LookRotation(-transform.forward), 0.7f, 3f);
+            FX.Portal(portalPos, Quaternion.LookRotation(-transform.forward), 0.7f, 3f);
             yield return new WaitForSeconds(0.7f);
             float t = 0;
             var start = transform.position;

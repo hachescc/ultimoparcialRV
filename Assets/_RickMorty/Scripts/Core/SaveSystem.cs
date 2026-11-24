@@ -5,6 +5,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
+    /// <summary>
+    /// Resultado de una partida terminada: fecha, resultado, puntaje, rango y estadisticas.
+    /// Lo usan: GameManager (lo arma al terminar), SaveSystem (lo guarda) y EndScreen (lo muestra).
+    /// </summary>
     [Serializable]
     public class RunRecord
     {
@@ -19,6 +23,10 @@ namespace RickMorty
         public int easterEggs;
     }
 
+    /// <summary>
+    /// Todo lo que se guarda en disco entre partidas: coleccion, records, historial y opciones de confort.
+    /// Lo usan: SaveSystem (lo lee y escribe en JSON), PauseMenu, EndScreen, ComfortVignette y DiscoveryHologram.
+    /// </summary>
     [Serializable]
     public class SaveData
     {
@@ -34,6 +42,7 @@ namespace RickMorty
     /// <summary>
     /// Persistencia en JSON (Application.persistentDataPath/rickmorty_save.json).
     /// Guarda la coleccion del multiverso, el mejor puntaje, el historial de partidas y opciones.
+    /// Lo usan: GameManager, ScoreManager, PauseMenu, EndScreen, ComfortVignette y DiscoveryHologram.
     /// </summary>
     public static class SaveSystem
     {
@@ -97,12 +106,6 @@ namespace RickMorty
             if (run.score > Data.bestScore) Data.bestScore = run.score;
             Data.runs.Insert(0, run);
             while (Data.runs.Count > MaxRuns) Data.runs.RemoveAt(Data.runs.Count - 1);
-            Save();
-        }
-
-        public static void ResetAll()
-        {
-            s_Data = new SaveData();
             Save();
         }
     }

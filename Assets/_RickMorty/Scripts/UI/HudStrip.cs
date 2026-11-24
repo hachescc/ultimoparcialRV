@@ -5,30 +5,29 @@ using UnityEngine.UI;
 namespace RickMorty
 {
     /// <summary>
-    /// Franja de avisos "pegada al cuerpo": flota delante del jugador, un poco por debajo de la vista,
-    /// y lo sigue con retardo (no esta clavada a la cabeza, que marea). Muestra:
-    ///  1) notificaciones (descubrimientos, eventos, penalizaciones) — siempre;
-    ///  2) subtitulos de Rick y el objetivo cuando cambia — solo si el monitor del garaje NO esta a la vista.
-    /// Antes todo eso vivia en el reloj de la muneca con letra de 0.3 grados: no se podia leer en el visor
-    /// y lejos de la mesa el jugador se quedaba sin saber que hacer.
+    /// Franja de avisos que sigue a la camara: flota delante del jugador, un poco por debajo de la vista,
+    /// y se mueve suave detras de la cabeza (si estuviera clavada a la cabeza mareria). Muestra:
+    /// 1) notificaciones (descubrimientos, eventos, penalizaciones), siempre;
+    /// 2) subtitulos de Rick y el objetivo cuando cambia, solo si el monitor del garaje NO esta a la vista.
+    /// Es angosta (unos 30 grados) para leerla sin mover la cabeza.
+    /// Lo usan: GameManager (la crea con Ensure; objetivo, pistas y recordatorios), WristWatch.Notify y PauseMenu.
     /// </summary>
     public class HudStrip : MonoBehaviour
     {
         public static HudStrip Instance { get; private set; }
 
         public Transform head;
-        [Tooltip("Distancia a la cabeza (m)")] public float distance = 1.05f;
-        [Tooltip("Cuanto baja respecto a los ojos (m)")] public float drop = 0.34f;
-        [Tooltip("Si el jugador gira mas que esto, la franja se vuelve a centrar")] public float recenterAngle = 32f;
+        [Tooltip("Distancia a la cabeza (m)")] public float distance = 1.0f;
+        [Tooltip("Grados por debajo del centro de la vista")] public float angleDown = 15f;
+        [Tooltip("Que tan rapido alcanza a la cabeza (mas alto = mas pegada)")] public float followSpeed = 6f;
         public float objectiveSeconds = 7f;
 
         Canvas m_Canvas;
         CanvasGroup m_Group;
         Image m_Border;
         TextMeshProUGUI m_Label, m_Text;
-        float m_Yaw, m_YawVel;
-        bool m_Recentering, m_Subscribed;
-        Vector3 m_PosVel;
+        bool m_Subscribed;
+        Vector3 m_Dir;
 
         string m_Note, m_SubSpeaker, m_SubText, m_Objective;
         Color m_NoteColor;
@@ -47,18 +46,19 @@ namespace RickMorty
         void Awake()
         {
             Instance = this;
-            m_Canvas = UIKit.WorldCanvas("HudCanvas", transform, new Vector2(920, 230), 0.001f, false);
+            m_Canvas = UIKit.WorldCanvas("HudCanvas", transform, new Vector2(600, 170), 0.001f, false);
             m_Canvas.sortingOrder = 8;
             m_Group = m_Canvas.gameObject.AddComponent<CanvasGroup>();
             m_Group.alpha = 0f;
             m_Group.blocksRaycasts = false;
             m_Group.interactable = false;
             var root = m_Canvas.transform;
-            m_Border = UIKit.Fill("Borde", root, new Color(0.35f, 1f, 0.45f, 0.9f));
-            var bg = UIKit.Panel("Fondo", root, new Color(0.02f, 0.05f, 0.04f, 0.93f), Vector2.zero, Vector2.one, new Vector2(4, 4), new Vector2(-4, -4));
-            m_Label = UIKit.Line("Etiqueta", bg.transform, "", 30, UIKit.Cyan, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.74f), new Vector2(1, 1f), 26, 4);
+            // vidrio verde oscuro translucido con borde de color (antes era una placa negra casi opaca)
+            m_Border = UIKit.Fill("Borde", root, new Color(0.35f, 1f, 0.45f, 0.75f));
+            var bg = UIKit.Panel("Fondo", root, new Color(0.02f, 0.07f, 0.06f, 0.84f), Vector2.zero, Vector2.one, new Vector2(3, 3), new Vector2(-3, -3));
+            m_Label = UIKit.Line("Etiqueta", bg.transform, "", 26, UIKit.Cyan, TextAlignmentOptions.MidlineLeft, new Vector2(0, 0.74f), new Vector2(1, 1f), 20, 4);
             m_Label.fontStyle = FontStyles.Bold;
-            m_Text = UIKit.Block("Texto", bg.transform, "", 30, 44, Color.white, new Vector2(0, 0), new Vector2(1, 0.76f), 26);
+            m_Text = UIKit.Block("Texto", bg.transform, "", 24, 32, Color.white, new Vector2(0, 0), new Vector2(1, 0.76f), 20);
             m_Canvas.gameObject.SetActive(false);
         }
 
@@ -122,7 +122,7 @@ namespace RickMorty
 
             // --- que mostrar (prioridad: aviso > subtitulo > objetivo)
             var gm = GameManager.Instance;
-            bool ended = gm != null && (gm.State == GameState.Ending || gm.State == GameState.GameOver);
+            bool ended = gm != null && gm.IsFinished;
             bool paused = Time.timeScale == 0f;
             int kind = -1;
             string text = null;
@@ -175,20 +175,12 @@ namespace RickMorty
             if (!m_Canvas.gameObject.activeSelf) m_Canvas.gameObject.SetActive(true);
             m_Group.alpha = m_Alpha;
 
-            // --- seguimiento: gira con el cuerpo solo cuando el jugador se aleja mucho del centro
-            float headYaw = head.eulerAngles.y;
-            if (wasHidden) { m_Yaw = headYaw; m_YawVel = 0f; m_Recentering = false; }
-            float err = Mathf.Abs(Mathf.DeltaAngle(m_Yaw, headYaw));
-            if (err > recenterAngle) m_Recentering = true;
-            if (m_Recentering)
-            {
-                m_Yaw = Mathf.SmoothDampAngle(m_Yaw, headYaw, ref m_YawVel, 0.28f, 720f, dt);
-                if (err < 3f) m_Recentering = false;
-            }
-            var fwd = Quaternion.Euler(0, m_Yaw, 0) * Vector3.forward;
-            var target = head.position + fwd * distance + Vector3.down * drop;
+            // --- seguimiento: la direccion de la franja persigue suave a la de la mirada (unos grados mas abajo)
+            Vector3 wanted = Quaternion.AngleAxis(angleDown, head.right) * head.forward;
+            if (wasHidden || m_Dir == Vector3.zero) m_Dir = wanted;
+            else m_Dir = Vector3.Slerp(m_Dir, wanted, 1f - Mathf.Exp(-followSpeed * dt));
             var t = m_Canvas.transform;
-            t.position = wasHidden ? target : Vector3.SmoothDamp(t.position, target, ref m_PosVel, 0.12f, 50f, dt);
+            t.position = head.position + m_Dir.normalized * distance;
             t.rotation = Quaternion.LookRotation(t.position - head.position, Vector3.up);
 
             // entrada con un pequeno "pop" (sin parpadeo)

@@ -5,6 +5,7 @@ namespace RickMorty
     /// <summary>
     /// Armas de corte (Katana, Espada de Zord): un golpe con velocidad suficiente mata
     /// criaturas (one-hit kill). La Espada de Zord deja marcas de quemadura.
+    /// Lo usan: ItemFactory (behaviours "melee" y "melee_heavy").
     /// </summary>
     public class MeleeWeapon : ItemBehaviour
     {

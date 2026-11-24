@@ -5,6 +5,7 @@ namespace RickMorty
     /// <summary>
     /// Movimiento simple de criaturas sobre el suelo (deambular o perseguir un objetivo)
     /// usando la velocidad del Rigidbody. No se mueve mientras el jugador la sostiene.
+    /// Lo usan: ItemFactory (criaturas que deambulan) y sus hijos: FakeUncleSteve, MeeseeksNPC y RickCaleno.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class CreatureMover : MonoBehaviour
@@ -12,8 +13,6 @@ namespace RickMorty
         public float speed = 0.4f;
         public float turnSpeed = 240f;
         public float wanderRadius = 1.5f;
-        public Transform target;
-        public Vector3? targetPoint;
         public bool hop = true;
 
         protected Rigidbody m_Body;
@@ -45,8 +44,6 @@ namespace RickMorty
 
         protected virtual Vector3? CurrentGoal()
         {
-            if (target != null) return target.position;
-            if (targetPoint.HasValue) return targetPoint.Value;
             if (Time.time > m_NextWander || (FlatDelta(m_WanderTarget).sqrMagnitude < 0.04f))
             {
                 m_NextWander = Time.time + Random.Range(2f, 5f);

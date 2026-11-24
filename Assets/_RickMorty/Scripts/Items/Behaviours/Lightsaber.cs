@@ -2,7 +2,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>Sable de luz: el gatillo despliega la hoja azul con zumbido. Corta criaturas y quema superficies.</summary>
+    /// <summary>
+    /// Sable de luz: el gatillo despliega la hoja azul con zumbido. Corta criaturas y quema superficies.
+    /// Lo usan: ItemFactory (behaviour "lightsaber").
+    /// </summary>
     public class Lightsaber : ItemBehaviour
     {
         public float bladeLength = 0.9f;

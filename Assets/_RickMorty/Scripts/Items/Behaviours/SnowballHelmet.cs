@@ -6,6 +6,7 @@ namespace RickMorty
     /// <summary>
     /// Casco traductor de Snowball: si te lo pones (tocar la cabeza) todo suena grave y los
     /// insultos de Rick por la radio se convierten en ladridos furiosos.
+    /// Lo usan: ItemFactory (behaviour "helmet_snowball") y PlayerHead (se lo pone al tocar la cabeza).
     /// </summary>
     public class SnowballHelmet : ItemBehaviour, IHeadInteractable
     {

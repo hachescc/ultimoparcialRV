@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,10 +9,13 @@ namespace RickMorty
     /// Cierre de la aplicacion: resultados verificables de la partida, historial guardado
     /// en JSON, creditos flotando en el espacio y botones para reiniciar o salir.
     /// Va en el objeto "EndRoom" (vacio espacial lejos del garaje).
+    /// Lo usan: GameManager (CoEnding llama a Show al ganar o perder).
     /// </summary>
     public class EndScreen : MonoBehaviour
     {
-        public static EndScreen Instance { get; private set; }
+        // Cantidad de secretos (easter eggs) que hay en la propuesta y en la escena.
+        // Si se agrega o se quita uno, hay que cambiar este numero.
+        const int TotalEasterEggs = 8;
 
         public Transform playerSpot;
         [TextArea(5, 20)]
@@ -37,11 +39,10 @@ namespace RickMorty
         Canvas m_Results, m_Credits;
         CanvasGroup m_CreditsGroup;
         float m_CreditsFloorY;
-        TextMeshProUGUI m_Title, m_Body, m_History, m_CreditsText;
+        TextMeshProUGUI m_Title, m_CreditsText;
 
         void Awake()
         {
-            Instance = this;
             BuildStars();
         }
 
@@ -92,21 +93,31 @@ namespace RickMorty
             UIKit.Line("Rank", big.transform, run.rank, 96, accent, TextAlignmentOptions.BottomRight, new Vector2(0.6f, 0), new Vector2(1, 0.8f), 26, 4).fontStyle = FontStyles.Bold;
 
             // Estadisticas en dos columnas
-            (string k, string v)[] stats =
+            // (statNames[i] va con statValues[i])
+            string[] statNames =
             {
-                ("Tiempo jugado", GameTimer.Format(run.seconds)),
-                ("Descubrimientos", run.discoveries + " de " + GameDatabase.DiscoverableCount),
-                ("Explosiones", run.explosions.ToString()),
-                ("Criaturas eliminadas", run.kills.ToString()),
-                ("Easter eggs", run.easterEggs + " de 8"),
-                ("Mejor puntaje", SaveSystem.Data.bestScore.ToString("N0")),
+                "Tiempo jugado",
+                "Descubrimientos",
+                "Explosiones",
+                "Criaturas eliminadas",
+                "Secretos encontrados",
+                "Mejor puntaje",
             };
-            for (int i = 0; i < stats.Length; i++)
+            string[] statValues =
+            {
+                GameTimer.Format(run.seconds),
+                run.discoveries + " de " + GameDatabase.DiscoverableCount,
+                run.explosions.ToString(),
+                run.kills.ToString(),
+                run.easterEggs + " de " + TotalEasterEggs,
+                SaveSystem.Data.bestScore.ToString("N0"),
+            };
+            for (int i = 0; i < statNames.Length; i++)
             {
                 int col = i % 2, row = i / 2;
                 var cell = UIKit.Rect("Stat" + i, root, new Vector2(0.05f + col * 0.46f, 0.47f - row * 0.075f), new Vector2(0.49f + col * 0.46f, 0.545f - row * 0.075f));
-                UIKit.Line("K", cell, stats[i].k, 34, new Color(0.65f, 0.75f, 0.85f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0), new Vector2(0.62f, 1), 8, 0);
-                UIKit.Line("V", cell, stats[i].v, 36, Color.white, TextAlignmentOptions.MidlineRight, new Vector2(0.6f, 0), new Vector2(1, 1), 8, 0).fontStyle = FontStyles.Bold;
+                UIKit.Line("K", cell, statNames[i], 34, new Color(0.65f, 0.75f, 0.85f), TextAlignmentOptions.MidlineLeft, new Vector2(0, 0), new Vector2(0.62f, 1), 8, 0);
+                UIKit.Line("V", cell, statValues[i], 36, Color.white, TextAlignmentOptions.MidlineRight, new Vector2(0.6f, 0), new Vector2(1, 1), 8, 0).fontStyle = FontStyles.Bold;
             }
 
             // Ultimas partidas
@@ -127,11 +138,13 @@ namespace RickMorty
             UIKit.Button("Quit", root, "Salir", Quit, new Vector2(0.52f, 0.022f), new Vector2(0.95f, 0.118f), color: new Color(0.5f, 0.12f, 0.1f, 0.95f), fontSize: 44);
 
             // Creditos flotando lentamente
-            m_Credits = UIKit.WorldCanvas("CreditsCanvas", transform, new Vector2(800, 1400), 0.0015f, false);
+            m_Credits = UIKit.WorldCanvas("CreditsCanvas", transform, new Vector2(800, 1700), 0.0015f, false);
             // a ~2.7 m y 28 grados a la derecha (antes 4.1 m: letra de 0.67 grados y fuera de la plataforma)
             m_Credits.transform.position = origin.position + origin.forward * 2.3f + origin.right * 1.75f;
             m_Credits.transform.rotation = Quaternion.LookRotation(origin.forward, Vector3.up) * Quaternion.Euler(0, 37f, 0);
             m_CreditsGroup = m_Credits.gameObject.AddComponent<CanvasGroup>();
+            // fondo oscuro translucido: sin el, las letras pequenas se perdian sobre el piso verde de la sala final
+            UIKit.Panel("FondoCreditos", m_Credits.transform, new Color(0f, 0f, 0f, 0.6f), Vector2.zero, Vector2.one, new Vector2(-30, -30), new Vector2(30, 30));
             m_CreditsText = UIKit.Text("Credits", m_Credits.transform, credits, 46, new Color(0.8f, 1f, 0.85f), TextAlignmentOptions.Top);
             m_CreditsFloorY = origin.position.y;
             StartCoroutine(CoScrollCredits());
@@ -143,7 +156,7 @@ namespace RickMorty
             // desvanece y vuelve a empezar. (Antes el recorrido era fijo de 4 m: las ultimas lineas nunca subian
             // del piso y el bucle daba un salto brusco.)
             yield return null;   // un cuadro para que TMP calcule el alto real del texto
-            const float scale = 0.0015f, half = 1400 * 0.0015f * 0.5f;
+            const float scale = 0.0015f, half = 1700 * 0.0015f * 0.5f;   // 1700 = alto del canvas de creditos
             float textH = Mathf.Max(1f, m_CreditsText.preferredHeight * scale);
             var basePos = m_Credits.transform.position;
             float range = textH + 2.2f;

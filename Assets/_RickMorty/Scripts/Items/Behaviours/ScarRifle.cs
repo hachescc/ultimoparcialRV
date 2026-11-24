@@ -3,7 +3,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>SCAR del Fortnite: rafaga rapida con dispersion horrible y numeros de dano amarillos.</summary>
+    /// <summary>
+    /// SCAR del Fortnite: rafaga rapida con dispersion horrible y numeros de dano amarillos.
+    /// Lo usan: ItemFactory (behaviour "scar").
+    /// </summary>
     public class ScarRifle : ItemBehaviour
     {
         public float fireRate = 10f;
@@ -44,7 +47,7 @@ namespace RickMorty
             AudioFX.Play("shot", origin, 0.7f, Random.Range(0.9f, 1.15f));
             Item.Haptic(0.45f, 0.04f);
             Vector3 end = origin + dir * range;
-            if (Physics.Raycast(origin, dir, out var hit, range, ~0, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(origin, dir, out var hit, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
                 end = hit.point;
                 ApplyProjectileHit(hit, dir, 1.5f, false);

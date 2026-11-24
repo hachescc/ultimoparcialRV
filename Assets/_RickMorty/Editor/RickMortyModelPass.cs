@@ -628,7 +628,9 @@ namespace RickMorty.EditorTools
         static void Rick()
         {
             if (!Exists("rick")) return;
-            var rick = GameObject.Find("Rick (placeholder - pedir modelo)");
+            // se busca por su componente (no por nombre: renombrar el objeto dejaba a Rick con el cuerpo de primitivas)
+            var npc = Object.FindFirstObjectByType<RickNPC>();
+            var rick = npc != null ? npc.gameObject : null;
             if (rick != null)
             {
                 var vis = rick.transform.Find("Visual");

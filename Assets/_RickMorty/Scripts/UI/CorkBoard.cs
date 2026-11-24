@@ -8,6 +8,7 @@ namespace RickMorty
     /// <summary>
     /// Tablero de corcho de Rick: notas con pistas que se van revelando durante la partida.
     /// Cada nota tiene su chincheta y un hilo rojo la une con la anterior (estilo "tablero de conspiracion").
+    /// Lo usan: GameManager (AddNote con pistas); lo crea el builder de escena.
     /// </summary>
     public class CorkBoard : MonoBehaviour
     {
@@ -48,8 +49,6 @@ namespace RickMorty
             m_PinsLayer = UIKit.Rect("Chinchetas", m_Root, Vector2.zero, Vector2.one);
             foreach (var n in startingNotes) AddNote(n);
         }
-
-        public bool HasNote(string text) => m_Notes.Contains(text);
 
         public void AddNote(string text)
         {

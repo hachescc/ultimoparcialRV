@@ -3,7 +3,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>Toallin: dice frases cuando estas cerca (y reacciona al humo de la marihuana).</summary>
+    /// <summary>
+    /// Toallin: dice frases cuando estas cerca (y reacciona al humo de la marihuana).
+    /// Lo usan: ItemFactory (behaviour "talker") y Burnable (reacciona al humo).
+    /// </summary>
     public class Talker : ItemBehaviour
     {
         static readonly List<Talker> s_All = new List<Talker>();

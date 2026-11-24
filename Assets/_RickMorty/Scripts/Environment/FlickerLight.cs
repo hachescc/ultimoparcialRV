@@ -2,7 +2,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>Tubo fluorescente que zumba y parpadea de vez en cuando. Soporta apagones.</summary>
+    /// <summary>
+    /// Tubo fluorescente que zumba y parpadea de vez en cuando. Soporta apagones.
+    /// Lo usan: EventDirector (apagon); el builder de escena lo pone en cada fluorescente.
+    /// </summary>
     public class FlickerLight : MonoBehaviour
     {
         public Light targetLight;

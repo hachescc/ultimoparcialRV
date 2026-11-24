@@ -11,6 +11,7 @@ namespace RickMorty
     /// Efectos de pantalla para VR: fundidos, destellos (flashbang), ceguera rosa del Tio Steve,
     /// filtro VHS, borrachera y sonido amortiguado (tinnitus / low pass).
     /// Va en la camara del XR Origin.
+    /// Lo usan: GameManager, tazon (explosion), Tio Steve, objetos (consumibles, guantelete, casco), soporte final, PlayAreaBoundary y la pausa.
     /// </summary>
     public class ScreenFX : MonoBehaviour
     {
@@ -23,13 +24,9 @@ namespace RickMorty
         TextMeshPro m_OverlayText;
         Volume m_Volume;
         ChromaticAberration m_Chroma;
-        LensDistortion m_Lens;
         ColorAdjustments m_Color;
-        FilmGrain m_Grain;
         AudioLowPassFilter m_LowPass;
         Coroutine m_FadeCo, m_VolumeCo, m_AudioCo, m_OverlayCo;
-
-        public bool IsBlind { get; private set; }
 
         void Awake()
         {
@@ -119,15 +116,12 @@ namespace RickMorty
             m_Volume.priority = 10;
             m_Volume.weight = 0f;
             var profile = ScriptableObject.CreateInstance<VolumeProfile>();
+            // Solo color y aberracion cromatica: deformar la lente o poner grano marea y es caro en el visor
             m_Chroma = profile.Add<ChromaticAberration>(true);
-            m_Lens = profile.Add<LensDistortion>(true);
             m_Color = profile.Add<ColorAdjustments>(true);
-            m_Grain = profile.Add<FilmGrain>(true);
             m_Chroma.intensity.Override(0f);
-            m_Lens.intensity.Override(0f);
             m_Color.saturation.Override(0f);
             m_Color.colorFilter.Override(Color.white);
-            m_Grain.intensity.Override(0f);
             m_Volume.sharedProfile = profile;
         }
 
@@ -165,7 +159,6 @@ namespace RickMorty
             m_FadeCo = null;
         }
 
-        /// <summary>Destello: sube instantaneo, se mantiene y se desvanece.</summary>
         /// <summary>Al abrir la pausa: quita fundidos, destellos y textos (corren con tiempo de juego y quedarian congelados encima del menu).</summary>
         public void ClearForPause()
         {
@@ -173,6 +166,7 @@ namespace RickMorty
             ClearOverlay();
         }
 
+        /// <summary>Destello: sube instantaneo, se mantiene y se desvanece.</summary>
         public void Flash(Color color, float hold = 0.1f, float fadeOut = 1.2f)
         {
             if (m_FadeCo != null) StopCoroutine(m_FadeCo);
@@ -214,12 +208,10 @@ namespace RickMorty
             m_HeartRenderers = null;
             if (m_Overlay != null) m_Overlay.enabled = false;
             if (m_OverlayText != null) SetOverlayText("");
-            IsBlind = false;
         }
 
         IEnumerator CoBlind(float seconds)
         {
-            IsBlind = true;
             m_Overlay.enabled = true;
             var hearts = m_Hearts = SpawnHearts(14);
             m_HeartRenderers = new Renderer[hearts.Count];
@@ -345,25 +337,19 @@ namespace RickMorty
                     case 0: // VHS
                         m_Color.saturation.Override(60f);
                         m_Color.colorFilter.Override(new Color(1f, 0.92f, 0.8f));
-                        m_Grain.intensity.Override(0f);     // el grano de pelicula es caro en Quest y en el visor solo se ve como ruido
                         m_Chroma.intensity.Override(0.8f);
-                        m_Lens.intensity.Override(0f);
                         break;
                     case 1: // borrachera
                         // borrachera por COLOR (vaiven de tono y saturacion). Antes ondulaba la lente ±0.35 durante 12 s:
                         // deformar la imagen del visor es de lo que mas marea en VR.
                         m_Chroma.intensity.Override(0.5f + 0.3f * Mathf.Sin(t * 2f));
-                        m_Lens.intensity.Override(0f);
                         m_Color.saturation.Override(25f + 35f * Mathf.Sin(t * 1.1f));
                         m_Color.colorFilter.Override(Color.Lerp(new Color(1f, 0.9f, 0.7f), new Color(0.8f, 1f, 0.85f), 0.5f + 0.5f * Mathf.Sin(t * 0.9f)));
-                        m_Grain.intensity.Override(0f);
                         break;
                     default: // humo morado
                         m_Color.colorFilter.Override(new Color(0.85f, 0.6f, 1f));
                         m_Color.saturation.Override(30f);
                         m_Chroma.intensity.Override(0.3f);
-                        m_Lens.intensity.Override(0f);
-                        m_Grain.intensity.Override(0f);
                         break;
                 }
                 yield return null;

@@ -8,6 +8,7 @@ namespace RickMorty
     /// Etiqueta flotante con el nombre del objeto; solo aparece de cerca para no saturar.
     /// Las etiquetas se coordinan entre si: si dos quedan casi en la misma direccion de la
     /// mirada (se encimarian), solo se muestra la del objeto que se agarra o el mas centrado.
+    /// Lo usan: ItemFactory (se la pone a cada objeto).
     /// </summary>
     public class ItemLabel : MonoBehaviour
     {

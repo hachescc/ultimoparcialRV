@@ -4,6 +4,10 @@ using UnityEngine.Rendering;
 
 namespace RickMorty
 {
+    /// <summary>
+    /// Fabrica y cache de materiales URP por color (Lit, Unlit, transparente, particulas) para no crear uno nuevo cada vez.
+    /// Lo usan: FX, ItemFactory, efectos de objetos y NPC, la UI 3D y el builder de escena.
+    /// </summary>
     public static class MatLib
     {
         static readonly Dictionary<string, Material> s_Cache = new Dictionary<string, Material>();
@@ -35,7 +39,8 @@ namespace RickMorty
             var shaderName = kind == 0 ? "Universal Render Pipeline/Lit"
                 : kind == 3 ? "Universal Render Pipeline/Particles/Unlit"
                 : "Universal Render Pipeline/Unlit";
-            var sh = Shader.Find(shaderName) ?? Shader.Find("Sprites/Default");
+            var sh = Shader.Find(shaderName);
+            if (sh == null) sh = Shader.Find("Sprites/Default");
             m = new Material(sh);
             if (kind >= 2) MakeTransparent(m, kind == 3);
             return m;
@@ -148,7 +153,7 @@ namespace RickMorty
         public static void SetColor(Renderer r, Color c)
         {
             if (r == null) return;
-            s_Mpb ??= new MaterialPropertyBlock();
+            if (s_Mpb == null) s_Mpb = new MaterialPropertyBlock();
             s_Mpb.Clear();
             r.GetPropertyBlock(s_Mpb);
             s_Mpb.SetColor(s_BaseColorId, c);

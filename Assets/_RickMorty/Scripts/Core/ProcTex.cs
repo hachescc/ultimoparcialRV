@@ -4,11 +4,12 @@ namespace RickMorty
 {
     /// <summary>
     /// Texturas generadas por codigo (una sola vez, se reutilizan). Evitan depender de archivos de imagen
-    /// para efectos simples: el remolino del portal y el anillo suave de las ondas.
+    /// para efectos simples: el remolino del portal, el halo del tazon y los planos tecnicos.
+    /// Lo usan: FX.Portal (remolino) y el builder de escena (halo y planos, guardados como PNG).
     /// </summary>
     public static class ProcTex
     {
-        static Texture2D s_Swirl, s_Ring;
+        static Texture2D s_Swirl;
         static Material s_PortalMat, s_PortalCoreMat;
 
         /// <summary>Remolino verde del portal (estilo Rick y Morty): espiral con borde irregular y centro claro.</summary>
@@ -67,29 +68,6 @@ namespace RickMorty
                 s_Swirl.SetPixels32(px);
                 s_Swirl.Apply(true, true);
                 return s_Swirl;
-            }
-        }
-
-        /// <summary>Anillo suave (borde difuminado) para ondas expansivas y marcas en el piso.</summary>
-        public static Texture2D SoftRing
-        {
-            get
-            {
-                if (s_Ring != null) return s_Ring;
-                const int n = 128;
-                s_Ring = new Texture2D(n, n, TextureFormat.RGBA32, true) { wrapMode = TextureWrapMode.Clamp, name = "SoftRing" };
-                var px = new Color32[n * n];
-                for (int y = 0; y < n; y++)
-                for (int x = 0; x < n; x++)
-                {
-                    float u = (x + 0.5f) / n * 2f - 1f, v = (y + 0.5f) / n * 2f - 1f;
-                    float r = Mathf.Sqrt(u * u + v * v);
-                    float a = Mathf.Clamp01(1f - Mathf.Abs(r - 0.78f) / 0.16f);
-                    px[y * n + x] = new Color(1, 1, 1, a * a);
-                }
-                s_Ring.SetPixels32(px);
-                s_Ring.Apply(true, true);
-                return s_Ring;
             }
         }
 

@@ -7,11 +7,11 @@ namespace RickMorty
     /// Bote de basura con un agujero negro en miniatura. Todo objeto creado que caiga adentro
     /// se estira como espagueti y se destruye ("Fuuump"). Mantiene limpio el garaje y el
     /// rendimiento (menos Rigidbodies activos). Los frascos base regresan a su lugar.
+    /// Lo usan: GameManager (referencia) y los Meeseeks, que llevan la basura aqui; lo crea el builder de escena.
     /// </summary>
     public class BlackHoleTrash : MonoBehaviour
     {
         public Transform core;
-        public int cleanedCount;
 
         void Update()
         {
@@ -68,7 +68,6 @@ namespace RickMorty
                 item.transform.localScale = new Vector3(s0.x * (1f - k), s0.y * (1f + k * 4f), s0.z * (1f - k));
                 yield return null;
             }
-            cleanedCount++;
             if (item != null) Destroy(item.gameObject);
         }
     }

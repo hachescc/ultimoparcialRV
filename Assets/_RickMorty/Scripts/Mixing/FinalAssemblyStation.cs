@@ -7,6 +7,7 @@ namespace RickMorty
     /// Soporte de ensamblaje final. Socket que solo acepta la Portal Gun de carton. Con la
     /// pistola asegurada, se le acercan los Cristales Kalaxianos y el Aguardiente: el carton
     /// arde con chispas verdes, levita, destello cegador y se transmuta en la Pistola de Portales real.
+    /// Lo usan: GameManager (referencia) y BlackHoleTrash (no se traga la pistola); lo crea el builder de escena.
     /// </summary>
     public class FinalAssemblyStation : MonoBehaviour
     {
@@ -45,14 +46,14 @@ namespace RickMorty
         {
             // la pistola real no puede quedar fuera del mundo ni del perimetro
             var gm0 = GameManager.Instance;
-            bool ended = gm0 != null && (gm0.State == GameState.Ending || gm0.State == GameState.GameOver);
+            bool ended = gm0 != null && gm0.IsFinished;
             if (m_RealGun != null && !m_RealGun.IsHeld && !ended)
             {
                 var p = m_RealGun.transform.position;
                 if (p.y < -3f || (p - transform.position).sqrMagnitude > 45f * 45f) ReturnGun(m_RealGun);
                 else
                 {
-                    // quieta fuera de la cinta del FBI o en un techo: inalcanzable → vuelve sola a los 4 s
+                    // quieta fuera de la cinta del FBI o en un techo: inalcanzable, asi que vuelve sola a los 4 s
                     var area = PlayAreaBoundary.Instance;
                     bool lost = (p.y > 2.3f || (area != null && !area.IsInside(p)))
                         && m_RealGun.Body != null && m_RealGun.Body.linearVelocity.sqrMagnitude < 0.02f && !m_RealGun.Body.isKinematic;

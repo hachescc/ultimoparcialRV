@@ -1,15 +1,17 @@
-using System;
-using System.Reflection;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit.Samples.StarterAssets;
 
 namespace RickMorty
 {
     /// <summary>
     /// Menu de pausa / opciones (boton Menu del control izquierdo, o tecla P en el simulador).
     /// Opciones de confort: vineta dinamica y giro suave/por pasos.
+    /// Lo usan: el jugador (boton Menu o tecla P) y GameManager, que la cierra al terminar la partida. La crea el builder de escena.
     /// </summary>
     public class PauseMenu : MonoBehaviour
     {
@@ -21,19 +23,20 @@ namespace RickMorty
         Canvas m_Canvas;
         GameObject m_Dim;
         TextMeshProUGUI m_VignetteLabel, m_TurnLabel, m_Info, m_RestartLabel, m_QuitLabel;
-        readonly System.Collections.Generic.List<RectTransform> m_Rows = new System.Collections.Generic.List<RectTransform>();
+        readonly List<RectTransform> m_Rows = new List<RectTransform>();
         RectTransform m_SkipRow, m_HintRow;
 
         void AskHint()
         {
             Close();
-            GameManager.Instance?.RequestHint();
+            bool given = GameManager.Instance != null && GameManager.Instance.RequestHint();
+            if (!given) HudStrip.Instance?.Notify("Rick no te va a dar otra pista todavía", UIKit.Cyan, 3f);
         }
         int m_Confirm;            // 1 = reiniciar, 2 = salir (esperando el segundo toque)
         float m_ConfirmUntil;
         const string RestartText = "Reiniciar partida", QuitText = "Salir del juego";
 
-        RectTransform Row(UnityEngine.UI.Button b)
+        RectTransform Row(Button b)
         {
             var rt = (RectTransform)b.transform;
             m_Rows.Add(rt);
@@ -143,7 +146,7 @@ namespace RickMorty
             // Las filas se acomodan en Layout() segun cuales esten visibles (el boton de saltar solo existe en el tutorial).
             Row(UIKit.Button("Resume", root, "Reanudar", Close, Vector2.zero, Vector2.one, fontSize: 30f));
             Row(UIKit.Button("Controls", root, "Ver controles", () => ControlsPanel.Instance?.Open(), Vector2.zero, Vector2.one, color: new Color(0.2f, 0.42f, 0.25f, 0.95f), fontSize: 30f));
-            m_SkipRow = Row(UIKit.Button("Skip", root, "Saltar el tutorial de Rick", SkipTutorial, Vector2.zero, Vector2.one, color: new Color(0.42f, 0.3f, 0.55f, 0.95f), fontSize: 30f));
+            m_SkipRow = Row(UIKit.Button("Skip", root, "Saltar la explicación de Rick", SkipTutorial, Vector2.zero, Vector2.one, color: new Color(0.42f, 0.3f, 0.55f, 0.95f), fontSize: 30f));
             m_HintRow = Row(UIKit.Button("Hint", root, "Pedir una pista a Rick (-25 pts)", AskHint, Vector2.zero, Vector2.one, color: new Color(0.5f, 0.42f, 0.12f, 0.95f), fontSize: 30f));
             var v = UIKit.Button("Vignette", root, "", ToggleVignette, Vector2.zero, Vector2.one, color: new Color(0.15f, 0.3f, 0.5f, 0.95f), fontSize: 30f);
             Row(v);
@@ -186,12 +189,12 @@ namespace RickMorty
         public void Open()
         {
             var gm = GameManager.Instance;
-            if (gm != null && (gm.State == GameState.Ending || gm.State == GameState.GameOver)) return;
+            if (gm != null && gm.IsFinished) return;
             RefreshLabels();
             ResetConfirm();
             // el boton de saltar solo tiene sentido mientras Rick explica
             if (m_SkipRow != null)
-                m_SkipRow.gameObject.SetActive(gm != null && (gm.State == GameState.Intro || gm.State == GameState.Onboarding || gm.State == GameState.Tutorial));
+                m_SkipRow.gameObject.SetActive(gm != null && (gm.State == GameState.Intro || gm.State == GameState.Onboarding || gm.State == GameState.Tutorial || gm.State == GameState.RickLeaving));
             // pedir pista solo en el juego libre (en el tutorial Rick ya dice que hacer)
             if (m_HintRow != null) m_HintRow.gameObject.SetActive(gm != null && gm.State == GameState.FreePlay);
             Layout();
@@ -224,6 +227,7 @@ namespace RickMorty
         {
             m_Canvas.gameObject.SetActive(false);
             if (m_Dim != null) m_Dim.SetActive(false);
+            if (ControlsPanel.Instance != null) ControlsPanel.Instance.Close();
             if (GameTimer.Instance != null) GameTimer.Instance.Paused = false;
             Time.timeScale = 1f;
         }
@@ -249,23 +253,12 @@ namespace RickMorty
             RefreshLabels();
         }
 
-        /// <summary>
-        /// Cambia el giro del control derecho usando el ControllerInputActionManager de los
-        /// Starter Assets (por reflexion para no depender del ensamblado del sample).
-        /// </summary>
+        /// <summary>Cambia el giro del control derecho (suave o por pasos) en el ControllerInputActionManager de los Starter Assets.</summary>
         void ApplyTurnMode(bool smooth)
         {
             if (rightControllerRoot == null) return;
-            foreach (var mb in rightControllerRoot.GetComponentsInChildren<MonoBehaviour>(true))
-            {
-                if (mb == null || mb.GetType().Name != "ControllerInputActionManager") continue;
-                var prop = mb.GetType().GetProperty("smoothTurnEnabled", BindingFlags.Public | BindingFlags.Instance);
-                if (prop != null && prop.CanWrite)
-                {
-                    try { prop.SetValue(mb, smooth); }
-                    catch (Exception e) { Debug.LogWarning("[PauseMenu] No se pudo cambiar el giro: " + e.Message); }
-                }
-            }
+            foreach (var manager in rightControllerRoot.GetComponentsInChildren<ControllerInputActionManager>(true))
+                manager.smoothTurnEnabled = smooth;
         }
 
         void Restart()

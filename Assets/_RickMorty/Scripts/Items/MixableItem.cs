@@ -9,6 +9,7 @@ namespace RickMorty
     /// <summary>
     /// Cualquier objeto del juego que se puede agarrar y mezclar en el tazon.
     /// Mantiene un registro global para el tazon, el guantelete, los Meeseeks, etc.
+    /// Lo usan: el tazon, el soporte final, sockets, frascos base, criaturas, Meeseeks, guantelete, basurero y GameManager.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class MixableItem : MonoBehaviour
@@ -70,6 +71,7 @@ namespace RickMorty
             if (Grab != null)
             {
                 Grab.selectEntered.AddListener(OnSelectEntered);
+                Grab.selectExited.AddListener(OnSelectExited);
                 Grab.activated.AddListener(OnActivated);
                 Grab.hoverEntered.AddListener(OnHoverEntered);
                 Grab.hoverExited.AddListener(OnHoverExited);
@@ -97,6 +99,23 @@ namespace RickMorty
             }
             AudioFX.Play("grab", transform.position, 0.4f, Random.Range(0.92f, 1.08f));
             GameEvents.RaiseItemGrabbed(itemId);
+            IgnorePlayerBody(true);
+        }
+
+        void OnSelectExited(SelectExitEventArgs args)
+        {
+            if (!(args.interactorObject is XRSocketInteractor)) IgnorePlayerBody(false);
+        }
+
+        /// <summary>Lo que tienes en la mano no choca con tu propio cuerpo (una espada te empujaba al caminar).</summary>
+        void IgnorePlayerBody(bool ignore)
+        {
+            var rig = PlayerRig.Instance;
+            if (rig == null) return;
+            var body = rig.GetComponent<CharacterController>();
+            if (body == null) return;
+            foreach (var c in GetComponentsInChildren<Collider>())
+                if (c != null) Physics.IgnoreCollision(body, c, ignore);
         }
 
         // ---- Resalte: el objeto que la mano puede agarrar crece un 8 %. Antes solo habia una vibracion y,

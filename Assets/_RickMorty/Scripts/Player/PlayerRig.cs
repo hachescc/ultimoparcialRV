@@ -1,17 +1,24 @@
-using UnityEngine.InputSystem;
 using System.Collections;
 using Unity.XR.CoreUtils;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Inputs.Haptics;
+using UnityEngine.XR.Interaction.Toolkit.Interactables;
 using UnityEngine.XR.Interaction.Toolkit.Interactors;
+using UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement;
 
 namespace RickMorty
 {
+    /// <summary>
+    /// Mano del jugador (izquierda, derecha o ambas) para vibraciones y agarres.
+    /// Lo usan: PlayerRig.Haptic y todo lo que hace vibrar los controles.
+    /// </summary>
     public enum Hand { Left, Right, Both }
 
     /// <summary>
-    /// Punto de acceso al jugador (XR Origin): cabeza, manos, haptica y teletransporte.
+    /// Punto de acceso al jugador (XR Origin): cabeza, manos, haptica, correr y teletransporte.
+    /// Lo usan: casi todos los scripts por PlayerRig.Instance (posicion de la cabeza, vibracion, reaparicion).
     /// </summary>
     public class PlayerRig : MonoBehaviour
     {
@@ -20,12 +27,12 @@ namespace RickMorty
         [Header("Correr (palanca izquierda presionada)")]
         public float walkSpeed = 2.0f;
         public float runSpeed = 3.4f;
-        UnityEngine.InputSystem.InputAction m_Run;
-        UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider m_Move;
+        InputAction m_Run;
+        ContinuousMoveProvider m_Move;
 
         void OnEnable()
         {
-            m_Run = new UnityEngine.InputSystem.InputAction("Correr", UnityEngine.InputSystem.InputActionType.Button);
+            m_Run = new InputAction("Correr", InputActionType.Button);
             m_Run.AddBinding("<XRController>{LeftHand}/thumbstickClicked");
             m_Run.AddBinding("<XRController>{LeftHand}/primary2DAxisClick");
             m_Run.AddBinding("<Keyboard>/f");
@@ -36,10 +43,70 @@ namespace RickMorty
 
         void LateUpdate()
         {
-            if (m_Move == null) m_Move = GetComponentInChildren<UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider>(true);
-            if (m_Move == null || m_Run == null) return;
-            float target = m_Run.IsPressed() ? runSpeed : walkSpeed;
-            m_Move.moveSpeed = Mathf.MoveTowards(m_Move.moveSpeed, target, Time.deltaTime * 6f);
+            // Correr: la velocidad sube poco a poco hasta runSpeed mientras se presiona el boton
+            if (m_Move == null) m_Move = GetComponentInChildren<ContinuousMoveProvider>(true);
+            if (m_Move != null && m_Run != null)
+            {
+                float target = m_Run.IsPressed() ? runSpeed : walkSpeed;
+                m_Move.moveSpeed = Mathf.MoveTowards(m_Move.moveSpeed, target, Time.deltaTime * 6f);
+            }
+
+            if (EditorSimulatorToggle.SimulatorOn)
+            {
+                BlockSimulatorWalls();
+                ReleaseFixedThings();
+            }
+        }
+
+        // ---------- Solo en el PC (simulador) ----------
+        // Con teclado es incomodo mantener G presionada mientras se mira con el mouse, asi que en el PC
+        // agarrar funciona como interruptor: G agarra y G otra vez suelta (modo Toggle de XRI).
+        XRBaseInputInteractor[] m_PcInteractors;
+
+        void Start()
+        {
+            if (!EditorSimulatorToggle.SimulatorOn) return;
+            m_PcInteractors = GetComponentsInChildren<XRBaseInputInteractor>(true);
+            foreach (var interactor in m_PcInteractors)
+                interactor.selectActionTrigger = XRBaseInputInteractor.InputTriggerType.Toggle;
+        }
+
+        // Los botones y objetos fijos (XRSimpleInteractable) no se cargan: se sueltan solos apenas se presionan,
+        // si no, el siguiente G los "soltaba" en vez de agarrar otra cosa.
+        void ReleaseFixedThings()
+        {
+            if (m_PcInteractors == null) return;
+            foreach (var interactor in m_PcInteractors)
+            {
+                if (interactor == null || !interactor.hasSelection) continue;
+                var selected = interactor.firstInteractableSelected;
+                if (selected is XRSimpleInteractable)
+                    interactor.interactionManager.SelectExit((IXRSelectInteractor)interactor, selected);
+            }
+        }
+
+        // ---------- Solo en el PC (simulador) ----------
+        // El simulador mueve la "cabeza" con WASD sin pasar por el CharacterController, asi que se
+        // atravesaban paredes. Aqui deshacemos ese movimiento y lo repetimos con el CharacterController,
+        // que si choca con las paredes. Las manos son hijas del rig, asi que siguen a la camara.
+        Vector3 m_LastHeadLocal;
+        bool m_HasLastHead;
+
+        void BlockSimulatorWalls()
+        {
+            if (head == null || head.parent == null || m_CC == null) return;
+            Vector3 headLocal = head.localPosition;
+            if (!m_HasLastHead) { m_LastHeadLocal = headLocal; m_HasLastHead = true; return; }
+
+            Vector3 step = head.parent.TransformVector(headLocal - m_LastHeadLocal);
+            step.y = 0f;
+            m_LastHeadLocal = headLocal;
+            if (step.sqrMagnitude < 0.000001f) return;
+
+            transform.position -= step;      // vuelve a donde estaba
+            Physics.SyncTransforms();
+            if (m_Run != null && m_Run.IsPressed()) step *= runSpeed / walkSpeed;   // tecla F: correr
+            m_CC.Move(step);                 // y camina lo mismo, pero chocando
         }
 
         public XROrigin origin;
@@ -72,9 +139,6 @@ namespace RickMorty
             // El XR Body Transformer ajusta la altura del CharacterController a la cabeza; un step offset
             // pequeno evita el error "Step Offset must be less or equal..." cuando la altura es baja.
             if (m_CC != null) m_CC.stepOffset = Mathf.Min(m_CC.stepOffset, 0.1f);
-            // manos en vez del modelo del control (pedido del equipo)
-            if (leftHand != null && leftHand.GetComponent<HandVisual>() == null) leftHand.gameObject.AddComponent<HandVisual>().left = true;
-            if (rightHand != null && rightHand.GetComponent<HandVisual>() == null) rightHand.gameObject.AddComponent<HandVisual>().left = false;
             if (leftHand != null && leftHaptics == null) leftHaptics = leftHand.GetComponentInChildren<HapticImpulsePlayer>();
             if (rightHand != null && rightHaptics == null) rightHaptics = rightHand.GetComponentInChildren<HapticImpulsePlayer>();
         }

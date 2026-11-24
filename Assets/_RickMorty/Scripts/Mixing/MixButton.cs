@@ -1,14 +1,15 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace RickMorty
 {
     /// <summary>
     /// Boton fisico XR (se presiona con el dedo/poke, con agarre o con el rayo).
-    /// Por defecto llama a MixingBowl.Mix().
+    /// Al presionarlo llama a MixingBowl.Mix().
+    /// Lo usan: el jugador; lo crea el builder de escena junto al tazon (campo bowl).
     /// </summary>
     [RequireComponent(typeof(XRSimpleInteractable))]
     public class MixButton : MonoBehaviour
@@ -17,13 +18,10 @@ namespace RickMorty
         public float pressDepth = 0.015f;
         public float cooldown = 1f;
         public MixingBowl bowl;
-        public UnityEvent onPressed = new UnityEvent();
 
         XRSimpleInteractable m_Interactable;
         Vector3 m_CapRest;
         float m_Next;
-
-        public static event System.Action AnyPressed;
 
         void Awake()
         {
@@ -40,7 +38,7 @@ namespace RickMorty
 
         void OnHover(HoverEnterEventArgs args)
         {
-            if (args.interactorObject is UnityEngine.XR.Interaction.Toolkit.Interactors.XRPokeInteractor poke)
+            if (args.interactorObject is XRPokeInteractor poke)
             {
                 // solo cuenta si la mano llega desde arriba o de frente (no al rozarlo por debajo de la mesa)
                 var tip = poke.attachTransform != null ? poke.attachTransform.position : poke.transform.position;
@@ -48,16 +46,14 @@ namespace RickMorty
             }
         }
 
-        public void Press(UnityEngine.XR.Interaction.Toolkit.Interactors.IXRInteractor by)
+        public void Press(IXRInteractor by)
         {
             if (Time.time < m_Next) return;
             m_Next = Time.time + cooldown;
             AudioFX.Play("button", transform.position, 1f);
             PlayerRig.Instance?.Haptic(by != null ? PlayerRig.HandOf(by) : Hand.Both, 0.6f, 0.08f);
             if (cap != null) StartCoroutine(CoPress());
-            AnyPressed?.Invoke();
             if (bowl != null) bowl.Mix();
-            onPressed.Invoke();
         }
 
         IEnumerator CoPress()

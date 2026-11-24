@@ -4,7 +4,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>Portal Gun de carton: interaccion de burla. Saca una banderita "BANG!" y mancha de verde la pared.</summary>
+    /// <summary>
+    /// Portal Gun de carton: interaccion de burla. Saca una banderita "BANG!" y mancha de verde la pared.
+    /// Lo usan: ItemFactory (behaviour "cardboard_gun") y GameManager (ResetStatics al empezar).
+    /// </summary>
     public class CardboardPortalGun : ItemBehaviour
     {
         static bool s_Commented;
@@ -16,7 +19,7 @@ namespace RickMorty
             if (Time.time < m_Next) return;
             m_Next = Time.time + 1.2f;
             StartCoroutine(CoBang());
-            if (Physics.Raycast(Muzzle(0.2f), transform.forward, out var hit, 15f, ~0, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(Muzzle(0.2f), transform.forward, out var hit, 15f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
                 FX.Decal(hit.point, hit.normal, new Color(0.2f, 0.8f, 0.2f, 0.9f), 0.2f, 40f);
                 FX.Burst(hit.point, new Color(0.3f, 0.9f, 0.3f), 15, 1.5f, 0.03f, 0.5f, 1f);
@@ -52,7 +55,7 @@ namespace RickMorty
             txt.transform.SetParent(flag.transform, false);
             txt.transform.localPosition = new Vector3(0.0015f, 0.04f, 0.12f);
             txt.transform.localRotation = Quaternion.Euler(0, -90, 0);
-            txt.text = "BANG!";
+            txt.text = "¡BANG!";
             txt.fontSize = 0.35f;
             txt.color = Color.red;
             txt.fontStyle = FontStyles.Bold;

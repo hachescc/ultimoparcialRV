@@ -7,13 +7,13 @@ namespace RickMorty
     /// <summary>
     /// Director de eventos inesperados durante el juego libre: apagon del FBI, invasion del
     /// Falso Tio Steve, Meeseeks de contrabando que roba ingredientes y temblor interdimensional.
+    /// Lo usan: GameManager (Begin al empezar el juego libre y Stop al terminar).
     /// </summary>
     public class EventDirector : MonoBehaviour
     {
         public float firstEventDelay = 70f;
         public Vector2 interval = new Vector2(80f, 130f);
         public List<FlickerLight> lights = new List<FlickerLight>();
-        public Light sun;
         public Transform steveSpawn;
         public Transform meeseeksSpawn;
 

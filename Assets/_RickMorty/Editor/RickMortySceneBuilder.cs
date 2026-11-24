@@ -70,7 +70,7 @@ namespace RickMorty.EditorTools
                 var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
                 s_Env = new GameObject("Entorno").transform;
 
-                var lights = BuildLighting();
+                BuildLighting();
                 BuildGarageShell(out var garageDoor, out var windowPos);
                 var flickers = BuildFluorescents();
                 var desk = BuildDesk();
@@ -100,7 +100,6 @@ namespace RickMorty.EditorTools
                 var director = new GameObject("Director de Eventos").AddComponent<EventDirector>();
                 director.transform.position = new Vector3(0, 0, 1);
                 director.lights = flickers;
-                director.sun = lights;
                 director.steveSpawn = Marker("SpawnTioSteve", new Vector3(7f, 0.05f, 0.5f));
                 director.meeseeksSpawn = Marker("SpawnMeeseeksPirata", new Vector3(5.2f, 0.05f, 1.5f));
 
@@ -139,7 +138,7 @@ namespace RickMorty.EditorTools
                     Marker("Cuantico_BrazoRobotico", new Vector3(2.9f, 0f, 3.2f), Quaternion.LookRotation(Vector3.left)),
                     Marker("Cuantico_Estanteria", new Vector3(-2.6f, 0f, -1.2f), Quaternion.LookRotation(Vector3.forward)),
                     Marker("Cuantico_Entrada", new Vector3(8f, 0f, 0.5f), Quaternion.LookRotation(Vector3.left)),
-                    Marker("Cuantico_Mesa", new Vector3(-0.9f, 0.93f, 2.3f), Quaternion.LookRotation(Vector3.back)),
+                    Marker("Cuantico_JuntoMesa", new Vector3(-1.5f, 0f, 1.3f), Quaternion.LookRotation(Vector3.forward)),
                 };
                 gm.music = music;
                 boundary.respawnPoint = gm.playerStart;
@@ -380,7 +379,7 @@ namespace RickMorty.EditorTools
         {
             var list = new List<FlickerLight>();
             var g = Group("Tubos Fluorescentes");
-            float[] zs = { -0.6f, 1.4f, 3.0f };
+            float[] zs = { -0.6f, 1.4f, 3.5f };   // la de atras en 3.5: en 3.0 el tubo atravesaba la pantalla del monitor
             foreach (var z in zs)
             {
                 var root = new GameObject("Fluorescente").transform;
@@ -759,8 +758,9 @@ namespace RickMorty.EditorTools
             {
                 var jp = jarPos + Vector3.right * i * 0.22f;
                 // vidrio casi transparente + formol verdoso adentro + tapa metalica con borde
+                // sin colider: si no, el frasco tapaba el rayo y la esfera del dragon no se podia agarrar
                 Prim(PrimitiveType.Cylinder, "FrascoConserva", g, jp, new Vector3(0.15f, 0.1f, 0.15f),
-                    MatLib.Transparent(new Color(0.85f, 0.95f, 0.95f, 0.16f)));
+                    MatLib.Transparent(new Color(0.85f, 0.95f, 0.95f, 0.16f)), collider: false);
                 Prim(PrimitiveType.Cylinder, "Formol", g, jp + Vector3.down * 0.02f, new Vector3(0.138f, 0.075f, 0.138f),
                     MatLib.Transparent(new Color(0.75f, 0.85f, 0.35f, 0.32f)), collider: false);
                 Cyl("TapaFrasco", g, jp + Vector3.up * 0.108f, new Vector3(0.158f, 0.012f, 0.158f), MetalGray, false);
@@ -795,7 +795,7 @@ namespace RickMorty.EditorTools
             Prim(PrimitiveType.Cube, "OrejaIzq", llama.transform, new Vector3(-0.04f, 0.11f, 0), new Vector3(0.03f, 0.07f, 0.03f), MatLib.Lit(new Color(0.3f, 0.5f, 0.9f)), null, false);
             Prim(PrimitiveType.Cube, "OrejaDer", llama.transform, new Vector3(0.04f, 0.11f, 0), new Vector3(0.03f, 0.07f, 0.03f), MatLib.Lit(new Color(0.3f, 0.5f, 0.9f)), null, false);
             llama.AddComponent<BoxCollider>().size = new Vector3(0.14f, 0.25f, 0.14f);
-            MakeEgg(llama, "llama", "Llama de Fortnite", "La usé para guardar pólvora interdimensional. Salió mejor que las de verdad.", true);
+            MakeEgg(llama, "llama", "Llama de Fortnite", "La usé para guardar pólvora interdimensional. Guarda mejor que una caja fuerte.", true);
 
             // Monitor colgante (objetivo + subtitulos)
             var monGo = new GameObject("Monitor de Rick");
@@ -850,7 +850,7 @@ namespace RickMorty.EditorTools
             Prim(PrimitiveType.Cylinder, "Cable1", ball.transform, new Vector3(0.05f, 0.03f, 0), new Vector3(0.005f, 0.04f, 0.005f), MatLib.Lit(Color.yellow), Quaternion.Euler(0, 0, 50), false);
             Prim(PrimitiveType.Cylinder, "Cable2", ball.transform, new Vector3(0.04f, 0.03f, 0.02f), new Vector3(0.005f, 0.04f, 0.005f), MatLib.Lit(Color.blue), Quaternion.Euler(30, 0, 60), false);
             var bc = ball.AddComponent<SphereCollider>(); bc.radius = 0.05f;
-            MakeEgg(ball, "pokeball", "Pokebola desarmada", "Tenía un buen capacitor adentro. El bicho amarillo no estaba contento.", true);
+            MakeEgg(ball, "pokeball", "Pokebola vieja", "Tenía un buen capacitor adentro. El bicho amarillo no estaba contento.", true);
             for (int i = 0; i < 2; i++)
                 Box("Calcetin", g, new Vector3(-3.1f + i * 0.2f, 0.015f, 0.6f + i * 0.25f), new Vector3(0.08f, 0.03f, 0.22f), new Color(0.85f, 0.85f, 0.75f), collider: false, rot: Quaternion.Euler(0, 30 + i * 50, 0));
 
@@ -950,7 +950,7 @@ namespace RickMorty.EditorTools
                 var w = Box("VentanaVecino", nb, new Vector3(x == 6f ? 9f : x, 1.8f, 9.97f), new Vector3(1.3f, 1.1f, 0.06f), new Color(0.55f, 0.75f, 0.95f), SurfaceKind.Glass, true, 0.3f);
                 w.AddComponent<NeighborWindow>();
             }
-            Label("Ventanas del vecino:\n¡lanza cosas vivas aquí!", nb, new Vector3(7.5f, 3.1f, 9.9f), Quaternion.identity, 1.2f, Color.white, 4f);
+            Label("¡NO ME TIREN BICHOS\nA LAS VENTANAS!", nb, new Vector3(7.5f, 3.1f, 9.9f), Quaternion.identity, 1.2f, Color.white, 4f);
             // Valla blanca con puerta
             for (float x = 4.3f; x <= 13f; x += 0.5f)
             {
@@ -1004,7 +1004,7 @@ namespace RickMorty.EditorTools
                     foreach (var yaw in new[] { 90f, -90f })
                     {
                         var r = rot * Quaternion.Euler(0, yaw, 0);
-                        var lbl = Label("FBI - NO PASAR", g, p + Vector3.up * 1.05f - r * Vector3.forward * 0.01f, r, 0.9f, new Color(1f, 0.85f, 0.1f), 2f);
+                        var lbl = Label("FBI   NO PASAR", g, p + Vector3.up * 1.05f - r * Vector3.forward * 0.01f, r, 0.9f, new Color(1f, 0.85f, 0.1f), 2f);
                         lbl.fontSharedMaterial = FrontFaceFontMaterial(lbl.font);
                     }
                 }
@@ -1073,6 +1073,12 @@ namespace RickMorty.EditorTools
             }
 
             CleanUpRig(originGo);
+            originGo.layer = 2;   // "Ignore Raycast": los disparos (portal, laser) no chocan con la capsula del jugador
+
+            // Manos que nos dio el profesor (carpeta Assets/Oculus Hands): cada prefab va como hijo de su control,
+            // igual que en clase. Traen su Animator y el script AnimateHandOnInput (gatillo = pinza, grip = puno).
+            AddProfessorHand(left, "Left Hand Model");
+            AddProfessorHand(right, "Right Hand Model");
 
             var rig = originGo.AddComponent<PlayerRig>();
             rig.origin = origin;
@@ -1091,7 +1097,7 @@ namespace RickMorty.EditorTools
             // Reloj Multiversal en la muneca izquierda
             var watchGo = new GameObject("Reloj Multiversal");
             watchGo.transform.SetParent(left != null ? left : originGo.transform, false);
-            watchGo.transform.localPosition = new Vector3(0, 0.025f, -0.11f);
+            watchGo.transform.localPosition = new Vector3(0, 0.03f, -0.15f);   // en la muneca, detras de la mano del profesor
             watchGo.transform.localRotation = Quaternion.identity;
             watch = watchGo.AddComponent<WristWatch>();
             watch.head = head;
@@ -1118,7 +1124,7 @@ namespace RickMorty.EditorTools
                     if (px == null) continue;
                     px.floatValue = 0.42f;
                     var pz = so.FindProperty("m_TranslateZSpeed"); if (pz != null) pz.floatValue = 0.42f;
-                    var py = so.FindProperty("m_TranslateYSpeed"); if (py != null) py.floatValue = 0.3f;
+                    var py = so.FindProperty("m_TranslateYSpeed"); if (py != null) py.floatValue = 0f;   // sin volar (Q/E atravesaban el techo)
                     so.ApplyModifiedPropertiesWithoutUndo();
                 }
                 sim.SetActive(false);
@@ -1165,6 +1171,62 @@ namespace RickMorty.EditorTools
             }
         }
 
+        /// <summary>Pone la mano del profesor dentro del control y oculta el modelo del control de Quest.</summary>
+        static void AddProfessorHand(Transform controller, string prefabName)
+        {
+            if (controller == null) return;
+            var prefab = FindPrefab(prefabName);
+            if (prefab == null) { Debug.LogWarning("[RickMorty] Falta el prefab " + prefabName + " (Assets/Oculus Hands)."); return; }
+            var hand = (GameObject)PrefabUtility.InstantiatePrefab(prefab, controller);
+            hand.name = prefabName;
+            foreach (var r in hand.GetComponentsInChildren<Renderer>(true))
+                r.shadowCastingMode = ShadowCastingMode.Off;
+
+            // Ocultamos solo los renderers del modelo del control (del objeto cuelgan otras piezas del rig)
+            foreach (var t in controller.GetComponentsInChildren<Transform>(true))
+                if (t.name.EndsWith("Controller Visual"))
+                    foreach (var r in t.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
+
+            // Si el prefab del profesor perdio las acciones (otra version de XRI), se las ponemos a mano
+            var anim = hand.GetComponent<AnimateHandOnInput>();
+            if (anim != null)
+            {
+                string map = controller.name.StartsWith("Left") ? "XRI Left Interaction" : "XRI Right Interaction";
+                if (anim.pinchAnimationAction.reference == null) anim.pinchAnimationAction = new UnityEngine.InputSystem.InputActionProperty(FindActionRef(map, "Activate Value"));
+                if (anim.gripAnimationAction.reference == null) anim.gripAnimationAction = new UnityEngine.InputSystem.InputActionProperty(FindActionRef(map, "Select Value"));
+                if (anim.handAnimator == null) anim.handAnimator = hand.GetComponent<Animator>();
+                Debug.Log("[RickMorty] Mano " + prefabName + ": pinza=" + Describe(anim.pinchAnimationAction) + " grip=" + Describe(anim.gripAnimationAction));
+            }
+
+            // Agarrar a distancia trae el objeto A LA MANO (antes quedaba flotando en la punta del rayo)
+            foreach (var nf in controller.GetComponentsInChildren<UnityEngine.XR.Interaction.Toolkit.Interactors.NearFarInteractor>(true))
+            {
+                nf.farAttachMode = UnityEngine.XR.Interaction.Toolkit.Attachment.InteractorFarAttachMode.Near;
+                nf.blockUIOnInteractableSelection = false;   // con algo en la mano igual se pueden tocar los botones
+                EditorUtility.SetDirty(nf);
+            }
+        }
+
+        static string Describe(UnityEngine.InputSystem.InputActionProperty p)
+        {
+            if (p.reference != null && p.reference.action != null) return p.reference.action.actionMap.name + "/" + p.reference.action.name;
+            return "(sin accion)";
+        }
+
+        static UnityEngine.InputSystem.InputActionReference FindActionRef(string map, string action)
+        {
+            foreach (var guid in AssetDatabase.FindAssets("XRI Default Input Actions"))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guid);
+                if (!path.EndsWith(".inputactions")) continue;
+                foreach (var o in AssetDatabase.LoadAllAssetsAtPath(path))
+                    if (o is UnityEngine.InputSystem.InputActionReference r && r.action != null && r.action.actionMap.name == map && r.action.name == action)
+                        return r;
+            }
+            Debug.LogWarning("[RickMorty] No se encontro la accion " + map + "/" + action);
+            return null;
+        }
+
         static GameObject FindPrefab(string name)
         {
             foreach (var guid in AssetDatabase.FindAssets(name + " t:Prefab"))
@@ -1204,7 +1266,7 @@ namespace RickMorty.EditorTools
 
         static RickNPC BuildRick(out RickHologram holo)
         {
-            var rickGo = new GameObject("Rick (placeholder - pedir modelo)");
+            var rickGo = new GameObject("Rick");
             rickGo.transform.position = new Vector3(1.45f, 0, 1.25f);
             rickGo.transform.rotation = Quaternion.LookRotation(new Vector3(-1, 0, -0.3f));
             var vis = new GameObject("Visual").transform;
@@ -1216,7 +1278,7 @@ namespace RickMorty.EditorTools
             var rick = rickGo.AddComponent<RickNPC>();
             rick.mouth = mouth;
             rick.exitPoint = Marker("SalidaRick", new Vector3(3.3f, 0, 0.5f));
-            Label("RICK\n(placeholder)", rickGo.transform, new Vector3(0, 2.15f, 0), Quaternion.identity, 0.6f, new Color(0.6f, 0.9f, 1f));
+            Label("RICK", rickGo.transform, new Vector3(0, 2.15f, 0), Quaternion.identity, 0.6f, new Color(0.6f, 0.9f, 1f));
 
             var holoGo = new GameObject("Holograma de Rick");
             holoGo.transform.position = new Vector3(0, 0.92f, 2.45f);

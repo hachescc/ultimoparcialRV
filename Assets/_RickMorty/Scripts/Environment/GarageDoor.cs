@@ -3,7 +3,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>Puerta metalica del garaje: se enrolla hacia arriba cuando Rick se va.</summary>
+    /// <summary>
+    /// Puerta metalica del garaje: se abre cuando Rick se va. Con swingUp (como esta en la escena) bascula sobre la bisagra de arriba; si no, sube recta.
+    /// Lo usan: GameManager (Open cuando Rick se va); la crea el builder de escena.
+    /// </summary>
     public class GarageDoor : MonoBehaviour
     {
         public Transform panel;

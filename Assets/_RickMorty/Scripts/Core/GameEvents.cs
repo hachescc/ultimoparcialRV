@@ -2,13 +2,26 @@ using System;
 
 namespace RickMorty
 {
+    /// <summary>
+    /// Etapas de la partida, en orden. Ending = victoria, GameOver = atrapado por el FBI.
+    /// Lo usan: GameManager (la maquina de estados) y quien pregunta en que etapa va el juego (tazon, pausa, HUD...).
+    /// </summary>
     public enum GameState { Intro, Onboarding, Tutorial, RickLeaving, FreePlay, PortalGunReady, Ending, GameOver }
 
+    /// <summary>
+    /// Con que se mato a una criatura (cambia el efecto y la linea de Rick).
+    /// Lo usan: Creature.Kill, los proyectiles (ItemBehaviour), sable, armas cuerpo a cuerpo, cuchillo y FX.Explosion.
+    /// </summary>
     public enum DamageType { Firearm, Melee, Explosion }
 
     /// <summary>
-    /// Bus de eventos estatico: es el "sistema reactivo" del juego. Los sistemas
-    /// (puntaje, UI, Rick, director de eventos) se suscriben aqui sin conocerse entre si.
+    /// Bus de eventos estatico: es el "sistema reactivo" del juego. Quien produce algo llama a Raise...
+    /// y quien quiere reaccionar se suscribe, sin conocerse entre si.
+    /// Lo usan: GameManager, el tazon, EventDirector, criaturas, objetos y secretos (lanzan) y los suscriptores de abajo.
+    /// Suscriptores actuales: ScoreManager (mezclas, explosiones, muertes, bonos, penalizaciones, secretos),
+    /// WristWatch (ItemDiscovered), PetHinter (MixFailed) y GameManager (ItemGrabbed/ItemActivated en el tutorial).
+    /// StateChanged y UnexpectedEvent se lanzan siempre pero hoy nadie los escucha: quedan como puntos de
+    /// enganche para agregar reacciones nuevas sin tocar GameManager ni EventDirector.
     /// </summary>
     public static class GameEvents
     {
@@ -23,7 +36,6 @@ namespace RickMorty
         public static event Action<string> ItemActivated;                  // id del item activado (gatillo)
         public static event Action<string> ItemGrabbed;                    // id del item agarrado
         public static event Action<string> UnexpectedEvent;                // nombre del evento inesperado
-        public static event Action BaseIngredientRespawned;
 
         public static void RaiseStateChanged(GameState s) => StateChanged?.Invoke(s);
         public static void RaiseMixSucceeded(RecipeDef r, bool first) => MixSucceeded?.Invoke(r, first);
@@ -36,7 +48,6 @@ namespace RickMorty
         public static void RaiseItemActivated(string id) => ItemActivated?.Invoke(id);
         public static void RaiseItemGrabbed(string id) => ItemGrabbed?.Invoke(id);
         public static void RaiseUnexpectedEvent(string name) => UnexpectedEvent?.Invoke(name);
-        public static void RaiseBaseRespawned() => BaseIngredientRespawned?.Invoke();
 
         /// <summary>Limpia suscriptores al iniciar Play (por si el Domain Reload esta desactivado).</summary>
         [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -44,7 +55,7 @@ namespace RickMorty
         {
             StateChanged = null; MixSucceeded = null; MixFailed = null; ItemDiscovered = null;
             CreatureKilled = null; Penalty = null; Bonus = null; EasterEggFound = null;
-            ItemActivated = null; ItemGrabbed = null; UnexpectedEvent = null; BaseIngredientRespawned = null;
+            ItemActivated = null; ItemGrabbed = null; UnexpectedEvent = null;
         }
     }
 }

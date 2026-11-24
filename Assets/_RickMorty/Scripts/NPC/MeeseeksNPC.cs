@@ -5,8 +5,9 @@ namespace RickMorty
 {
     /// <summary>
     /// Meeseeks invocado por una caja.
-    /// Normal: busca basura tirada y la lleva al agujero negro ("¡Oooh, can do!").
+    /// Normal: busca basura tirada y la lleva al agujero negro ("¡Ooooh, sí se puede!").
     /// Contrabando (Kirkland rojo): camina a la mesa, roba un ingrediente base, tose y explota.
+    /// Lo usan: MeeseeksBox (lo invoca), EventDirector (Meeseeks pirata) y GameManager (lo borra al terminar).
     /// </summary>
     public class MeeseeksNPC : CreatureMover
     {
@@ -135,9 +136,11 @@ namespace RickMorty
 
             if (contraband)
             {
-                if (m_Target != null && (m_Target.transform.position - transform.position).sqrMagnitude < 0.8f)
+                bool close = m_Target != null && FlatDelta(m_Target.transform.position).sqrMagnitude < 0.8f;
+                bool tired = m_Target != null && Time.time - m_Born > 12f;   // si la mesa no lo deja llegar, roba igual
+                if (close || tired)
                 {
-                    m_Target.Base?.Steal(15f);
+                    if (m_Target.Base != null) m_Target.Base.Steal(15f);
                     StartCoroutine(CoPoof("*cof cof* Je, je... me llevo esto. *cof*"));
                 }
                 return;
@@ -151,7 +154,7 @@ namespace RickMorty
                 foreach (var c in m_Carrying.GetComponentsInChildren<Collider>()) c.enabled = false;
                 m_Carrying.transform.SetParent(transform, true);
                 m_Carrying.transform.localPosition = new Vector3(0, 0.9f, 0.1f);
-                RickComms.Instance?.SayText("¡Oooooh, can do!", "Meeseeks");
+                RickComms.Instance?.SayText("¡Ooooh, sí se puede!", "Sr. Meeseeks");
             }
 
             var gm = GameManager.Instance;

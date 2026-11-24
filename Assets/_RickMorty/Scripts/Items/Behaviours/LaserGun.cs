@@ -4,7 +4,10 @@ using UnityEngine;
 
 namespace RickMorty
 {
-    /// <summary>Pistola laser: dispara un rayo que rebota hasta 3 veces en las paredes.</summary>
+    /// <summary>
+    /// Pistola laser: dispara un rayo que rebota hasta 3 veces en las paredes.
+    /// Lo usan: ItemFactory (behaviour "laser").
+    /// </summary>
     public class LaserGun : ItemBehaviour
     {
         public int maxBounces = 3;
@@ -73,7 +76,7 @@ namespace RickMorty
         bool Raycast(Vector3 origin, Vector3 dir, Collider[] ignore, out RaycastHit best)
         {
             best = default;
-            var hits = Physics.RaycastAll(origin, dir, range, ~0, QueryTriggerInteraction.Ignore);
+            var hits = Physics.RaycastAll(origin, dir, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
             float bestDist = float.MaxValue;
             bool found = false;
             foreach (var h in hits)

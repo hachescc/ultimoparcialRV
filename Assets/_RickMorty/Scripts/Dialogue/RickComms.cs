@@ -10,6 +10,7 @@ namespace RickMorty
     /// Sistema de dialogos de Rick (radio del reloj). Cola de lineas con subtitulos por
     /// fragmentos, audio opcional (Resources/Audio/Rick/&lt;id&gt;), pitido + vibracion en la
     /// muneca y el "modo perro" del casco de Snowball.
+    /// Lo usan: GameManager, el tazon, los NPC que hablan, los eventos y el monitor/franja (SubtitleChanged).
     /// </summary>
     public class RickComms : MonoBehaviour
     {
@@ -28,6 +29,7 @@ namespace RickMorty
         public bool DogMode => Time.time < m_DogUntil;
         public Transform SpeakerOverride { get; set; }
 
+        /// <summary>Una linea en la cola de dialogos (id para el audio, hablante y texto).</summary>
         class Entry
         {
             public string id;
@@ -59,6 +61,9 @@ namespace RickMorty
         public void Say(string id, bool interrupt = false)
         {
             var line = GameDatabase.GetLine(id);
+            // En el PC se usa la version "_pc" de la linea si existe (habla de teclas en vez de joysticks)
+            if (EditorSimulatorToggle.SimulatorOn && GameDatabase.GetLine(id + "_pc") != null)
+                line = GameDatabase.GetLine(id + "_pc");
             if (line == null)
             {
                 Debug.LogWarning("[RickComms] Linea no encontrada: " + id);
@@ -96,11 +101,6 @@ namespace RickMorty
             SubtitleChanged?.Invoke(null, null);
         }
 
-        public IEnumerator WaitUntilIdle()
-        {
-            while (IsSpeaking) yield return null;
-        }
-
         IEnumerator CoProcess()
         {
             while (m_Queue.Count > 0)
@@ -123,7 +123,7 @@ namespace RickMorty
 
             if (dog)
             {
-                text = "¡GUAU GUAU! ¡GRRRRR! ¡GUAU! (el casco traduce todo a perruno)";
+                text = "¡GUAU GUAU! ¡GRRRRR! ¡GUAU!";
                 clip = AudioFX.Clip("bark");
             }
             else if (!string.IsNullOrEmpty(e.id))
@@ -151,7 +151,7 @@ namespace RickMorty
                 m_Voice.Play();
                 clipLen = clip.length;
             }
-            else if (!dog && speaker == "Rick" && text.Contains("(Eructa)"))
+            else if (!dog && speaker == "Rick" && text.Contains("¡Uurp!"))
             {
                 AudioFX.Play("burp", src != null ? src.position : transform.position, 0.6f);
             }

@@ -319,27 +319,3 @@ MonoBehaviour:
     positionOffset: {x: 0, y: 0, z: 0}
     rotationOffset: {x: 0, y: 0, z: 0}
     generateBoxCollider: 1
-  - id: mano_l_abierta
-    prefab: {fileID: 4285407929626176702, guid: 33724ddd0f30e8d42b330a1346f866cf, type: 3}
-    scale: 1
-    positionOffset: {x: 0, y: 0, z: 0}
-    rotationOffset: {x: 0, y: 0, z: 0}
-    generateBoxCollider: 1
-  - id: mano_l_cerrada
-    prefab: {fileID: 1251115151501001198, guid: 28a57650cc20ef94bafc4f5a454380fb, type: 3}
-    scale: 1
-    positionOffset: {x: 0, y: 0, z: 0}
-    rotationOffset: {x: 0, y: 0, z: 0}
-    generateBoxCollider: 1
-  - id: mano_r_abierta
-    prefab: {fileID: -7883537246373381437, guid: dc0b0b9e3b653974f90012bfc260f0b0, type: 3}
-    scale: 1
-    positionOffset: {x: 0, y: 0, z: 0}
-    rotationOffset: {x: 0, y: 0, z: 0}
-    generateBoxCollider: 1
-  - id: mano_r_cerrada
-    prefab: {fileID: 2687665653970848398, guid: 1809b0ccc4e9182408bee9d6d9ed39ca, type: 3}
-    scale: 1
-    positionOffset: {x: 0, y: 0, z: 0}
-    rotationOffset: {x: 0, y: 0, z: 0}
-    generateBoxCollider: 1

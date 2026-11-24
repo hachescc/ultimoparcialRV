@@ -7,6 +7,7 @@ namespace RickMorty
     /// Fabrica de objetos: crea cualquier item del JSON con fisica, agarre XR, etiqueta,
     /// sonido de impacto y su comportamiento especial. Usa el modelo del ItemVisualRegistry
     /// si existe; si no, arma un placeholder con primitivas y colores del diseno.
+    /// Lo usan: el tazon y el soporte final (resultados), GameManager, EventDirector, Meeseeks, DebugCheats y el builder de escena.
     /// </summary>
     public static class ItemFactory
     {
@@ -107,8 +108,8 @@ namespace RickMorty
                 case "meeseeks_box": go.AddComponent<MeeseeksBox>().contraband = false; break;
                 case "contraband_box": go.AddComponent<MeeseeksBox>().contraband = true; break;
                 case "gauntlet": go.AddComponent<InfinityGauntlet>(); break;
-                case "minecraft": go.AddComponent<FloatingBlock>().spin = false; break;
-                case "spinner": go.AddComponent<FloatingBlock>().spin = true; break;
+                case "minecraft": go.AddComponent<FloatingBlock>().spin = false; grab.throwOnDetach = false; break;
+                case "spinner": go.AddComponent<FloatingBlock>().spin = true; grab.throwOnDetach = false; break;
                 case "burnable": go.AddComponent<Burnable>(); break;
                 case "talker": go.AddComponent<Talker>(); break;
                 case "shield": go.AddComponent<Shield>(); break;

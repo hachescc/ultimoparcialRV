@@ -7,6 +7,7 @@ namespace RickMorty
     /// <summary>
     /// Guantelete del Infinito: gatillo = chasquido. Exactamente la mitad de los objetos
     /// sueltos desaparece en polvo (los ingredientes base regresan por el anti-estupidez).
+    /// Lo usan: ItemFactory (behaviour "gauntlet").
     /// </summary>
     public class InfinityGauntlet : ItemBehaviour
     {
@@ -45,7 +46,7 @@ namespace RickMorty
             var candidates = new List<MixableItem>();
             foreach (var m in MixableItem.All)
             {
-                if (m == null || m == Item || m.Unavailable || m.IsHeld) continue;
+                if (m == null || m == Item || m.Unavailable || m.IsHeld || m.InSocket) continue;
                 if (m.itemId == "pistola_portales") continue;
                 candidates.Add(m);
             }
@@ -53,7 +54,9 @@ namespace RickMorty
             for (int i = 0; i < candidates.Count; i++)
             {
                 int j = Random.Range(i, candidates.Count);
-                (candidates[i], candidates[j]) = (candidates[j], candidates[i]);
+                var temp = candidates[i];   // intercambia las posiciones i y j
+                candidates[i] = candidates[j];
+                candidates[j] = temp;
             }
             int half = candidates.Count / 2;
             for (int i = 0; i < half; i++)

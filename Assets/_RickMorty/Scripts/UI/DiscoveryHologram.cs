@@ -9,6 +9,7 @@ namespace RickMorty
     /// Holograma de Descubrimientos: cuadricula con todos los objetos del multiverso.
     /// Los no descubiertos salen como "???". Al apuntar con la mano derecha a uno descubierto
     /// se despliega su receta (asi no hay que memorizar las combinaciones).
+    /// Lo usan: WristWatch (lo muestra al mirar el reloj); lo crea el builder de escena.
     /// </summary>
     public class DiscoveryHologram : MonoBehaviour
     {
@@ -119,7 +120,7 @@ namespace RickMorty
                 bool known = score != null && score.IsDiscovered(kv.Key);
                 bool everKnown = SaveSystem.Data.collection.Contains(kv.Key);
                 if (known) count++;
-                kv.Value.label.text = known ? GameDatabase.NameOf(kv.Key) : (everKnown ? "?? (ya visto)" : "???");
+                kv.Value.label.text = known ? GameDatabase.NameOf(kv.Key) : (everKnown ? "Visto en otra partida" : "???");
                 kv.Value.label.color = known ? Color.white : new Color(0.55f, 0.62f, 0.72f);
                 kv.Value.bg.color = known ? CellKnown : CellUnknown;
                 if (m_Chips.TryGetValue(kv.Key, out var chip)) chip.enabled = known;

@@ -6,6 +6,7 @@ namespace RickMorty
     /// Caja de Meeseeks. Gatillo: aparece un Meeseeks.
     /// Original: limpia el garaje llevando basura al agujero negro ("¡Oooh, can do!").
     /// Contrabando: se roba un ingrediente al azar, tose y explota.
+    /// Lo usan: ItemFactory (behaviours "meeseeks_box" y "contraband_box").
     /// </summary>
     public class MeeseeksBox : ItemBehaviour
     {
@@ -31,7 +32,7 @@ namespace RickMorty
                 var toPlayer = rig.FeetPosition - transform.position; toPlayer.y = 0;
                 pos = transform.position + Vector3.Cross(Vector3.up, toPlayer.normalized) * 0.6f;
                 pos.y = Mathf.Max(0.05f, transform.position.y - 0.5f);
-                if (Physics.Raycast(pos + Vector3.up * 2f, Vector3.down, out var hit, 5f, ~0, QueryTriggerInteraction.Ignore))
+                if (Physics.Raycast(pos + Vector3.up * 2f, Vector3.down, out var hit, 5f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
                     pos = hit.point;
             }
             m_Active = MeeseeksNPC.Spawn(pos, contraband);

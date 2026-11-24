@@ -6,6 +6,7 @@ namespace RickMorty
     /// <summary>
     /// Perimetro de la cinta policial del FBI. Si el jugador sale, los francotiradores
     /// "le vuelan la cabeza": destello rojo, penalizacion y reaparicion en el garaje.
+    /// Lo usan: el builder de escena (la pone alrededor de la casa); se activa sola al salir de la cinta.
     /// </summary>
     public class PlayAreaBoundary : MonoBehaviour
     {
@@ -51,7 +52,8 @@ namespace RickMorty
             var rig = PlayerRig.Instance;
             if (rig == null || allowedZones.Count == 0) return;
             var gm = GameManager.Instance;
-            if (gm != null && (gm.State == GameState.Ending || gm.State == GameState.GameOver)) return;
+            if (gm != null && gm.IsFinished) return;
+            if (Time.timeScale == 0f) return;   // en pausa no dispara
 
             m_Cooldown -= Time.deltaTime;
             var p = rig.HeadPosition;

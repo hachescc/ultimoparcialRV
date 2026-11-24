@@ -7,6 +7,7 @@ namespace RickMorty
     /// Audio espacial con pool de AudioSources. Cada sonido se busca primero en
     /// Resources/Audio/SFX/&lt;nombre&gt; (para que el equipo ponga sonidos reales) y si no
     /// existe se sintetiza un placeholder procedural.
+    /// Lo usan: practicamente todos los scripts que suenan (objetos, NPC, UI, eventos).
     /// </summary>
     public static class AudioFX
     {
@@ -110,7 +111,10 @@ namespace RickMorty
         }
     }
 
-    /// <summary>Sintetizador de efectos placeholder (para no depender de assets externos).</summary>
+    /// <summary>
+    /// Sintetizador de efectos placeholder (para no depender de assets externos).
+    /// Lo usan: AudioFX.Clip cuando no hay archivo de audio en Resources.
+    /// </summary>
     public static class SfxSynth
     {
         const int Rate = 22050;
@@ -169,6 +173,7 @@ namespace RickMorty
             return clip;
         }
 
+        /// <summary>Forma de onda del oscilador (seno, cuadrada, sierra).</summary>
         enum Wave { Sine, Square, Saw }
 
         static float Osc(Wave w, float phase)

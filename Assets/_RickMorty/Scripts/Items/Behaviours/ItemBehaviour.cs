@@ -1,18 +1,19 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.XR.Interaction.Toolkit.Interactables;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 namespace RickMorty
 {
     /// <summary>
     /// Base para comportamientos de objetos agarrables: expone eventos de agarre,
     /// soltar y gatillo (activate) del XRGrabInteractable.
+    /// Lo usan: todos los comportamientos de Items/Behaviours (armas, consumibles, caja Meeseeks...) y PetHinter.
     /// </summary>
     [RequireComponent(typeof(MixableItem))]
     public abstract class ItemBehaviour : MonoBehaviour
     {
         protected MixableItem Item { get; private set; }
-        protected XRGrabInteractable Grab => Item != null ? Item.Grab : null;
         protected Rigidbody Body => Item != null ? Item.Body : null;
 
         protected virtual void Awake()
@@ -24,10 +25,24 @@ namespace RickMorty
         {
             var g = GetComponent<XRGrabInteractable>();
             if (g == null) return;
-            g.activated.AddListener(_ => OnActivate());
-            g.deactivated.AddListener(_ => OnDeactivate());
-            g.selectEntered.AddListener(a => { if (!(a.interactorObject is UnityEngine.XR.Interaction.Toolkit.Interactors.XRSocketInteractor)) OnGrabbed(); });
-            g.selectExited.AddListener(a => { if (!(a.interactorObject is UnityEngine.XR.Interaction.Toolkit.Interactors.XRSocketInteractor)) OnReleased(); });
+            g.activated.AddListener(HandleActivated);
+            g.deactivated.AddListener(HandleDeactivated);
+            g.selectEntered.AddListener(HandleSelectEntered);
+            g.selectExited.AddListener(HandleSelectExited);
+        }
+
+        void HandleActivated(ActivateEventArgs args) => OnActivate();
+        void HandleDeactivated(DeactivateEventArgs args) => OnDeactivate();
+
+        // Un soporte (socket) tambien "agarra" el objeto: eso no cuenta como agarre del jugador
+        void HandleSelectEntered(SelectEnterEventArgs args)
+        {
+            if (!(args.interactorObject is XRSocketInteractor)) OnGrabbed();
+        }
+
+        void HandleSelectExited(SelectExitEventArgs args)
+        {
+            if (!(args.interactorObject is XRSocketInteractor)) OnReleased();
         }
 
         protected virtual void OnActivate() { }

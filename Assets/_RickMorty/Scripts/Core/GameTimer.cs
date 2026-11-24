@@ -4,18 +4,18 @@ namespace RickMorty
 {
     /// <summary>
     /// Cuenta regresiva del FBI. Cuando llega a 0 los agentes entran al garaje (fallo).
+    /// Lo usan: GameManager (inicio, avisos y fin), reloj de muneca, monitor, menu de pausa y PlayAreaBoundary.
     /// </summary>
     public class GameTimer : MonoBehaviour
     {
         public static GameTimer Instance { get; private set; }
 
         [Tooltip("Segundos de juego libre antes de que el FBI entre")]
-        public float duration = 600f;   // 10 min (15 se hacia largo segun las pruebas del equipo)
+        public float duration = 480f;   // 8 minutos (15 y luego 10 se hacian largos en las pruebas del equipo)
 
         public float Remaining { get; private set; }
         public bool Running { get; private set; }
         public bool Paused { get; set; }
-        public float Elapsed { get; private set; }
 
         public event System.Action Expired;
         public event System.Action<int> MinuteWarning; // minutos restantes
@@ -33,7 +33,8 @@ namespace RickMorty
         {
             Remaining = duration;
             Running = true;
-            m_LastWarnedMinute = Mathf.CeilToInt(duration / 60f);
+            // +1: asi el aviso tambien saldria si la duracion empieza justo en 5, 3 o 1 minutos
+            m_LastWarnedMinute = Mathf.CeilToInt(duration / 60f) + 1;
         }
 
         public void Stop() => Running = false;
@@ -46,7 +47,6 @@ namespace RickMorty
         void Update()
         {
             if (!Running || Paused) return;
-            Elapsed += Time.deltaTime;
             Remaining -= Time.deltaTime;
 
             int minute = Mathf.CeilToInt(Remaining / 60f);

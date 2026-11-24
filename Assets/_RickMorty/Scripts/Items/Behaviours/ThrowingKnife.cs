@@ -5,6 +5,7 @@ namespace RickMorty
     /// <summary>
     /// Cuchillos (CS:GO, Kunai): si se lanzan con fuerza se clavan en la madera o el corcho
     /// (FixedJoint temporal / kinematic). El de CS:GO gira en el dedo con el gatillo sostenido.
+    /// Lo usan: ItemFactory (behaviour "knife").
     /// </summary>
     public class ThrowingKnife : ItemBehaviour
     {
